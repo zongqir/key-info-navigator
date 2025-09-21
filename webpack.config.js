@@ -10,7 +10,7 @@ module.exports = (env, argv) => {
     const isPro = argv.mode === "production";
     const plugins = [
         new MiniCssExtractPlugin({
-            filename: isPro ? "dist/index.css" : "index.css",
+            filename: "index.css",
         })
     ];
     let entry = {
@@ -18,7 +18,7 @@ module.exports = (env, argv) => {
     };
     if (isPro) {
         entry = {
-            "dist/index": "./src/index.ts",
+            "index": "./src/index.ts",
         };
         plugins.push(new webpack.BannerPlugin({
             banner: () => {
@@ -27,20 +27,17 @@ module.exports = (env, argv) => {
         }));
         plugins.push(new CopyPlugin({
             patterns: [
-                {from: "preview.png", to: "./dist/"},
-                {from: "icon.png", to: "./dist/"},
-                {from: "README*.md", to: "./dist/"},
-                {from: "plugin.json", to: "./dist/"},
-                {from: "src/i18n/", to: "./dist/i18n/"},
+                {from: "preview.png", to: "./"},
+                {from: "icon.png", to: "./"},
+                {from: "README*.md", to: "./"},
+                {from: "plugin.json", to: "./"},
+                {from: "src/i18n/", to: "./i18n/"},
             ],
         }));
         plugins.push(new ZipPlugin({
             filename: "package.zip",
             algorithm: "gzip",
-            include: [/dist/],
-            pathMapper: (assetPath) => {
-                return assetPath.replace("dist/", "");
-            },
+            exclude: [/node_modules/, /src/, /\.git/, /scripts/, /deploy/, /dev\.bat/, /quick-deploy\.ps1/],
         }));
     } else {
         plugins.push(new CopyPlugin({
@@ -52,7 +49,7 @@ module.exports = (env, argv) => {
     return {
         mode: argv.mode || "development",
         watch: !isPro,
-        devtool: isPro ? false : "eval",
+        devtool: false,
         output: {
             filename: "[name].js",
             path: path.resolve(__dirname),
@@ -95,6 +92,9 @@ module.exports = (env, argv) => {
                         MiniCssExtractPlugin.loader,
                         {
                             loader: "css-loader", // translates CSS into CommonJS
+                            options: {
+                                sourceMap: false
+                            }
                         },
                         {
                             loader: "sass-loader", // compiles Sass to CSS

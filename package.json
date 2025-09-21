@@ -2,10 +2,11 @@
   "name": "plugin-sample",
   "version": "0.4.2",
   "description": "This is a sample plugin for Siyuan (https://b3log.org/siyuan)",
-  "main": ".src/index.js",
+  "main": "index.js",
   "scripts": {
     "lint": "eslint . --fix --cache",
     "dev": "webpack --mode development",
+    "dev-build": "webpack --mode development --no-watch",
     "build": "webpack --mode production",
     "deploy": "node scripts/deploy.js",
     "deploy:dev": "pnpm run dev && node scripts/deploy.js",
