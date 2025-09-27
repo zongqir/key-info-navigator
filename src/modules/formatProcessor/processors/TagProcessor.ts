@@ -11,8 +11,8 @@ export class TagProcessor extends BaseFormatProcessor {
         sqlType: [], // 标签块通过blocks表查询，不使用spans
         htmlSelectors: ["span[data-type='tag']"],
         kramdownRegex: /#[\w\u4e00-\u9fa5]+/g,
-        icon: "iconTags",
-        color: "#4285f4",
+        icon: "iconCube",
+        color: "#f9a8d4",
         displayMode: DisplayMode.CUSTOM
     };
     

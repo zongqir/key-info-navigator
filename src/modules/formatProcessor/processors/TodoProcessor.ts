@@ -12,8 +12,8 @@ export class TodoProcessor extends BaseFormatProcessor {
         sqlType: [], // Todo块通过blocks表查询，不使用spans
         htmlSelectors: ["div[data-subtype='t']", "li[data-subtype='t']"],
         kramdownRegex: /^\s*[-*+]\s*\[[ x]\]/m,
-        icon: "iconCheck",
-        color: "#34a853",
+        icon: "iconStop",
+        color: "#dc2626",
         displayMode: DisplayMode.CUSTOM
     };
     
@@ -54,8 +54,8 @@ export class TodoProcessor extends BaseFormatProcessor {
                 blockId: block.id,
                 position: position,
                 context: this.truncateText(content, 80),
-                icon: isCompleted ? "iconCheck" : "iconUncheck",
-                color: isCompleted ? "#34a853" : "#ff9800",
+                icon: isCompleted ? "iconStop" : "iconStop",
+                color: isCompleted ? "#dc2626" : "#dc2626",
                 metadata: { 
                     isCompleted: isCompleted,
                     originalContent: block.content || ""
@@ -133,8 +133,8 @@ export class TodoProcessor extends BaseFormatProcessor {
                         blockId: actualBlockId, // 使用真实的段落ID
                         position: index,
                         context: element.parentElement?.textContent || "",
-                        icon: isCompleted ? "iconCheck" : "iconUncheck",
-                        color: isCompleted ? "#34a853" : "#ff9800",
+                        icon: isCompleted ? "iconStop" : "iconStop",
+                        color: isCompleted ? "#dc2626" : "#dc2626",
                         metadata: { 
                             isCompleted: isCompleted,
                             originalContent: element.outerHTML || ""
