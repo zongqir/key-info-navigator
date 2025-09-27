@@ -29,17 +29,21 @@ import {
     saveLayout
 } from "siyuan";
 import "./index.scss";
+import "./styles/formattedTextDock.scss";
+import { FormattedTextDock } from "./modules/formattedTextDock";
 import {IMenuItem} from "siyuan/types";
 
 const STORAGE_NAME = "menu-config";
 const TAB_TYPE = "custom_tab";
 const DOCK_TYPE = "dock_tab";
+const FORMATTED_TEXT_DOCK_TYPE = "formatted_text_dock";
 
-export default class PluginSample extends Plugin {
+export default class FormattedTextNavigatorPlugin extends Plugin {
 
     private custom: () => Custom;
     private isMobile: boolean;
     private blockIconEventBindThis = this.blockIconEvent.bind(this);
+    private formattedTextDock?: FormattedTextDock;
 
     updateProtyleToolbar(toolbar: Array<string | IMenuItem>) {
         toolbar.push("|");
@@ -145,6 +149,36 @@ export default class PluginSample extends Plugin {
             }
         });
 
+        // 添加格式化文本侧边栏
+        this.addDock({
+            config: {
+                position: "RightTop",
+                size: {width: 280, height: 0},
+                icon: "iconList",
+                title: "格式化文字导航",
+                hotkey: "⌥⌘F",
+            },
+            data: {},
+            type: FORMATTED_TEXT_DOCK_TYPE,
+            resize: () => {
+                this.formattedTextDock?.onDocumentChange();
+            },
+            update: () => {
+                this.formattedTextDock?.onDocumentChange();
+            },
+            init: (dock) => {
+                this.formattedTextDock = new FormattedTextDock(
+                    dock.element as HTMLElement,
+                    this.i18n,
+                    console.log.bind(console)
+                );
+            },
+            destroy: () => {
+                this.formattedTextDock?.destroy();
+                this.formattedTextDock = undefined;
+            }
+        });
+
         const textareaElement = document.createElement("textarea");
         this.setting = new Setting({
             confirmCallback: () => {
@@ -205,6 +239,19 @@ export default class PluginSample extends Plugin {
             ],
         };
 
+        // 监听文档变更事件
+        this.eventBus.on("switch-protyle", () => {
+            this.formattedTextDock?.onDocumentChange();
+        });
+        
+        this.eventBus.on("loaded-protyle-dynamic", () => {
+            this.formattedTextDock?.onDocumentChange();
+        });
+        
+        this.eventBus.on("loaded-protyle-static", () => {
+            this.formattedTextDock?.onDocumentChange();
+        });
+
         console.log(this.i18n.helloPlugin);
     }
 
@@ -251,6 +298,19 @@ export default class PluginSample extends Plugin {
     }
 
     onunload() {
+        // 清理事件监听
+        this.eventBus.off("switch-protyle", () => {
+            this.formattedTextDock?.onDocumentChange();
+        });
+        
+        this.eventBus.off("loaded-protyle-dynamic", () => {
+            this.formattedTextDock?.onDocumentChange();
+        });
+        
+        this.eventBus.off("loaded-protyle-static", () => {
+            this.formattedTextDock?.onDocumentChange();
+        });
+        
         console.log(this.i18n.byePlugin);
     }
 

@@ -1,7 +1,7 @@
 {
-  "name": "plugin-sample",
-  "version": "0.4.2",
-  "description": "This is a sample plugin for Siyuan (https://b3log.org/siyuan)",
+  "name": "formatted-text-navigator",
+  "version": "1.0.0",
+  "description": "Navigate and locate formatted text in Siyuan documents (https://b3log.org/siyuan)",
   "main": "index.js",
   "scripts": {
     "lint": "eslint . --fix --cache",
@@ -22,6 +22,7 @@
     "css-loader": "^6.7.1",
     "esbuild-loader": "^3.0.1",
     "eslint": "^9.33.0",
+    "globals": "^16.3.0",
     "mini-css-extract-plugin": "2.3.0",
     "sass": "^1.62.1",
     "sass-loader": "^12.6.0",
@@ -30,8 +31,10 @@
     "typescript": "4.8.4",
     "webpack": "^5.76.0",
     "webpack-cli": "^5.0.2",
-    "zip-webpack-plugin": "^4.0.1",
-    "globals": "^16.3.0"
+    "zip-webpack-plugin": "^4.0.1"
   },
-  "packageManager": "pnpm@10.17.0+sha512.fce8a3dd29a4ed2ec566fb53efbb04d8c44a0f05bc6f24a73046910fb9c3ce7afa35a0980500668fa3573345bd644644fa98338fa168235c80f4aa17aa17fbef"
+  "packageManager": "pnpm@10.17.0+sha512.fce8a3dd29a4ed2ec566fb53efbb04d8c44a0f05bc6f24a73046910fb9c3ce7afa35a0980500668fa3573345bd644644fa98338fa168235c80f4aa17aa17fbef",
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  }
 }
