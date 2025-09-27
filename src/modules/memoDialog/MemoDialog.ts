@@ -22,6 +22,14 @@ export class MemoDialog {
     }
 
     /**
+     * 显示编辑备注对话框
+     */
+    public showEdit(text: string, existingMemo: string, onConfirm: (memoContent: string) => void): void {
+        this.createDialog(text, onConfirm, existingMemo, true);
+        this.showDialog();
+    }
+
+    /**
      * 隐藏对话框
      */
     public hide(): void {
@@ -41,7 +49,7 @@ export class MemoDialog {
     /**
      * 创建对话框
      */
-    private createDialog(text: string, onConfirm: (memoContent: string) => void): void {
+    private createDialog(text: string, onConfirm: (memoContent: string) => void, existingMemo?: string, isEdit?: boolean): void {
         // 创建遮罩层
         this.overlay = document.createElement('div');
         this.overlay.className = 'memo-dialog-overlay';
@@ -50,13 +58,17 @@ export class MemoDialog {
         this.dialog = document.createElement('div');
         this.dialog.className = 'memo-dialog';
         
+        const dialogTitle = isEdit ? (this.i18n.editMemo || '编辑备注') : (this.i18n.addMemo || '添加备注');
+        const targetLabel = isEdit ? (this.i18n.editMemoTargetLabel || '编辑以下内容的备注：') : (this.i18n.memoTargetLabel || '为以下内容添加备注：');
+        const confirmText = isEdit ? (this.i18n.save || '保存') : (this.i18n.confirm || '确认');
+        
         this.dialog.innerHTML = `
             <div class="memo-dialog__header">
                 <div class="memo-dialog__title">
                     <svg class="memo-dialog__icon">
                         <use xlink:href="#iconMessage"></use>
                     </svg>
-                    <span>${this.i18n.addMemo || '添加备注'}</span>
+                    <span>${dialogTitle}</span>
                 </div>
                 <button class="memo-dialog__close" data-action="close">
                     <svg>
@@ -67,7 +79,7 @@ export class MemoDialog {
             
             <div class="memo-dialog__body">
                 <div class="memo-dialog__target">
-                    <div class="memo-dialog__target-label">${this.i18n.memoTargetLabel || '为以下内容添加备注：'}</div>
+                    <div class="memo-dialog__target-label">${targetLabel}</div>
                     <div class="memo-dialog__target-text">${this.escapeHtml(text)}</div>
                 </div>
                 
@@ -76,9 +88,9 @@ export class MemoDialog {
                     <textarea class="memo-dialog__textarea" 
                               placeholder="${this.i18n.memoPlaceholder || '请输入备注内容...'}"
                               rows="4"
-                              maxlength="500"></textarea>
+                              maxlength="500">${existingMemo ? this.escapeHtml(existingMemo) : ''}</textarea>
                     <div class="memo-dialog__char-count">
-                        <span class="memo-dialog__current-count">0</span> / 500
+                        <span class="memo-dialog__current-count">${existingMemo ? existingMemo.length : 0}</span> / 500
                     </div>
                 </div>
             </div>
@@ -88,7 +100,7 @@ export class MemoDialog {
                     ${this.i18n.cancel || '取消'}
                 </button>
                 <button class="memo-dialog__btn memo-dialog__btn--primary" data-action="confirm">
-                    ${this.i18n.confirm || '确认'}
+                    ${confirmText}
                 </button>
             </div>
         `;

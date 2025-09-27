@@ -402,7 +402,17 @@ export class FormattedTextDock {
                 const blockId = btn.dataset.blockId || '';
                 const text = btn.dataset.text || '';
                 
-                this.addMemoToText(blockId, text);
+                // 检查是否是备注类型的项目
+                const itemElement = btn.closest('.formatted-text-dock__item') as HTMLElement;
+                const itemType = itemElement?.dataset.type as TextFormatType;
+                
+                if (itemType === TextFormatType.MEMO) {
+                    // 备注类型：编辑已有备注
+                    this.editExistingMemo(blockId, text);
+                } else {
+                    // 其他类型：添加新备注
+                    this.addMemoToText(blockId, text);
+                }
             });
         });
         
@@ -440,7 +450,70 @@ export class FormattedTextDock {
             showMessage(`❌ ${this.i18n.addMemoFailed}: ${text}`, 3000, 'error');
         }
     }
+
+    /**
+     * 编辑已有备注
+     */
+    private async editExistingMemo(blockId: string, text: string): Promise<void> {
+        try {
+            this.log(`开始编辑备注: "${text}", 块ID: ${blockId}`);
+            
+            // 从已解析的数据中查找备注内容
+            const memoItem = this.formattedTexts.find(item => 
+                item.type === TextFormatType.MEMO && 
+                item.text === text && 
+                item.blockId === blockId
+            );
+            
+            const existingMemo = memoItem?.memoContent || '';
+            this.log(`找到已有备注内容: "${existingMemo}"`);
+            
+            // 显示编辑备注对话框
+            this.memoDialog.showEdit(text, existingMemo, (memoContent: string) => {
+                this.updateExistingMemo(blockId, text, memoContent);
+            });
+            
+        } catch (error) {
+            this.log('显示编辑备注对话框失败:', error);
+            showMessage(`❌ ${this.i18n.editMemoFailed || '编辑备注失败'}: ${text}`, 3000, 'error');
+        }
+    }
     
+    /**
+     * 更新已有备注
+     */
+    private async updateExistingMemo(blockId: string, text: string, memoContent: string): Promise<void> {
+        try {
+            this.log(`更新备注: "${text}" -> "${memoContent}"`);
+            
+            // 查找备注元素
+            const targetElement = this.findMemoElement(text);
+            if (!targetElement) {
+                showMessage(`❌ ${this.i18n.textNotFound}: ${text}`, 3000, 'error');
+                return;
+            }
+            
+            // 更新备注内容属性
+            targetElement.setAttribute('data-inline-memo-content', memoContent);
+            
+            this.log('备注内容更新成功');
+            
+            // 更新块内容到后端
+            await this.updateBlockContent();
+            
+            // 刷新列表显示最新的备注
+            setTimeout(() => {
+                this.refresh(true);
+            }, 500);
+            
+            showMessage(`✅ ${this.i18n.editMemoSuccess || '备注编辑成功'}: ${text}`, 2000, 'info');
+            
+        } catch (error) {
+            this.log('更新备注失败:', error);
+            showMessage(`❌ ${this.i18n.editMemoFailed || '编辑备注失败'}: ${text}`, 3000, 'error');
+        }
+    }
+
     /**
      * 保存备注到文本
      */
@@ -615,6 +688,27 @@ export class FormattedTextDock {
         
         return null;
     }
+
+    /**
+     * 查找备注元素
+     */
+    private findMemoElement(text: string): HTMLElement | null {
+        // 查找备注元素
+        const memoSelectors = [
+            'span[data-type*="inline-memo"]',
+            '[data-inline-memo-content]'
+        ];
+        
+        for (const selector of memoSelectors) {
+            const elements = Array.from(document.querySelectorAll(selector));
+            const found = elements.find(el => el.textContent?.trim() === text);
+            if (found) {
+                return found as HTMLElement;
+            }
+        }
+        
+        return null;
+    }
     
 
     /**
@@ -696,14 +790,28 @@ export class FormattedTextDock {
     }
 
     /**
-     * 高亮元素
+     * 高亮元素 - 使用深蓝色波纹扩散效果
      */
     private highlightElement(element: HTMLElement): void {
-        element.classList.add('formatted-text-dock__highlight');
+        // 移除可能存在的旧高亮效果
+        element.classList.remove('formatted-text-dock__highlight', 'formatted-text-dock__highlight-ripple');
         
+        // 添加新的波纹高亮效果
+        element.classList.add('formatted-text-dock__highlight-ripple');
+        
+        // 2秒后移除高亮效果
         setTimeout(() => {
-            element.classList.remove('formatted-text-dock__highlight');
+            element.classList.remove('formatted-text-dock__highlight-ripple');
         }, 2000);
+        
+        // 短暂的背景色变化作为初始提示
+        const originalBackground = element.style.backgroundColor;
+        element.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+        
+        // 300毫秒后恢复原始背景色，让CSS波纹动画接管
+        setTimeout(() => {
+            element.style.backgroundColor = originalBackground;
+        }, 300);
     }
 
     /**

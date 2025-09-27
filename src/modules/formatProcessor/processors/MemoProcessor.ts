@@ -240,10 +240,10 @@ export class MemoProcessor extends BaseFormatProcessor {
     }
 
     /**
-     * 备注不需要添加备注功能
+     * 备注支持添加备注功能（为备注添加额外的备注）
      */
     public supportAddMemo(): boolean {
-        return false;
+        return true; // 允许为备注添加更多备注，实现备注的嵌套或补充
     }
     
     /**
