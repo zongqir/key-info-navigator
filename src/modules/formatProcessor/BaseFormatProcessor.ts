@@ -57,6 +57,7 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
         }
     }
     
+    
     /**
      * 验证文本是否匹配该格式
      */

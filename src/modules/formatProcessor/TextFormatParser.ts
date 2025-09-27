@@ -103,16 +103,95 @@ export class TextFormatParser {
         if (memoProcessor) {
             this.log('使用备注特殊提取方法');
             const memoItems = memoProcessor.getAllMemosFromPage(element);
+            // 🔧 修复：统一位置计算基准
+            memoItems.forEach(item => {
+                if (item.element) {
+                    item.position = this.calculateConsistentPosition(item.element, element);
+                }
+            });
+            this.log(`🔍 备注提取结果 (${memoItems.length}个):`);
+            memoItems.forEach((item, index) => {
+                this.log(`  ${index + 1}. [MEMO] "${item.text}" - 位置: ${item.position}, 块: ${item.blockId}`);
+            });
             allItems.push(...memoItems);
         }
         
         // 处理其他格式化文本
         if (otherProcessors.length > 0) {
             const otherItems = this.extractFromHTML(element.innerHTML, blockId, otherProcessors, options);
+            // 🔧 修复：重新计算位置以匹配真实DOM
+            otherItems.forEach(item => {
+                item.position = this.findElementPositionInRealDOM(item.text, item.type, element);
+            });
+            this.log(`🔍 其他格式提取结果 (${otherItems.length}个):`);
+            otherItems.forEach((item, index) => {
+                this.log(`  ${index + 1}. [${item.type}] "${item.text}" - 位置: ${item.position}, 块: ${item.blockId}`);
+            });
             allItems.push(...otherItems);
         }
         
-        return this.filterAndSortResults(allItems, options);
+        this.log(`🔍 合并前总计 ${allItems.length} 个项目，即将进行排序...`);
+        const sortedItems = this.filterAndSortResults(allItems, options);
+        this.log(`🔍 最终排序结果 (${sortedItems.length}个):`);
+        sortedItems.forEach((item, index) => {
+            this.log(`  ${index + 1}. [${item.type}] "${item.text}" - 位置: ${item.position}, 块: ${item.blockId}`);
+        });
+        
+        return sortedItems;
+    }
+    
+    /**
+     * 一致的位置计算方法（基于真实DOM）
+     */
+    private calculateConsistentPosition(targetElement: Element, containerElement: HTMLElement): number {
+        try {
+            // 获取容器内所有元素
+            const allElements = Array.from(containerElement.querySelectorAll('*'));
+            
+            // 找到目标元素在容器内的索引
+            const position = allElements.indexOf(targetElement as Element);
+            
+            return position >= 0 ? position : 0;
+        } catch (error) {
+            this.log('位置计算失败，使用时间戳:', error);
+            return Date.now() % 100000;
+        }
+    }
+    
+    /**
+     * 在真实DOM中查找元素位置（用于修正从HTML字符串提取的项目）
+     */
+    private findElementPositionInRealDOM(text: string, type: TextFormatType, containerElement: HTMLElement): number {
+        try {
+            const processor = FormatProcessorFactory.getProcessor(type);
+            const config = processor.getConfig();
+            
+            // 在真实DOM中查找匹配的元素
+            const elements = containerElement.querySelectorAll(config.htmlSelectors.join(','));
+            
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                const elementText = this.cleanText(element.textContent || '');
+                
+                if (elementText === text) {
+                    // 找到匹配的元素，计算其在容器中的位置
+                    return this.calculateConsistentPosition(element, containerElement);
+                }
+            }
+            
+            // 如果没找到，使用时间戳
+            return Date.now() % 100000;
+        } catch (error) {
+            this.log('查找真实DOM位置失败:', error);
+            return Date.now() % 100000;
+        }
+    }
+    
+    /**
+     * 清理文本
+     */
+    private cleanText(text: string): string {
+        return text.trim().replace(/\s+/g, ' ');
     }
     
     /**
