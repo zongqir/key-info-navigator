@@ -1,6 +1,6 @@
 {
-  "name": "formatted-text-navigator",
-  "author": "Vanessa",
+  "name": "key-info-navigator",
+  "author": "zongqir",
   "url": "https://github.com/siyuan-note/plugin-sample",
   "version": "1.0.0",
   "minAppVersion": "3.3.0",
@@ -22,12 +22,12 @@
   ],
   "disabledInPublish": false,
   "displayName": {
-    "default": "Formatted Text Navigator",
-    "zh_CN": "格式化文本导航器"
+    "default": "Key Info Navigator",
+    "zh_CN": "关键信息导航"
   },
   "description": {
-    "default": "Navigate and locate formatted text (bold, italic, underline, highlight) in documents with sidebar",
-    "zh_CN": "在侧边栏中导航和定位文档中的格式化文本（加粗、斜体、下划线、高亮）"
+    "default": "Navigate and locate key information in documents with smart sidebar",
+    "zh_CN": "通过智能侧边栏导航和定位文档中的关键信息"
   },
   "readme": {
     "default": "README.md",
@@ -42,21 +42,15 @@
     ]
   },
   "keywords": [
-    "format",
     "navigation",
-    "text",
-    "bold",
-    "italic",
-    "underline",
-    "highlight",
+    "key-info", 
     "sidebar",
-    "格式化",
+    "navigator",
+    "information",
+    "关键信息",
     "导航",
-    "文本",
-    "加粗",
-    "斜体",
-    "下划线",
-    "高亮",
-    "侧边栏"
+    "侧边栏",
+    "信息导航",
+    "智能导航"
   ]
 }
