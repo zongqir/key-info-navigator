@@ -13,7 +13,7 @@
     "deploy:build": "pnpm run build && node scripts/deploy.js --dist"
   },
   "keywords": [],
-  "author": "Vanessa",
+  "author": "zongqir",
   "license": "MIT",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.40.0",
