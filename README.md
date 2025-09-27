@@ -1,15 +1,43 @@
-[中文](https://github.com/siyuan-note/plugin-sample/blob/main/README_zh_CN.md)
+[中文](README_zh_CN.md)
 
-# SiYuan plugin sample
+# Formatted Text Navigator
 
-## Get started
+A powerful SiYuan plugin that helps you navigate and locate formatted text elements (bold, italic, underline, highlight) in your documents through an intuitive sidebar interface.
 
-* Make a copy of this repo as a template with the <kbd>Use this template</kbd> button, please note that the repo name
-  must be the same as the plugin name, the default branch must be `main`
-* Clone your repo to a local development folder. For convenience, you can place this folder in
-  your `{workspace}/data/plugins/` folder
-* Install [NodeJS](https://nodejs.org/en/download) and [pnpm](https://pnpm.io/installation), then run `pnpm i` in the
-  command line under your repo folder
+## Features
+
+✨ **Smart Navigation**: Quickly locate and navigate to formatted text elements in your documents
+📍 **Sidebar Integration**: Clean, intuitive sidebar showing all formatted content 
+🎨 **Multiple Format Support**: Works with bold, italic, underline, and highlight text
+🔍 **One-Click Navigation**: Click any item to instantly jump to its location in the document
+📝 **Memo Support**: Add and manage custom memos for better organization
+🎯 **Real-time Updates**: Automatically refreshes when document content changes
+
+## Installation
+
+### From SiYuan Marketplace
+1. Open SiYuan and go to the Plugin Marketplace
+2. Search for "Formatted Text Navigator" or "格式化文本导航器"
+3. Click Install and Enable
+
+### Manual Installation
+1. Download the latest release from [GitHub Releases](https://github.com/siyuan-note/plugin-sample/releases)
+2. Extract the plugin files to `{workspace}/data/plugins/formatted-text-navigator/`
+3. Restart SiYuan and enable the plugin in Settings > Plugins
+
+## Usage
+
+1. Open any document in SiYuan
+2. The Formatted Text Navigator will appear in the sidebar
+3. All formatted text elements will be automatically detected and listed
+4. Click on any item to navigate directly to that location in your document
+5. Use the memo feature to add notes and organize your content
+
+## Development Setup
+
+* Clone this repository to your local development folder
+* For convenience, you can place this folder in your `{workspace}/data/plugins/` folder
+* Install [NodeJS](https://nodejs.org/en/download) and [pnpm](https://pnpm.io/installation), then run `pnpm i`
 * Execute `pnpm run dev` for real-time compilation
 * Open SiYuan marketplace and enable plugin in downloaded tab
 
@@ -176,3 +204,39 @@ Developers should pay attention to the following when developing the functionali
 
 * If `/api/filetree/createDailyNote` is called to create a daily note, the attribute will be automatically added to the document, and developers do not need to handle it separately
 * If a document is created manually by developer's code (e.g., using the `createDocWithMd` API to create a daily note), please manually add this attribute to the document
+
+## Support & Appreciation
+
+If you find this plugin helpful, consider supporting the development:
+
+### 💝 Donation Options
+
+<table>
+<tr>
+<td align="center">
+<img src="https://raw.githubusercontent.com/siyuan-note/plugin-sample/main/assets/payment-wechat.png" width="200" alt="微信支付"/>
+<br>
+<strong>微信支付 WeChat Pay</strong>
+<br>
+ZQ(*旗)
+</td>
+<td align="center">
+<img src="https://raw.githubusercontent.com/siyuan-note/plugin-sample/main/assets/payment-alipay.png" width="200" alt="支付宝"/>
+<br>
+<strong>支付宝 Alipay</strong>
+<br>
+as(*旗)
+</td>
+</tr>
+</table>
+
+### 🌟 Other Ways to Support
+
+- ⭐ Star this repository
+- 🐛 Report bugs and suggest features
+- 📢 Share with friends who use SiYuan
+- 💬 Join the [SiYuan Community](https://ld246.com/tag/siyuan)
+
+---
+
+**Thank you for your support! 感谢您的支持！**

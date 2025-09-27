@@ -1,11 +1,41 @@
-[English](https://github.com/siyuan-note/plugin-sample/blob/main/README.md)
+[English](README.md)
 
-# 思源笔记插件示例
+# 格式化文本导航器
 
-## 开始
+一个强大的思源笔记插件，通过直观的侧边栏界面帮助您导航和定位文档中的格式化文本元素（加粗、斜体、下划线、高亮）。
 
-* 通过 <kbd>Use this template</kbd> 按钮将该库文件复制到你自己的库中，请注意库名必须和插件名称一致，默认分支必须为 `main`
-* 将你的库克隆到本地开发文件夹中，为了方便可以直接将开发文件夹放置在 `{工作空间}/data/plugins/` 下
+## 功能特性
+
+✨ **智能导航**: 快速定位和导航到文档中的格式化文本元素
+📍 **侧边栏集成**: 简洁直观的侧边栏显示所有格式化内容
+🎨 **多种格式支持**: 支持加粗、斜体、下划线和高亮文本
+🔍 **一键导航**: 点击任意项目即可瞬间跳转到文档中对应位置
+📝 **备注支持**: 添加和管理自定义备注，更好地组织内容
+🎯 **实时更新**: 文档内容变化时自动刷新
+
+## 安装方法
+
+### 从思源集市安装
+1. 打开思源笔记，进入插件集市
+2. 搜索"格式化文本导航器"或"Formatted Text Navigator"
+3. 点击安装并启用
+
+### 手动安装
+1. 从 [GitHub Releases](https://github.com/siyuan-note/plugin-sample/releases) 下载最新版本
+2. 将插件文件解压到 `{工作空间}/data/plugins/formatted-text-navigator/`
+3. 重启思源笔记并在设置 > 插件中启用该插件
+
+## 使用方法
+
+1. 在思源笔记中打开任意文档
+2. 格式化文本导航器将出现在侧边栏中
+3. 所有格式化文本元素将被自动检测并列出
+4. 点击任意项目即可直接导航到文档中对应位置
+5. 使用备注功能来添加笔记和整理内容
+
+## 开发环境搭建
+
+* 将该库克隆到本地开发文件夹中，为了方便可以直接将开发文件夹放置在 `{工作空间}/data/plugins/` 下
 * 安装 [NodeJS](https://nodejs.org/en/download) 和 [pnpm](https://pnpm.io/installation)，然后在开发文件夹下执行 `pnpm i`
 * 执行 `pnpm run dev` 进行实时编译
 * 在思源中打开集市并在下载选项卡中启用插件
@@ -165,3 +195,39 @@ PR 社区集市仓库。
 
 * 如果调用了 `/api/filetree/createDailyNote` 创建日记，那么文档会自动添加这个属性，无需开发者特别处理
 * 如果是开发者代码手动创建文档（例如使用 `createDocWithMd` API 创建日记），请手动为文档添加该属性
+
+## 支持与赞赏
+
+如果这个插件对您有帮助，请考虑支持开发工作：
+
+### 💝 打赏方式
+
+<table>
+<tr>
+<td align="center">
+<img src="https://raw.githubusercontent.com/siyuan-note/plugin-sample/main/assets/payment-wechat.png" width="200" alt="微信支付"/>
+<br>
+<strong>微信支付</strong>
+<br>
+ZQ(*旗)
+</td>
+<td align="center">
+<img src="https://raw.githubusercontent.com/siyuan-note/plugin-sample/main/assets/payment-alipay.png" width="200" alt="支付宝"/>
+<br>
+<strong>支付宝</strong>
+<br>
+as(*旗)
+</td>
+</tr>
+</table>
+
+### 🌟 其他支持方式
+
+- ⭐ 给仓库点星星
+- 🐛 报告问题和建议功能
+- 📢 推荐给使用思源笔记的朋友
+- 💬 加入 [思源社区](https://ld246.com/tag/siyuan)
+
+---
+
+**感谢您的支持！**
