@@ -119,12 +119,13 @@ function deploy() {
                 console.log("已复制: i18n/");
             }
             
-            // 复制README文件
-            const readmeFiles = fs.readdirSync(".")
-                .filter(file => file.startsWith("README") && file.endsWith(".md"));
+            // 复制README文件（排除技术说明文档）
+            const readmeFiles = ["README.md", "README_zh_CN.md"];
             readmeFiles.forEach(file => {
-                copyFile(file, path.join(targetPath, file));
-                console.log(`已复制: ${file}`);
+                if (fs.existsSync(file)) {
+                    copyFile(file, path.join(targetPath, file));
+                    console.log(`已复制: ${file}`);
+                }
             });
         }
         

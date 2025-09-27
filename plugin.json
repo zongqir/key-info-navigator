@@ -4,22 +4,8 @@
   "url": "https://github.com/zongqir/key-info-navigator",
   "version": "1.0.0",
   "minAppVersion": "3.3.0",
-  "backends": [
-    "windows",
-    "linux",
-    "darwin",
-    "ios",
-    "android",
-    "harmony",
-    "docker"
-  ],
-  "frontends": [
-    "desktop",
-    "mobile",
-    "browser-desktop",
-    "browser-mobile",
-    "desktop-window"
-  ],
+  "backends": "all",
+  "frontends": "all",
   "disabledInPublish": false,
   "displayName": {
     "default": "Key Info Navigator",
@@ -34,23 +20,13 @@
     "zh_CN": "README_zh_CN.md"
   },
   "funding": {
-    "openCollective": "",
-    "patreon": "",
-    "github": "",
     "custom": [
       "https://ld246.com/sponsor"
     ]
   },
   "keywords": [
     "navigation",
-    "key-info", 
-    "sidebar",
-    "navigator",
     "information",
-    "关键信息",
-    "导航",
-    "侧边栏",
-    "信息导航",
     "智能导航"
   ]
 }
