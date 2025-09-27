@@ -186,7 +186,19 @@ export class TextFormatParser {
     ): FormattedTextItem[] {
         const allItems: FormattedTextItem[] = [];
         
+        // 检查spans是否为有效数组
+        if (!spans || !Array.isArray(spans)) {
+            this.log('查询结果不是有效数组:', spans);
+            return [];
+        }
+        
         for (const span of spans) {
+            // 检查span是否为有效对象
+            if (!span || typeof span !== 'object') {
+                this.log('跳过无效的span对象:', span);
+                continue;
+            }
+            
             for (const processor of processors) {
                 try {
                     const config = processor.getConfig();
@@ -255,14 +267,30 @@ export class TextFormatParser {
         const stmt = this.buildSqlQuery(rootBlockId, sqlTypes, options.maxResults);
         this.log('执行Span SQL查询:', stmt);
         
-        const response = await fetchPost("/api/query/sql", { stmt }) as any;
-        
-        if (response.code !== 0) {
-            this.log('Span SQL查询失败:', response);
+        try {
+            const response = await fetchPost("/api/query/sql", { stmt }) as any;
+            
+            if (!response) {
+                this.log('Span SQL查询无响应');
+                return [];
+            }
+            
+            if (response.code !== 0) {
+                this.log('Span SQL查询失败:', response);
+                return [];
+            }
+            
+            // 确保response.data是有效数组
+            if (!response.data || !Array.isArray(response.data)) {
+                this.log('Span SQL查询返回无效数据:', response.data);
+                return [];
+            }
+            
+            return this.processQueryResults(response.data, processors, options);
+        } catch (error) {
+            this.log('Span SQL查询异常:', error);
             return [];
         }
-        
-        return this.processQueryResults(response.data, processors, options);
     }
     
     
@@ -282,14 +310,30 @@ export class TextFormatParser {
             ${limit}
         `.trim();
         
-        const response = await fetchPost("/api/query/sql", { stmt }) as any;
-        
-        if (response.code !== 0) {
-            this.log('标签块查询失败:', response);
+        try {
+            const response = await fetchPost("/api/query/sql", { stmt }) as any;
+            
+            if (!response) {
+                this.log('标签块查询无响应');
+                return [];
+            }
+            
+            if (response.code !== 0) {
+                this.log('标签块查询失败:', response);
+                return [];
+            }
+            
+            // 确保response.data是有效数组
+            if (!response.data || !Array.isArray(response.data)) {
+                this.log('标签块查询返回无效数据:', response.data);
+                return [];
+            }
+            
+            return this.processTagBlocks(response.data);
+        } catch (error) {
+            this.log('标签块查询异常:', error);
             return [];
         }
-        
-        return this.processTagBlocks(response.data);
     }
     
     /**
@@ -307,14 +351,30 @@ export class TextFormatParser {
             ${limit}
         `.trim();
         
-        const response = await fetchPost("/api/query/sql", { stmt }) as any;
-        
-        if (response.code !== 0) {
-            this.log('Todo块查询失败:', response);
+        try {
+            const response = await fetchPost("/api/query/sql", { stmt }) as any;
+            
+            if (!response) {
+                this.log('Todo块查询无响应');
+                return [];
+            }
+            
+            if (response.code !== 0) {
+                this.log('Todo块查询失败:', response);
+                return [];
+            }
+            
+            // 确保response.data是有效数组
+            if (!response.data || !Array.isArray(response.data)) {
+                this.log('Todo块查询返回无效数据:', response.data);
+                return [];
+            }
+            
+            return this.processTodoBlocks(response.data);
+        } catch (error) {
+            this.log('Todo块查询异常:', error);
             return [];
         }
-        
-        return this.processTodoBlocks(response.data);
     }
     
     /**
@@ -323,22 +383,34 @@ export class TextFormatParser {
     private processTagBlocks(blocks: any[]): FormattedTextItem[] {
         const items: FormattedTextItem[] = [];
         
+        // 检查blocks是否为有效数组
+        if (!blocks || !Array.isArray(blocks)) {
+            this.log('标签块数据不是有效数组:', blocks);
+            return [];
+        }
+        
+        // 使用TagProcessor来处理标签块
+        const tagProcessor = this.getFormatProcessor(TextFormatType.TAG);
+        
         blocks.forEach((block, index) => {
+            // 检查block是否为有效对象
+            if (!block || typeof block !== 'object') {
+                this.log('跳过无效的标签块对象:', block);
+                return;
+            }
+            
+            this.log('处理标签块:', {
+                id: block.id,
+                tag: block.tag,
+                content: block.content,
+                type: block.type
+            });
+            
             if (block.tag) {
-                const tags = block.tag.split(',').map((tag: string) => tag.trim()).filter(Boolean);
-                
-                tags.forEach(tag => {
-                    items.push({
-                        id: `tag_${block.id}_${tag}`,
-                        text: `#${tag}`,
-                        type: TextFormatType.TAG,
-                        blockId: block.id,
-                        position: index,
-                        context: this.truncateText(block.content || "", 50),
-                        icon: "iconTags",
-                        color: "#4285f4"
-                    });
-                });
+                // 使用TagProcessor的extractFromBlock方法
+                const tagItems = tagProcessor.extractFromBlock(block);
+                this.log('TagProcessor提取的标签项:', tagItems);
+                items.push(...tagItems);
             }
         });
         
@@ -351,7 +423,19 @@ export class TextFormatParser {
     private processTodoBlocks(blocks: any[]): FormattedTextItem[] {
         const items: FormattedTextItem[] = [];
         
+        // 检查blocks是否为有效数组
+        if (!blocks || !Array.isArray(blocks)) {
+            this.log('Todo块数据不是有效数组:', blocks);
+            return [];
+        }
+        
         blocks.forEach((block, index) => {
+            // 检查block是否为有效对象
+            if (!block || typeof block !== 'object') {
+                this.log('跳过无效的Todo块对象:', block);
+                return;
+            }
+            
             if (block.subtype === 't') {
                 const content = this.extractTodoContent(block.content || "");
                 const isCompleted = this.isTodoCompleted(block.content || "");
