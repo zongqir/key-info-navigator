@@ -35,5 +35,6 @@
   "memoTargetLabel": "Add memo to the following content:",
   "removeFormat": "Remove Format",
   "removeFormatSuccess": "Format removed successfully",
-  "removeFormatFailed": "Failed to remove format"
+  "removeFormatFailed": "Failed to remove format",
+  "reverseNavigationSuccess": "Located to sidebar item"
 }

@@ -16,8 +16,9 @@ export class FormattedTextDock {
         TextFormatType.MEMO,
     ];
     private currentBlockId = "";
-    private refreshTimer?: NodeJS.Timeout;
+    private refreshTimer?: number;
     private memoDialog: MemoDialog;
+    private pageClickListener?: (event: MouseEvent) => void;
 
     constructor(
         private element: HTMLElement,
@@ -27,6 +28,7 @@ export class FormattedTextDock {
         this.parser = new TextFormatParser(logger);
         this.memoDialog = new MemoDialog(i18n, logger);
         this.initUI();
+        this.initReverseNavigation(); // 初始化反向导航
         this.refresh(true); // 初始化时强制刷新
     }
 
@@ -56,6 +58,9 @@ export class FormattedTextDock {
         
         // 关闭可能打开的备注对话框
         this.memoDialog?.hide();
+        
+        // 移除反向导航监听器
+        this.destroyReverseNavigation();
     }
 
     /**
@@ -219,7 +224,7 @@ export class FormattedTextDock {
         const activeFormats = this.getActiveFormats();
         this.log('当前激活的格式:', activeFormats);
         
-        const filteredItems = this.formattedTexts.filter(item => activeFormats.includes(item.type));
+        const filteredItems = this.formattedTexts.filter(item => activeFormats.indexOf(item.type) !== -1);
         this.log(`过滤后的项目数量: ${filteredItems.length}`);
 
         if (filteredItems.length === 0) {
@@ -529,16 +534,15 @@ export class FormattedTextDock {
             const newContent = blockElement.innerHTML;
             
             // 调用思源API更新块内容
-            const response = await fetchPost('/api/block/updateBlock', {
-                id: blockId,
-                data: newContent,
-                dataType: 'dom'
-            });
-            
-            if (response.code === 0) {
+            try {
+                await fetchPost('/api/block/updateBlock', {
+                    id: blockId,
+                    data: newContent,
+                    dataType: 'dom'
+                });
                 this.log('块内容更新成功');
-            } else {
-                this.log('块内容更新失败:', response);
+            } catch (updateError) {
+                this.log('块内容更新失败:', updateError);
             }
             
         } catch (error) {
@@ -782,6 +786,227 @@ export class FormattedTextDock {
      */
     private truncateText(text: string, maxLength: number): string {
         return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    }
+
+    /**
+     * 初始化反向导航功能
+     */
+    private initReverseNavigation(): void {
+        this.log('初始化反向导航功能');
+        
+        // 创建页面点击监听器
+        this.pageClickListener = (event: MouseEvent) => {
+            this.handlePageClick(event);
+        };
+        
+        // 添加到document上，使用捕获阶段确保能捕获到所有点击
+        document.addEventListener('click', this.pageClickListener, true);
+    }
+    
+    /**
+     * 销毁反向导航功能
+     */
+    private destroyReverseNavigation(): void {
+        if (this.pageClickListener) {
+            document.removeEventListener('click', this.pageClickListener, true);
+            this.pageClickListener = undefined;
+            this.log('反向导航功能已销毁');
+        }
+    }
+    
+    /**
+     * 处理页面点击事件
+     */
+    private handlePageClick(event: MouseEvent): void {
+        const target = event.target as HTMLElement;
+        if (!target) return;
+        
+        // 检查是否点击了侧边栏本身，如果是则不处理
+        if (this.element.contains(target)) {
+            return;
+        }
+        
+        // 检查点击的是否是格式化文本元素
+        const formattedElement = this.findFormattedElement(target);
+        if (!formattedElement) {
+            return;
+        }
+        
+        // 识别格式化文本的类型和内容
+        const formatInfo = this.identifyFormattedElement(formattedElement);
+        if (!formatInfo) {
+            return;
+        }
+        
+        this.log('检测到格式化元素点击:', formatInfo);
+        
+        // 在侧边栏中定位对应条目
+        this.locateInDock(formatInfo.text, formatInfo.type, formatInfo.element);
+    }
+    
+    /**
+     * 查找格式化元素（向上遍历DOM树）
+     */
+    private findFormattedElement(element: HTMLElement): HTMLElement | null {
+        let current: HTMLElement | null = element;
+        
+        // 向上遍历，最多遍历10层，避免无限循环
+        for (let i = 0; i < 10 && current; i++) {
+            // 检查当前元素是否是格式化元素
+            if (this.isFormattedElement(current)) {
+                return current;
+            }
+            current = current.parentElement;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 检查元素是否是格式化元素
+     */
+    private isFormattedElement(element: HTMLElement): boolean {
+        // 收集所有格式处理器的选择器
+        const allSelectors = new Set<string>();
+        
+        for (const formatType of this.enabledFormats) {
+            const processor = this.parser.getFormatProcessor(formatType);
+            const config = processor.getConfig();
+            config.htmlSelectors.forEach(selector => allSelectors.add(selector));
+        }
+        
+        // 检查元素是否匹配任何选择器
+        for (const selector of allSelectors) {
+            try {
+                if (element.matches(selector)) {
+                    return true;
+                }
+            } catch (error) {
+                // 忽略无效的选择器
+                continue;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 识别格式化元素的类型和内容
+     */
+    private identifyFormattedElement(element: HTMLElement): {text: string, type: TextFormatType, element: HTMLElement} | null {
+        const text = element.textContent?.trim();
+        if (!text) return null;
+        
+        // 遍历所有格式类型，找到匹配的
+        for (const formatType of this.enabledFormats) {
+            const processor = this.parser.getFormatProcessor(formatType);
+            const config = processor.getConfig();
+            
+            // 检查元素是否匹配该格式的选择器
+            for (const selector of config.htmlSelectors) {
+                try {
+                    if (element.matches(selector)) {
+                        return {
+                            text,
+                            type: formatType,
+                            element
+                        };
+                    }
+                } catch (error) {
+                    // 忽略无效的选择器
+                    continue;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 在侧边栏中定位对应条目
+     */
+    private locateInDock(text: string, type: TextFormatType, clickedElement: HTMLElement): void {
+        this.log(`在侧边栏中定位: "${text}", 类型: ${type}`);
+        
+        // 查找侧边栏中匹配的条目
+        const dockItems = this.element.querySelectorAll('.formatted-text-dock__item');
+        
+        let targetItem: HTMLElement | null = null;
+        let bestMatch = -1;
+        
+        dockItems.forEach((item, index) => {
+            const itemElement = item as HTMLElement;
+            const itemText = itemElement.dataset.text;
+            const itemType = itemElement.dataset.type;
+            
+            if (itemText === text && itemType === type) {
+                // 如果有多个相同的项目，尝试找到最匹配的
+                const itemPosition = Number(itemElement.dataset.position || 0);
+                const clickedPosition = this.getElementPosition(clickedElement);
+                
+                // 简单的位置匹配逻辑：选择位置最接近的
+                if (bestMatch === -1 || Math.abs(clickedPosition - itemPosition) < bestMatch) {
+                    bestMatch = Math.abs(clickedPosition - itemPosition);
+                    targetItem = itemElement;
+                }
+            }
+        });
+        
+        if (targetItem) {
+            this.highlightDockItem(targetItem);
+        } else {
+            this.log(`未在侧边栏中找到匹配的条目: "${text}", 类型: ${type}`);
+        }
+    }
+    
+    /**
+     * 获取元素在文档中的大致位置
+     */
+    private getElementPosition(element: HTMLElement): number {
+        try {
+            const rect = element.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            return rect.top + scrollTop;
+        } catch (error) {
+            this.log('获取元素位置失败:', error);
+            return 0;
+        }
+    }
+    
+    /**
+     * 高亮侧边栏条目
+     */
+    private highlightDockItem(item: HTMLElement): void {
+        this.log('高亮侧边栏条目:', item.dataset.text);
+        
+        // 滚动到条目位置
+        item.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+        });
+        
+        // 添加高亮效果
+        item.classList.add('formatted-text-dock__item--reverse-highlight');
+        
+        // 移除之前的高亮
+        const previousHighlighted = this.element.querySelectorAll('.formatted-text-dock__item--reverse-highlight');
+        previousHighlighted.forEach(el => {
+            if (el !== item) {
+                el.classList.remove('formatted-text-dock__item--reverse-highlight');
+            }
+        });
+        
+        // 2秒后移除高亮
+        setTimeout(() => {
+            item.classList.remove('formatted-text-dock__item--reverse-highlight');
+        }, 2000);
+        
+        // 显示反馈消息
+        const text = item.dataset.text || '';
+        const type = item.dataset.type || '';
+        const typeName = this.getFormatDisplayName(type as TextFormatType);
+        showMessage(`🎯 ${this.i18n.reverseNavigationSuccess || '已定位到侧边栏条目'}: ${typeName} "${text}"`, 2000, 'info');
     }
 
     /**
