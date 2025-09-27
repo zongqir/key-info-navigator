@@ -28,19 +28,22 @@ export class TodoProcessor extends BaseFormatProcessor {
     /**
      * 从块数据中提取Todo项目（这是主要方法）
      */
-    extractFromBlock(block: any): FormattedTextItem[] {
+    extractFromBlock(block: any, blockIndex?: number): FormattedTextItem[] {
         const items: FormattedTextItem[] = [];
         
         if (block && block.subtype === 't') {
             const content = this.extractTodoContent(block.content || "");
             const isCompleted = this.isTodoCompleted(block.content || "");
             
+            // 使用块在文档中的位置
+            const position = blockIndex !== undefined ? blockIndex : 0;
+            
             items.push({
                 id: `todo_${block.id}`,
                 text: content,
                 type: this.formatType,
                 blockId: block.id,
-                position: 0,
+                position: position,
                 context: this.truncateText(content, 80),
                 icon: isCompleted ? "iconCheck" : "iconUncheck",
                 color: isCompleted ? "#34a853" : "#ff9800"
@@ -72,16 +75,34 @@ export class TodoProcessor extends BaseFormatProcessor {
                 const text = this.extractTodoText(element);
                 if (text) {
                     const isCompleted = this.isTodoCompleted(element);
+                    
+                    // 查找TODO所在的具体段落ID
+                    let actualBlockId = blockId; // 默认使用传入的blockId
+                    let currentElement = element.parentElement;
+                    
+                    // 向上查找，寻找具有data-node-id的元素（这才是真正的段落ID）
+                    while (currentElement) {
+                        const nodeId = currentElement.getAttribute('data-node-id');
+                        if (nodeId && nodeId !== blockId) {
+                            // 找到了不同于根ID的段落ID
+                            actualBlockId = nodeId;
+                            this.log(`找到TODO"${text.substring(0, 20)}..."的真实段落ID: ${actualBlockId}`);
+                            break;
+                        }
+                        currentElement = currentElement.parentElement;
+                    }
+                    
                     items.push({
-                        id: this.generateId({ text, index, completed: isCompleted }, blockId),
+                        id: this.generateId('html', `${actualBlockId}_${index}`),
                         text: text,
                         type: this.formatType,
-                        blockId: blockId,
+                        blockId: actualBlockId, // 使用真实的段落ID
                         position: index,
-                        context: this.extractContext(text, element.parentElement?.textContent || ""),
+                        context: element.parentElement?.textContent || "",
                         icon: isCompleted ? "iconCheck" : "iconUncheck",
-                        color: isCompleted ? "#34a853" : "#ff9800",
-                        element: element as HTMLElement
+                        color: isCompleted ? "#34a853" : "#ff9800"
+                        // 不设置element属性，让导航器使用块ID导航
+                        // element: element as HTMLElement
                     });
                 }
             });

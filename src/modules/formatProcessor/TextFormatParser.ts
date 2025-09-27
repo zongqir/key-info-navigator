@@ -399,16 +399,18 @@ export class TextFormatParser {
                 return;
             }
             
-            this.log('处理标签块:', {
-                id: block.id,
-                tag: block.tag,
-                content: block.content,
-                type: block.type
+            this.log('🔍 [DEBUG] 处理标签块详情:', {
+                'block.id': block.id,
+                'block.root_id': block.root_id,
+                'block.tag': block.tag,
+                'block.content': block.content?.substring(0, 100),
+                'block.type': block.type,
+                '完整block对象': block
             });
             
             if (block.tag) {
-                // 使用TagProcessor的extractFromBlock方法
-                const tagItems = tagProcessor.extractFromBlock(block);
+                // 使用TagProcessor的extractFromBlock方法，传递块索引
+                const tagItems = tagProcessor.extractFromBlock(block, index);
                 this.log('TagProcessor提取的标签项:', tagItems);
                 items.push(...tagItems);
             }
@@ -429,6 +431,9 @@ export class TextFormatParser {
             return [];
         }
         
+        // 使用TodoProcessor来处理Todo块
+        const todoProcessor = this.getFormatProcessor(TextFormatType.TODO);
+        
         blocks.forEach((block, index) => {
             // 检查block是否为有效对象
             if (!block || typeof block !== 'object') {
@@ -437,42 +442,15 @@ export class TextFormatParser {
             }
             
             if (block.subtype === 't') {
-                const content = this.extractTodoContent(block.content || "");
-                const isCompleted = this.isTodoCompleted(block.content || "");
-                
-                items.push({
-                    id: `todo_${block.id}`,
-                    text: content,
-                    type: TextFormatType.TODO,
-                    blockId: block.id,
-                    position: index,
-                    context: this.truncateText(content, 80),
-                    icon: isCompleted ? "iconCheck" : "iconUncheck",
-                    color: isCompleted ? "#34a853" : "#ff9800"
-                });
+                // 使用TodoProcessor的extractFromBlock方法，传递块索引
+                const todoItems = todoProcessor.extractFromBlock(block, index);
+                items.push(...todoItems);
             }
         });
         
         return items;
     }
     
-    /**
-     * 提取Todo内容
-     */
-    private extractTodoContent(content: string): string {
-        // 移除HTML标签，获取纯文本
-        const text = content.replace(/<[^>]*>/g, '').trim();
-        // 移除checkbox标记
-        return text.replace(/^\s*[\[✓☑️✗✘x\]\s*]*/, '').trim();
-    }
-    
-    /**
-     * 检查Todo是否完成
-     */
-    private isTodoCompleted(content: string): boolean {
-        // 检查是否包含完成标记
-        return /\[✓\]|\[x\]|☑️/.test(content);
-    }
     
     /**
      * 截断文本

@@ -56,22 +56,25 @@ export class TagProcessor extends BaseFormatProcessor {
     /**
      * 从块数据中提取标签项目（这是主要方法）
      */
-    extractFromBlock(block: any): FormattedTextItem[] {
+    extractFromBlock(block: any, blockIndex?: number): FormattedTextItem[] {
         const items: FormattedTextItem[] = [];
         
-        this.log('TagProcessor.extractFromBlock called with block:', block);
+        this.log('TagProcessor.extractFromBlock called with block:', block, 'blockIndex:', blockIndex);
         
         if (block && block.tag) {
             const tags = block.tag.split(',').map((tag: string) => tag.trim()).filter(Boolean);
             this.log('解析出的标签列表:', tags);
             
-            tags.forEach((tag, index) => {
+            tags.forEach((tag, tagIndex) => {
+                // 使用块在文档中的位置，而不是标签在块中的索引
+                const position = blockIndex !== undefined ? blockIndex : 0;
+                
                 const item = {
                     id: `tag_${block.id}_${tag}`,
                     text: `#${tag}`,
                     type: this.formatType,
                     blockId: block.id,
-                    position: index,
+                    position: position,
                     context: this.truncateText(block.content || "", 50),
                     icon: this.getConfig().icon,
                     color: this.getTagColor(tag),
@@ -117,16 +120,33 @@ export class TagProcessor extends BaseFormatProcessor {
                 // 从标签文本中提取标签名称（移除#号）
                 const tagName = text.startsWith('#') ? text.substring(1) : text;
                 
+                // 查找标签所在的具体段落ID
+                let actualBlockId = blockId; // 默认使用传入的blockId
+                let currentElement = element.parentElement;
+                
+                // 向上查找，寻找具有data-node-id的元素（这才是真正的段落ID）
+                while (currentElement) {
+                    const nodeId = currentElement.getAttribute('data-node-id');
+                    if (nodeId && nodeId !== blockId) {
+                        // 找到了不同于根ID的段落ID
+                        actualBlockId = nodeId;
+                        this.log(`找到标签"${tagName}"的真实段落ID: ${actualBlockId}`);
+                        break;
+                    }
+                    currentElement = currentElement.parentElement;
+                }
+                
                 const item = {
-                    id: this.generateId('html', `${blockId}_${index}`),
+                    id: this.generateId('html', `${actualBlockId}_${index}`),
                     text: text,
                     type: this.formatType,
-                    blockId: blockId,
+                    blockId: actualBlockId, // 使用真实的段落ID
                     position: index,
                     context: element.parentElement?.textContent || "",
                     icon: config.icon,
                     color: this.getTagColor(tagName),
-                    element: element as HTMLElement,
+                    // 不设置element属性，让导航器使用块ID导航
+                    // element: element as HTMLElement,
                     // 设置metadata用于胶囊状渲染
                     metadata: { 
                         tagName: tagName, 
