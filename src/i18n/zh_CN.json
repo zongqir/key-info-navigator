@@ -32,5 +32,8 @@
   "textSelected": "文本已选中，请手动点击工具栏的备注按钮或使用快捷键 Ctrl+Shift+M",
   "confirm": "确认",
   "memoPlaceholder": "请输入备注内容...",
-  "memoTargetLabel": "为以下内容添加备注："
+  "memoTargetLabel": "为以下内容添加备注：",
+  "removeFormat": "删除格式",
+  "removeFormatSuccess": "格式删除成功",
+  "removeFormatFailed": "格式删除失败"
 }

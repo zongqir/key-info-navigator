@@ -247,6 +247,47 @@ export class MemoProcessor extends BaseFormatProcessor {
     }
     
     /**
+     * 删除备注格式化，保留纯文本
+     */
+    public async removeFormatting(text: string, blockId: string, itemIndex?: number): Promise<boolean> {
+        try {
+            this.log(`开始删除备注格式化: "${text}", 块ID: ${blockId}, 索引: ${itemIndex}`);
+            
+            // 查找备注元素
+            const memoElements = Array.from(document.querySelectorAll(this.config.htmlSelectors.join(','))) as HTMLElement[];
+            
+            // 过滤出匹配的备注元素
+            const matchingElements = memoElements.filter(el => 
+                el.textContent?.trim() === text
+            );
+            
+            if (matchingElements.length === 0) {
+                this.log('未找到目标备注元素');
+                return false;
+            }
+            
+            // 确定要删除的元素
+            let targetElement: HTMLElement;
+            if (itemIndex !== undefined && itemIndex < matchingElements.length) {
+                targetElement = matchingElements[itemIndex];
+            } else {
+                targetElement = matchingElements[0]; // 默认删除第一个
+            }
+            
+            // 删除备注格式化，保留纯文本
+            const textNode = document.createTextNode(text);
+            targetElement.parentNode?.replaceChild(textNode, targetElement);
+            
+            this.log(`成功删除备注格式化: "${text}"`);
+            return true;
+            
+        } catch (error) {
+            this.log('删除备注格式化失败:', error);
+            return false;
+        }
+    }
+    
+    /**
      * 自定义渲染备注详细内容
      */
     public renderItemDetails(item: FormattedTextItem, displayText: string): string {

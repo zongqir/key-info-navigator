@@ -173,23 +173,131 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
      * 渲染操作按钮
      */
     public renderActionButtons(item: FormattedTextItem, i18n?: any): string {
-        if (!this.supportAddMemo()) {
-            return '';
-        }
+        const buttons: string[] = [];
         
-        const title = i18n?.addMemo || '添加备注';
-        
-        return `
-            <button class="formatted-text-dock__action-btn formatted-text-dock__add-memo-btn" 
+        // 删除格式化按钮（所有类型都支持）
+        const deleteTitle = i18n?.removeFormat || '删除格式';
+        buttons.push(`
+            <button class="formatted-text-dock__action-btn formatted-text-dock__remove-format-btn" 
                     data-block-id="${item.blockId}"
                     data-text="${item.text}"
-                    data-action="add-memo"
-                    title="${title}">
+                    data-type="${item.type}"
+                    data-position="${item.position}"
+                    data-action="remove-format"
+                    title="${deleteTitle}">
                 <svg class="formatted-text-dock__action-icon">
-                    <use xlink:href="#iconMessage"></use>
+                    <use xlink:href="#iconTrashcan"></use>
                 </svg>
             </button>
-        `;
+        `);
+        
+        // 添加备注按钮（只有支持的类型才显示）
+        if (this.supportAddMemo()) {
+            const addMemoTitle = i18n?.addMemo || '添加备注';
+            buttons.push(`
+                <button class="formatted-text-dock__action-btn formatted-text-dock__add-memo-btn" 
+                        data-block-id="${item.blockId}"
+                        data-text="${item.text}"
+                        data-action="add-memo"
+                        title="${addMemoTitle}">
+                    <svg class="formatted-text-dock__action-icon">
+                        <use xlink:href="#iconMessage"></use>
+                    </svg>
+                </button>
+            `);
+        }
+        
+        return buttons.join('');
+    }
+    
+    /**
+     * 删除格式化，保留纯文本
+     */
+    public async removeFormatting(text: string, blockId: string, itemIndex?: number): Promise<boolean> {
+        try {
+            this.log(`开始删除格式化: "${text}", 块ID: ${blockId}, 索引: ${itemIndex}`);
+            
+            // 查找目标元素
+            const targetElements = this.findFormattedElements(text, itemIndex);
+            if (targetElements.length === 0) {
+                this.log('未找到目标格式化元素');
+                return false;
+            }
+            
+            // 删除格式化
+            let success = false;
+            for (const element of targetElements) {
+                if (this.removeElementFormatting(element, text)) {
+                    success = true;
+                }
+            }
+            
+            if (success) {
+                this.log('格式化删除成功');
+                // 触发文档更新
+                await this.updateDocumentContent();
+            }
+            
+            return success;
+            
+        } catch (error) {
+            this.log('删除格式化失败:', error);
+            return false;
+        }
+    }
+    
+    /**
+     * 查找格式化元素
+     */
+    protected findFormattedElements(text: string, itemIndex?: number): HTMLElement[] {
+        const selectors = this.config.htmlSelectors.join(',');
+        const allElements = Array.from(document.querySelectorAll(selectors)) as HTMLElement[];
+        
+        // 过滤出文本匹配的元素
+        const matchingElements = allElements.filter(el => 
+            el.textContent?.trim() === text
+        );
+        
+        // 如果指定了索引，返回对应的元素
+        if (itemIndex !== undefined && itemIndex < matchingElements.length) {
+            return [matchingElements[itemIndex]];
+        }
+        
+        // 否则返回所有匹配的元素
+        return matchingElements;
+    }
+    
+    /**
+     * 删除元素的格式化
+     */
+    protected removeElementFormatting(element: HTMLElement, text: string): boolean {
+        try {
+            // 创建纯文本节点
+            const textNode = document.createTextNode(text);
+            
+            // 替换格式化元素为纯文本
+            element.parentNode?.replaceChild(textNode, element);
+            
+            this.log(`成功将格式化元素替换为纯文本: "${text}"`);
+            return true;
+            
+        } catch (error) {
+            this.log('删除元素格式化失败:', error);
+            return false;
+        }
+    }
+    
+    /**
+     * 更新文档内容到后端
+     */
+    protected async updateDocumentContent(): Promise<void> {
+        try {
+            // 这里需要导入 fetchPost，先暂时留空，在具体实现中处理
+            // 或者通过回调函数的方式让调用方处理
+            this.log('文档内容已更新（需要在具体实现中处理后端同步）');
+        } catch (error) {
+            this.log('更新文档内容失败:', error);
+        }
     }
     
     /**

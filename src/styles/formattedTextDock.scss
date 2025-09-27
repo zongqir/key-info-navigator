@@ -226,6 +226,20 @@
     }
   }
 
+  &__remove-format-btn {
+    &:hover {
+      background: #f44336;
+      
+      .formatted-text-dock__action-icon {
+        color: white;
+      }
+    }
+    
+    &:active {
+      background: #d32f2f;
+    }
+  }
+
   // 状态样式
   &__empty,
   &__loading {

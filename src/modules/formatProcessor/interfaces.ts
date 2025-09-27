@@ -92,6 +92,9 @@ export interface IFormatProcessor {
     
     /** 渲染操作按钮（如添加备注按钮） */
     renderActionButtons?(item: FormattedTextItem, i18n?: any): string;
+    
+    /** 删除格式化，保留纯文本 */
+    removeFormatting?(text: string, blockId: string, itemIndex?: number): Promise<boolean>;
 }
 
 /**

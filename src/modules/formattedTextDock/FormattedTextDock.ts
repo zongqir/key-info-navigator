@@ -400,6 +400,22 @@ export class FormattedTextDock {
                 this.addMemoToText(blockId, text);
             });
         });
+        
+        // 绑定删除格式化按钮事件
+        const removeFormatButtons = container.querySelectorAll<HTMLButtonElement>('.formatted-text-dock__remove-format-btn');
+        
+        removeFormatButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 阻止事件冒泡，避免触发导航
+                
+                const blockId = btn.dataset.blockId || '';
+                const text = btn.dataset.text || '';
+                const type = btn.dataset.type as TextFormatType;
+                const position = Number(btn.dataset.position || 0);
+                
+                this.removeFormattingFromText(blockId, text, type, position);
+            });
+        });
     }
 
     /**
@@ -527,6 +543,51 @@ export class FormattedTextDock {
             
         } catch (error) {
             this.log('更新块内容失败:', error);
+        }
+    }
+    
+    /**
+     * 删除文本格式化
+     */
+    private async removeFormattingFromText(blockId: string, text: string, type: TextFormatType, position: number): Promise<void> {
+        try {
+            this.log(`开始删除格式化: "${text}", 类型: ${type}, 位置: ${position}`);
+            
+            // 获取对应的格式处理器
+            const processor = this.parser.getFormatProcessor(type);
+            
+            // 计算项目索引（同类型同文本的项目中的索引）
+            const sameTypeItems = this.formattedTexts.filter(item => 
+                item.type === type && item.text === text
+            );
+            
+            // 按位置排序找到当前项目的索引
+            sameTypeItems.sort((a, b) => a.position - b.position);
+            const itemIndex = sameTypeItems.findIndex(item => item.position === position);
+            
+            this.log(`找到 ${sameTypeItems.length} 个相同的项目，当前项目索引: ${itemIndex}`);
+            
+            // 调用处理器删除格式化
+            const success = await processor.removeFormatting!(text, blockId, itemIndex >= 0 ? itemIndex : 0);
+            
+            if (success) {
+                showMessage(`✅ ${this.i18n.removeFormatSuccess || '格式删除成功'}: ${text}`, 2000, 'info');
+                
+                // 更新块内容到后端
+                await this.updateBlockContent();
+                
+                // 延迟刷新列表，让DOM更新完成
+                setTimeout(() => {
+                    this.refresh(true);
+                }, 500);
+                
+            } else {
+                showMessage(`❌ ${this.i18n.removeFormatFailed || '格式删除失败'}: ${text}`, 3000, 'error');
+            }
+            
+        } catch (error) {
+            this.log('删除格式化失败:', error);
+            showMessage(`❌ ${this.i18n.removeFormatFailed || '格式删除失败'}: ${text}`, 3000, 'error');
         }
     }
     
