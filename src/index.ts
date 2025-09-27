@@ -18,13 +18,13 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
         const frontEnd = getFrontend();
         this.isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
 
-        // 添加关键信息导航侧边栏
+        // 添加导航侧边栏
         this.addDock({
             config: {
                 position: "RightTop",
                 size: {width: 280, height: 0},
                 icon: "iconFocus",
-                title: "关键信息",
+                title: "",
                 hotkey: "⌥⌘F",
             },
             data: {},

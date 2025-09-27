@@ -134,6 +134,8 @@ export class FormattedTextDock {
      */
     private initUI(): void {
         this.element.innerHTML = this.uiRenderer.createMainHTML();
+        // 确保DOM状态与enabledFormats数组一致
+        this.updateFilterButtonsState();
         this.eventHandler.bindEvents();
     }
 
@@ -302,6 +304,9 @@ export class FormattedTextDock {
             this.log(`启用格式类型: ${type}`);
         }
         
+        // 同步更新DOM状态
+        this.updateFilterButtonsState();
+        
         // 更新事件处理器的格式列表
         this.eventHandler.updateEnabledFormats(this.enabledFormats);
         
@@ -313,10 +318,22 @@ export class FormattedTextDock {
      * 获取当前激活的格式类型
      */
     private getActiveFormats(): TextFormatType[] {
-        const activeButtons = this.element.querySelectorAll('.format-filter.active');
-        return Array.from(activeButtons)
-            .map(btn => (btn as HTMLElement).dataset.format as TextFormatType)
-            .filter(type => type);
+        return [...this.enabledFormats];
+    }
+
+    /**
+     * 更新过滤器按钮状态以同步DOM
+     */
+    private updateFilterButtonsState(): void {
+        const filterButtons = this.element.querySelectorAll<HTMLButtonElement>('.format-filter');
+        filterButtons.forEach(btn => {
+            const format = btn.dataset.format as TextFormatType;
+            if (this.enabledFormats.includes(format)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
     }
 
     /**

@@ -33,7 +33,7 @@ export class FormattedTextEventHandler {
                 btn.addEventListener("click", () => {
                     const format = btn.dataset.format as TextFormatType;
                     this.onFormatToggle(format);
-                    btn.classList.toggle("active");
+                    // DOM状态会在toggleFormat方法中统一更新，不需要在这里手动toggle
                 });
             });
 

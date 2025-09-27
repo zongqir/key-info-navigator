@@ -26,7 +26,6 @@ export class FormattedTextUIRenderer {
                         <svg class="formatted-text-dock__icon">
                             <use xlink:href="#iconFocus"></use>
                         </svg>
-                        <span>${this.i18n.keyInformation}</span>
                     </div>
                     <div class="formatted-text-dock__controls">
                         <div class="formatted-text-dock__filters">${filtersHTML}</div>
