@@ -256,11 +256,9 @@ export class MemoProcessor extends BaseFormatProcessor {
             return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
         };
 
+        // 只显示备注内容，不重复显示目标文字（因为主标题已经显示了）
         return `
             <div class="formatted-text-dock__item-memo">
-                <div class="formatted-text-dock__item-memo-target">
-                    ${escapeHtml(displayText)}
-                </div>
                 <div class="formatted-text-dock__item-memo-content">
                     ${escapeHtml(truncateText(item.memoContent, 150))}
                 </div>
