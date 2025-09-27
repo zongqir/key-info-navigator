@@ -1,7 +1,7 @@
 {
   "name": "key-info-navigator",
   "author": "zongqir",
-  "url": "https://github.com/siyuan-note/plugin-sample",
+  "url": "https://github.com/zongqir/key-info-navigator",
   "version": "1.0.0",
   "minAppVersion": "3.3.0",
   "backends": [

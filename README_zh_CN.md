@@ -17,14 +17,21 @@
 1. 在思源笔记集市中搜索"关键信息导航"并安装
 2. 打开任意文档，侧边栏会自动显示关键信息导航面板
 3. 点击任意条目即可快速跳转到对应位置
+
+## 致谢
+
+特别感谢 **JeffreyChen** 提供的帮助和支持。
+
 ## 支持开发
 
 如果这个插件对你有帮助，欢迎支持开发者！
 
+Give me a coffee, thanks! 请我喝杯咖啡，谢谢！
+
 <div align="center">
-<img src="https://i0.hdslb.com/bfs/openplatform/3b4d37a5285096d3493d09ca88280d9acf90129e.png@1e_1c.webp" width="200" alt="赞助二维码"/>
+<img src="https://i0.hdslb.com/bfs/openplatform/3b4d37a5285096d3493d09ca88280d9acf90129e.png@1e_1c.webp" width="200" alt="Support QR Code 赞助二维码"/>
 </div>
 
 ---
 
-**感谢您的支持！**
+**Thank you for your support! 感谢您的支持！**
