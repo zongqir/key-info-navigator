@@ -91,6 +91,9 @@ export interface IFormatProcessor {
     /** 渲染项目详细内容（用于自定义显示） */
     renderItemDetails?(item: FormattedTextItem, displayText: string): string;
     
+    /** 渲染主要内容（用于自定义主要内容显示） */
+    renderMainContent?(item: FormattedTextItem): string;
+    
     /** 是否支持添加备注功能 */
     supportAddMemo?(): boolean;
     

@@ -423,31 +423,44 @@ export class TextFormatParser {
      * 处理Todo块数据
      */
     private processTodoBlocks(blocks: any[]): FormattedTextItem[] {
+        this.log('🔍 [TextFormatParser] processTodoBlocks 开始处理Todo块数据');
         const items: FormattedTextItem[] = [];
         
         // 检查blocks是否为有效数组
         if (!blocks || !Array.isArray(blocks)) {
-            this.log('Todo块数据不是有效数组:', blocks);
+            this.log('❌ [TextFormatParser] Todo块数据不是有效数组:', blocks);
             return [];
         }
         
+        this.log('✅ [TextFormatParser] 找到', blocks.length, '个Todo块');
+        
         // 使用TodoProcessor来处理Todo块
         const todoProcessor = this.getFormatProcessor(TextFormatType.TODO);
+        this.log('🎯 [TextFormatParser] 获得TodoProcessor:', todoProcessor);
         
         blocks.forEach((block, index) => {
+            this.log(`📋 [TextFormatParser] 处理第${index + 1}个块:`, block);
+            
             // 检查block是否为有效对象
             if (!block || typeof block !== 'object') {
-                this.log('跳过无效的Todo块对象:', block);
+                this.log('⚠️ [TextFormatParser] 跳过无效的Todo块对象:', block);
                 return;
             }
             
+            this.log('🔍 [TextFormatParser] 块的subtype:', block.subtype);
+            
             if (block.subtype === 't') {
+                this.log('✅ [TextFormatParser] 确认是Todo块，调用TodoProcessor');
                 // 使用TodoProcessor的extractFromBlock方法，传递块索引
                 const todoItems = todoProcessor.extractFromBlock(block, index);
+                this.log('🎯 [TextFormatParser] TodoProcessor返回的项目:', todoItems);
                 items.push(...todoItems);
+            } else {
+                this.log('⚠️ [TextFormatParser] 不是Todo块，subtype:', block.subtype);
             }
         });
         
+        this.log('🎉 [TextFormatParser] processTodoBlocks 完成，总共', items.length, '个Todo项目');
         return items;
     }
     

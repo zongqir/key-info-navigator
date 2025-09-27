@@ -118,13 +118,18 @@ export class FormattedTextUIRenderer {
                             <div class="formatted-text-dock__item-header">
                                 <div class="formatted-text-dock__item-main">
                                     ${(() => {
-                                        console.log('[UIRenderer] Processing item type:', item.type, 'processor:', processor.constructor.name);
-                                        console.log('[UIRenderer] Has renderMainContent?', typeof processor.renderMainContent === 'function');
+                                        this.log('🎨 [UIRenderer] 正在处理项目类型:', item.type, '处理器:', processor.constructor.name);
+                                        this.log('🔍 [UIRenderer] 项目详细信息:', item);
+                                        this.log('🔍 [UIRenderer] 处理器配置:', processor.getConfig());
+                                        this.log('🔍 [UIRenderer] 是否有renderMainContent方法?', typeof processor.renderMainContent === 'function');
+                                        
                                         if (typeof processor.renderMainContent === 'function') {
-                                            console.log('[UIRenderer] Calling renderMainContent for item:', item);
-                                            return processor.renderMainContent(item);
+                                            this.log('✅ [UIRenderer] 调用自定义renderMainContent，item:', item);
+                                            const customContent = processor.renderMainContent(item);
+                                            this.log('🎯 [UIRenderer] 自定义内容结果:', customContent);
+                                            return customContent;
                                         } else {
-                                            console.log('[UIRenderer] Using default text rendering');
+                                            this.log('⚠️ [UIRenderer] 没有自定义renderMainContent，使用默认文本渲染');
                                             return `<span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>`;
                                         }
                                     })()}
