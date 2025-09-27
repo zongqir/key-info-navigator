@@ -37,13 +37,18 @@ export class FormattedTextDock {
         private i18n: any,
         private logger?: (...args: any[]) => void
     ) {
+        console.log('[FormattedTextDock] 构造函数开始初始化');
         this.parser = new TextFormatParser(logger);
         
         // 初始化功能模块
+        console.log('[FormattedTextDock] 初始化功能模块');
         this.initModules();
         
         // 初始化UI和功能
+        console.log('[FormattedTextDock] 初始化UI');
         this.initUI();
+        
+        console.log('[FormattedTextDock] 开始初始刷新');
         this.refresh(true); // 初始化时强制刷新
     }
 
@@ -159,7 +164,7 @@ export class FormattedTextDock {
         this.showLoading();
 
         try {
-            this.log(`开始${force ? '强制' : '自动'}刷新，文档ID: ${blockId}`);
+            console.log(`[FormattedTextDock] 开始${force ? '强制' : '自动'}刷新，文档ID: ${blockId}`);
             
             const options: ParseOptions = {
                 enabledFormats: this.enabledFormats,
@@ -167,37 +172,51 @@ export class FormattedTextDock {
                 includeContext: true
             };
 
-            this.log('解析选项:', options);
+            console.log('[FormattedTextDock] 解析选项:', options);
 
             // 优先从编辑器实时获取
-            this.log('尝试从编辑器实时获取格式化文本...');
+            console.log('[FormattedTextDock] 尝试从编辑器实时获取格式化文本...');
             const realtimeResults = this.parser.getCurrentEditorFormattedTexts(editor.protyle, options);
-            this.log(`实时解析结果: ${realtimeResults.length} 项`);
+            console.log(`[FormattedTextDock] 实时解析结果: ${realtimeResults.length} 项`);
             
             // 如果实时结果为空，从数据库查询
             if (realtimeResults.length === 0) {
-                this.log('实时解析无结果，从数据库查询...');
+                console.log('[FormattedTextDock] 实时解析无结果，从数据库查询...');
                 this.formattedTexts = await this.parser.parseFormattedTexts(blockId, options);
-                this.log(`数据库查询结果: ${this.formattedTexts.length} 项`);
+                console.log(`[FormattedTextDock] 数据库查询结果: ${this.formattedTexts.length} 项`);
             } else {
                 this.formattedTexts = realtimeResults;
             }
+            
+            // 详细日志：分析标签数据
+            const tagItems = this.formattedTexts.filter(item => item.type === TextFormatType.TAG);
+            console.log('[FormattedTextDock] 标签数据详情:', tagItems);
+            tagItems.forEach((item, index) => {
+                console.log(`[FormattedTextDock] 标签 ${index + 1}:`, {
+                    id: item.id,
+                    text: item.text,
+                    type: item.type,
+                    blockId: item.blockId,
+                    metadata: item.metadata,
+                    color: item.color
+                });
+            });
 
             // 更新各模块的数据
             this.updateModulesData();
 
-            this.log(`最终获取到 ${this.formattedTexts.length} 个格式化文本项`);
+            console.log(`[FormattedTextDock] 最终获取到 ${this.formattedTexts.length} 个格式化文本项`);
 
             if (this.formattedTexts.length === 0) {
-                this.log('没有找到格式化文本，显示空状态');
+                console.log('[FormattedTextDock] 没有找到格式化文本，显示空状态');
                 this.showEmpty(this.i18n.noFormattedText);
             } else {
-                this.log('开始渲染列表');
+                console.log('[FormattedTextDock] 开始渲染列表');
                 this.renderList();
             }
 
         } catch (error) {
-            this.log('刷新失败:', error);
+            console.log('[FormattedTextDock] 刷新失败:', error);
             this.showEmpty(this.i18n.loadFailed);
         }
     }
@@ -215,30 +234,53 @@ export class FormattedTextDock {
      * 渲染列表
      */
     private renderList(): void {
-        this.log('开始渲染列表');
+        console.log('[FormattedTextDock] 开始渲染列表');
         const content = this.element.querySelector<HTMLElement>(".formatted-text-dock__content");
         if (!content) {
-            this.log('未找到内容容器元素');
+            console.log('[FormattedTextDock] 未找到内容容器元素');
             return;
         }
 
         const activeFormats = this.getActiveFormats();
-        this.log('当前激活的格式:', activeFormats);
+        console.log('[FormattedTextDock] 当前激活的格式:', activeFormats);
         
         const filteredItems = this.formattedTexts.filter(item => activeFormats.indexOf(item.type) !== -1);
-        this.log(`过滤后的项目数量: ${filteredItems.length}`);
+        console.log(`[FormattedTextDock] 过滤后的项目数量: ${filteredItems.length}`);
+        
+        // 详细分析过滤后的标签数据
+        const filteredTagItems = filteredItems.filter(item => item.type === TextFormatType.TAG);
+        console.log('[FormattedTextDock] 过滤后的标签数据:', filteredTagItems);
+        filteredTagItems.forEach((item, index) => {
+            console.log(`[FormattedTextDock] 过滤标签 ${index + 1}:`, {
+                id: item.id,
+                text: item.text,
+                type: item.type,
+                metadata: item.metadata,
+                color: item.color
+            });
+        });
 
         if (filteredItems.length === 0) {
-            this.log('没有匹配的格式化文本，显示空状态');
+            console.log('[FormattedTextDock] 没有匹配的格式化文本，显示空状态');
             this.showEmpty(this.i18n.noMatchingFormat);
             return;
         }
 
         const groupedItems = FormattedTextUtils.groupItems(filteredItems);
-        this.log(`分组后的项目数量: ${groupedItems.size}`);
+        console.log(`[FormattedTextDock] 分组后的项目数量: ${groupedItems.size}`);
+        
+        // 分析分组后的标签数据
+        console.log('[FormattedTextDock] 分组后的数据:', groupedItems);
+        for (const [key, items] of groupedItems) {
+            const tagGroupItems = items.filter(item => item.type === TextFormatType.TAG);
+            if (tagGroupItems.length > 0) {
+                console.log(`[FormattedTextDock] 分组 "${key}" 中的标签:`, tagGroupItems);
+            }
+        }
         
         const listHTML = this.uiRenderer.createListHTML(groupedItems);
-        this.log('生成列表HTML完成');
+        console.log('[FormattedTextDock] 生成列表HTML完成');
+        console.log('[FormattedTextDock] 生成的HTML:', listHTML);
 
         content.innerHTML = `<div class="formatted-text-dock__list">${listHTML}</div>`;
         

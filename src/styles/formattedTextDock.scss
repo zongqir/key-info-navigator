@@ -165,6 +165,12 @@
     &:hover {
       opacity: 0.8;
     }
+    
+    // 当包含标签内联内容时，移除默认的gap和padding
+    .formatted-text-dock__item-tag-inline {
+      margin-top: 0;
+      width: 100%;
+    }
   }
 
   &__item-actions {
@@ -220,6 +226,78 @@
         font-size: 10px;
       }
     }
+  }
+
+  // 标签特异化显示样式 - 单行布局
+  &__item-tag-inline {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 0;
+  }
+
+  &__tag-shape {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 10px;
+    border-radius: 14px; // 弧度形状，稍微小一点更精致
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0; // 防止标签被压缩
+    
+    // 添加光泽效果
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+    
+    // 标签文字样式
+    .formatted-text-dock__tag-text {
+      font-size: 10px;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+  }
+
+  &__tag-block-text {
+    font-size: 12px;
+    color: #374151;
+    line-height: 1.4;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0; // 允许文本溢出时正确截断
+    
+    // 文本溢出处理
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   // 操作按钮样式

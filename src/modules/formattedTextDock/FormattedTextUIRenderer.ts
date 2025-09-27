@@ -117,7 +117,17 @@ export class FormattedTextUIRenderer {
                         <div class="formatted-text-dock__item-content">
                             <div class="formatted-text-dock__item-header">
                                 <div class="formatted-text-dock__item-main">
-                                    <span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>
+                                    ${(() => {
+                                        console.log('[UIRenderer] Processing item type:', item.type, 'processor:', processor.constructor.name);
+                                        console.log('[UIRenderer] Has renderMainContent?', typeof processor.renderMainContent === 'function');
+                                        if (typeof processor.renderMainContent === 'function') {
+                                            console.log('[UIRenderer] Calling renderMainContent for item:', item);
+                                            return processor.renderMainContent(item);
+                                        } else {
+                                            console.log('[UIRenderer] Using default text rendering');
+                                            return `<span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>`;
+                                        }
+                                    })()}
                                 </div>
                                 <div class="formatted-text-dock__item-actions">
                                     ${actionButtons}

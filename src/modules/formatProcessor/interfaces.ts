@@ -35,6 +35,8 @@ export interface FormattedTextItem {
     memoContent?: string;
     /** 原始DOM元素（用于精确定位） */
     element?: HTMLElement;
+    /** 附加元数据（用于自定义渲染） */
+    metadata?: any;
 }
 
 /**

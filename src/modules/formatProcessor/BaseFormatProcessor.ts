@@ -170,6 +170,11 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
     }
     
     /**
+     * 自定义渲染主要内容（可选，子类可重写）
+     */
+    public renderMainContent?(item: FormattedTextItem): string;
+
+    /**
      * 渲染操作按钮
      */
     public renderActionButtons(item: FormattedTextItem, i18n?: any): string {
