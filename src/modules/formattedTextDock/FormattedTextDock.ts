@@ -258,7 +258,31 @@ export class FormattedTextDock {
     private createListHTML(groupedItems: Map<string, FormattedTextItem[]>): string {
         const html: string[] = [];
         
-        for (const [key, items] of groupedItems) {
+        // 将分组转换为数组并按文档位置排序
+        const sortedGroups = Array.from(groupedItems.entries()).sort((a, b) => {
+            const [keyA, itemsA] = a;
+            const [keyB, itemsB] = b;
+            
+            // 按照每组第一个项目的位置和块ID排序
+            const firstA = itemsA[0];
+            const firstB = itemsB[0];
+            
+            // 首先按块ID排序
+            if (firstA.blockId !== firstB.blockId) {
+                return firstA.blockId.localeCompare(firstB.blockId);
+            }
+            
+            // 同一块内按位置排序
+            return firstA.position - firstB.position;
+        });
+        
+        this.log(`分组排序完成，共 ${sortedGroups.length} 个分组:`);
+        sortedGroups.forEach(([key, items], index) => {
+            const first = items[0];
+            this.log(`  ${index + 1}. [${first.type}] "${first.text}" - 位置: ${first.position}, 块: ${first.blockId}`);
+        });
+        
+        for (const [key, items] of sortedGroups) {
             const firstItem = items[0];
             const processor = this.parser.getFormatProcessor(firstItem.type);
             const config = processor.getConfig();

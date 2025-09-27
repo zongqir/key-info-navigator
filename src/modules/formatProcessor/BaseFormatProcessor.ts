@@ -80,17 +80,47 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
         const text = this.cleanText(el.textContent || '');
         if (!text) return null;
         
+        // 计算元素在文档中的真实位置
+        const documentPosition = this.getElementDocumentPosition(el);
+        
         const id = this.generateId('html', `${blockId}_${index}`);
         return {
             id,
             text,
             type: this.formatType,
             blockId,
-            position: index,
+            position: documentPosition, // 使用真实的文档位置
             context: this.getElementContext(el),
             icon: this.config.icon,
             color: this.config.color,
         };
+    }
+    
+    /**
+     * 计算元素在文档中的位置（使用简单的DOM遍历方法）
+     */
+    protected getElementDocumentPosition(element: Element): number {
+        try {
+            // 使用 compareDocumentPosition 来确定相对位置
+            const container = element.ownerDocument.body || element.ownerDocument.documentElement;
+            if (!container) return 0;
+            
+            // 获取容器中的所有元素
+            const allElements = container.querySelectorAll('*');
+            
+            // 找到当前元素在所有元素中的索引
+            for (let i = 0; i < allElements.length; i++) {
+                if (allElements[i] === element) {
+                    return i;
+                }
+            }
+            
+            return 0;
+        } catch (error) {
+            // 如果计算失败，回退到使用时间戳
+            this.log('计算文档位置失败，使用时间戳:', error);
+            return Date.now() % 100000; // 使用时间戳作为位置，确保顺序
+        }
     }
     
     /**

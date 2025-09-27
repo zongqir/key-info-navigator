@@ -167,12 +167,15 @@ export class MemoProcessor extends BaseFormatProcessor {
             const blockElement = this.findParentBlock(element as HTMLElement);
             const blockId = blockElement?.dataset.nodeId || 'unknown';
             
+            // 计算元素在文档中的真实位置
+            const documentPosition = this.getElementDocumentPosition(element);
+            
             const memo: FormattedTextItem = {
                 id: this.generateId('page', `${blockId}_${index}`),
                 text: this.cleanText(element.textContent || ''),
                 type: this.formatType,
                 blockId: blockId,
-                position: index,
+                position: documentPosition, // 使用真实的文档位置
                 context: this.getElementContext(element),
                 icon: this.config.icon,
                 color: this.config.color,
