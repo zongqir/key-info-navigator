@@ -195,6 +195,8 @@ export class FormattedTextUIRenderer {
             [TextFormatType.UNDERLINE]: this.i18n.underline,
             [TextFormatType.HIGHLIGHT]: this.i18n.highlight,
             [TextFormatType.MEMO]: this.i18n.memo,
+            [TextFormatType.TAG]: this.i18n.tag || "标签",
+            [TextFormatType.TODO]: this.i18n.todo || "待办",
         };
         return names[type] || type;
     }

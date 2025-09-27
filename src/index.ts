@@ -14,7 +14,6 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
     private isMobile: boolean;
     private formattedTextDock?: FormattedTextDock;
 
-
     onload() {
         const frontEnd = getFrontend();
         this.isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
@@ -72,5 +71,4 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
     onunload() {
         console.log("Key Info Navigator plugin unloaded");
     }
-
 }

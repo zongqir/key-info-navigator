@@ -7,6 +7,8 @@ export enum TextFormatType {
     UNDERLINE = "underline",
     HIGHLIGHT = "highlight",
     MEMO = "memo",
+    TAG = "tag",
+    TODO = "todo",
 }
 
 /**

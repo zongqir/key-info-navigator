@@ -4,6 +4,8 @@ import { ItalicProcessor } from './processors/ItalicProcessor';
 import { UnderlineProcessor } from './processors/UnderlineProcessor';
 import { HighlightProcessor } from './processors/HighlightProcessor';
 import { MemoProcessor } from './processors/MemoProcessor';
+import { TagProcessor } from './processors/TagProcessor';
+import { TodoProcessor } from './processors/TodoProcessor';
 
 /**
  * 格式处理器工厂
@@ -68,6 +70,10 @@ export class FormatProcessorFactory {
                 return new HighlightProcessor(logger);
             case TextFormatType.MEMO:
                 return new MemoProcessor(logger);
+            case TextFormatType.TAG:
+                return new TagProcessor(logger);
+            case TextFormatType.TODO:
+                return new TodoProcessor(logger);
             default:
                 throw new Error(`不支持的格式类型: ${type}`);
         }

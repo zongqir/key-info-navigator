@@ -20,6 +20,8 @@ export class FormattedTextDock {
         TextFormatType.UNDERLINE,
         TextFormatType.HIGHLIGHT,
         TextFormatType.MEMO,
+        TextFormatType.TAG,
+        TextFormatType.TODO,
     ];
     private currentBlockId = "";
     private refreshTimer?: number;
@@ -294,6 +296,7 @@ export class FormattedTextDock {
             content.innerHTML = this.uiRenderer.createEmptyHTML(message);
         }
     }
+
 
     /**
      * 日志输出

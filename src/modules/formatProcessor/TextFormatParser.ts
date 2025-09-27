@@ -23,25 +23,32 @@ export class TextFormatParser {
         options: ParseOptions
     ): Promise<FormattedTextItem[]> {
         try {
-            const processors = FormatProcessorFactory.getProcessors(options.enabledFormats);
-            const sqlTypes = this.collectSqlTypes(processors);
+            const allItems: FormattedTextItem[] = [];
             
-            if (sqlTypes.length === 0) {
-                this.log('没有可用的SQL类型');
-                return [];
+            // 直接查询标签块
+            if (options.enabledFormats.includes(TextFormatType.TAG)) {
+                const tagItems = await this.queryTagBlocks(rootBlockId, options.maxResults);
+                allItems.push(...tagItems);
             }
             
-            const stmt = this.buildSqlQuery(rootBlockId, sqlTypes, options.maxResults);
-            this.log('执行SQL查询:', stmt);
-            
-            const response = await fetchPost("/api/query/sql", { stmt }) as any;
-            
-            if (response.code !== 0) {
-                this.log('SQL查询失败:', response);
-                return [];
+            // 直接查询Todo块
+            if (options.enabledFormats.includes(TextFormatType.TODO)) {
+                const todoItems = await this.queryTodoBlocks(rootBlockId, options.maxResults);
+                allItems.push(...todoItems);
             }
             
-            return this.processQueryResults(response.data, processors, options);
+            // 查询spans（原有的格式化文本）
+            const spanFormats = options.enabledFormats.filter(f => 
+                f !== TextFormatType.TAG && f !== TextFormatType.TODO
+            );
+            
+            if (spanFormats.length > 0) {
+                const processors = FormatProcessorFactory.getProcessors(spanFormats);
+                const spanItems = await this.querySpans(rootBlockId, processors, options);
+                allItems.push(...spanItems);
+            }
+            
+            return allItems;
             
         } catch (error) {
             this.log('解析格式化文本时出错:', error);
@@ -230,6 +237,169 @@ export class TextFormatParser {
         return result;
     }
     
+    
+    /**
+     * 查询spans表
+     */
+    private async querySpans(
+        rootBlockId: string, 
+        processors: IFormatProcessor[],
+        options: ParseOptions
+    ): Promise<FormattedTextItem[]> {
+        const sqlTypes = this.collectSqlTypes(processors);
+        
+        if (sqlTypes.length === 0) {
+            return [];
+        }
+        
+        const stmt = this.buildSqlQuery(rootBlockId, sqlTypes, options.maxResults);
+        this.log('执行Span SQL查询:', stmt);
+        
+        const response = await fetchPost("/api/query/sql", { stmt }) as any;
+        
+        if (response.code !== 0) {
+            this.log('Span SQL查询失败:', response);
+            return [];
+        }
+        
+        return this.processQueryResults(response.data, processors, options);
+    }
+    
+    
+    
+    /**
+     * 查询标签块
+     */
+    private async queryTagBlocks(rootBlockId: string, maxResults?: number): Promise<FormattedTextItem[]> {
+        const limit = maxResults ? `LIMIT ${maxResults}` : 'LIMIT 200';
+        
+        const stmt = `
+            SELECT *
+            FROM blocks
+            WHERE root_id = "${rootBlockId}"
+              AND tag IS NOT NULL
+            ORDER BY created ASC
+            ${limit}
+        `.trim();
+        
+        const response = await fetchPost("/api/query/sql", { stmt }) as any;
+        
+        if (response.code !== 0) {
+            this.log('标签块查询失败:', response);
+            return [];
+        }
+        
+        return this.processTagBlocks(response.data);
+    }
+    
+    /**
+     * 查询Todo块
+     */
+    private async queryTodoBlocks(rootBlockId: string, maxResults?: number): Promise<FormattedTextItem[]> {
+        const limit = maxResults ? `LIMIT ${maxResults}` : 'LIMIT 200';
+        
+        const stmt = `
+            SELECT *
+            FROM blocks
+            WHERE root_id = "${rootBlockId}"
+              AND subtype = "t"
+            ORDER BY created ASC
+            ${limit}
+        `.trim();
+        
+        const response = await fetchPost("/api/query/sql", { stmt }) as any;
+        
+        if (response.code !== 0) {
+            this.log('Todo块查询失败:', response);
+            return [];
+        }
+        
+        return this.processTodoBlocks(response.data);
+    }
+    
+    /**
+     * 处理标签块数据
+     */
+    private processTagBlocks(blocks: any[]): FormattedTextItem[] {
+        const items: FormattedTextItem[] = [];
+        
+        blocks.forEach((block, index) => {
+            if (block.tag) {
+                const tags = block.tag.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+                
+                tags.forEach(tag => {
+                    items.push({
+                        id: `tag_${block.id}_${tag}`,
+                        text: `#${tag}`,
+                        type: TextFormatType.TAG,
+                        blockId: block.id,
+                        position: index,
+                        context: this.truncateText(block.content || "", 50),
+                        icon: "iconTags",
+                        color: "#4285f4"
+                    });
+                });
+            }
+        });
+        
+        return items;
+    }
+    
+    /**
+     * 处理Todo块数据
+     */
+    private processTodoBlocks(blocks: any[]): FormattedTextItem[] {
+        const items: FormattedTextItem[] = [];
+        
+        blocks.forEach((block, index) => {
+            if (block.subtype === 't') {
+                const content = this.extractTodoContent(block.content || "");
+                const isCompleted = this.isTodoCompleted(block.content || "");
+                
+                items.push({
+                    id: `todo_${block.id}`,
+                    text: content,
+                    type: TextFormatType.TODO,
+                    blockId: block.id,
+                    position: index,
+                    context: this.truncateText(content, 80),
+                    icon: isCompleted ? "iconCheck" : "iconUncheck",
+                    color: isCompleted ? "#34a853" : "#ff9800"
+                });
+            }
+        });
+        
+        return items;
+    }
+    
+    /**
+     * 提取Todo内容
+     */
+    private extractTodoContent(content: string): string {
+        // 移除HTML标签，获取纯文本
+        const text = content.replace(/<[^>]*>/g, '').trim();
+        // 移除checkbox标记
+        return text.replace(/^\s*[\[✓☑️✗✘x\]\s*]*/, '').trim();
+    }
+    
+    /**
+     * 检查Todo是否完成
+     */
+    private isTodoCompleted(content: string): boolean {
+        // 检查是否包含完成标记
+        return /\[✓\]|\[x\]|☑️/.test(content);
+    }
+    
+    /**
+     * 截断文本
+     */
+    private truncateText(text: string, maxLength: number): string {
+        if (text.length <= maxLength) {
+            return text;
+        }
+        return text.substring(0, maxLength) + '...';
+    }
+
     /**
      * 日志输出
      */
