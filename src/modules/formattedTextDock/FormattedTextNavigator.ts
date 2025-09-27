@@ -226,24 +226,93 @@ export class FormattedTextNavigator {
             return;
         }
         
-        // 检查点击的是否是格式化文本元素
-        const formattedElement = this.findFormattedElement(target);
-        if (!formattedElement) {
+        // 查找点击元素所在的块
+        const blockElement = this.findBlockElement(target);
+        if (!blockElement) {
             return;
         }
         
-        // 识别格式化文本的类型和内容
-        const formatInfo = this.identifyFormattedElement(formattedElement);
-        if (!formatInfo) {
+        // 查找该块中的所有格式化文本
+        const formattedElements = this.findAllFormattedElementsInBlock(blockElement);
+        if (formattedElements.length === 0) {
             return;
         }
         
-        this.log('检测到格式化元素点击:', formatInfo);
+        // 如果只有一个格式化元素，直接定位
+        if (formattedElements.length === 1) {
+            const formatInfo = formattedElements[0];
+            this.locateInDock(formatInfo.text, formatInfo.type, formatInfo.element);
+            return;
+        }
         
-        // 在侧边栏中定位对应条目
-        this.locateInDock(formatInfo.text, formatInfo.type, formatInfo.element);
+        // 如果有多个格式化元素，优先选择距离点击位置最近的
+        const clickedPosition = this.getElementPosition(target);
+        let closestElement = formattedElements[0];
+        let minDistance = Math.abs(this.getElementPosition(closestElement.element) - clickedPosition);
+        
+        for (const formatInfo of formattedElements) {
+            const distance = Math.abs(this.getElementPosition(formatInfo.element) - clickedPosition);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestElement = formatInfo;
+            }
+        }
+        
+        this.locateInDock(closestElement.text, closestElement.type, closestElement.element);
     }
     
+    /**
+     * 查找点击元素所在的块
+     */
+    private findBlockElement(element: HTMLElement): HTMLElement | null {
+        let current: HTMLElement | null = element;
+        
+        // 向上遍历，寻找具有data-node-id的块元素
+        while (current && current !== document.body) {
+            if (current.getAttribute && current.getAttribute('data-node-id')) {
+                return current;
+            }
+            current = current.parentElement;
+        }
+        
+        return null;
+    }
+
+    /**
+     * 查找块中的所有格式化文本元素
+     */
+    private findAllFormattedElementsInBlock(blockElement: HTMLElement): Array<{text: string, type: TextFormatType, element: HTMLElement}> {
+        const results: Array<{text: string, type: TextFormatType, element: HTMLElement}> = [];
+        
+        // 遍历所有启用的格式类型
+        for (const formatType of this.enabledFormats) {
+            const processor = this.parser.getFormatProcessor(formatType);
+            const config = processor.getConfig();
+            
+            // 在块内查找该格式的所有元素
+            for (const selector of config.htmlSelectors) {
+                try {
+                    const elements = blockElement.querySelectorAll(selector);
+                    elements.forEach(element => {
+                        const text = element.textContent?.trim();
+                        if (text) {
+                            results.push({
+                                text,
+                                type: formatType,
+                                element: element as HTMLElement
+                            });
+                        }
+                    });
+                } catch (error) {
+                    // 忽略无效的选择器
+                    continue;
+                }
+            }
+        }
+        
+        return results;
+    }
+
     /**
      * 查找格式化元素（向上遍历DOM树）
      */
@@ -332,25 +401,44 @@ export class FormattedTextNavigator {
         const dockItems = this.element.querySelectorAll('.formatted-text-dock__item');
         
         let targetItem: HTMLElement | null = null;
-        let bestMatch = -1;
         
-        dockItems.forEach((item, index) => {
-            const itemElement = item as HTMLElement;
-            const itemText = itemElement.dataset.text;
-            const itemType = itemElement.dataset.type;
+        // 对于标签和TODO，通过块ID进行精确匹配
+        if (type === TextFormatType.TAG || type === TextFormatType.TODO) {
+            // 找到点击元素所在的块ID
+            const clickedBlockId = this.findBlockId(clickedElement);
             
-            if (itemText === text && itemType === type) {
-                // 如果有多个相同的项目，尝试找到最匹配的
-                const itemPosition = Number(itemElement.dataset.position || 0);
-                const clickedPosition = this.getElementPosition(clickedElement);
+            dockItems.forEach((item) => {
+                const itemElement = item as HTMLElement;
+                const itemText = itemElement.dataset.text;
+                const itemType = itemElement.dataset.type;
+                const itemBlockId = itemElement.dataset.blockId;
                 
-                // 简单的位置匹配逻辑：选择位置最接近的
-                if (bestMatch === -1 || Math.abs(clickedPosition - itemPosition) < bestMatch) {
-                    bestMatch = Math.abs(clickedPosition - itemPosition);
+                // 精确匹配：文本、类型和块ID都要相同
+                if (itemText === text && itemType === type && itemBlockId === clickedBlockId) {
                     targetItem = itemElement;
+                    return;
                 }
-            }
-        });
+            });
+        } else {
+            // 其他格式使用位置匹配
+            let bestMatch = -1;
+            
+            dockItems.forEach((item) => {
+                const itemElement = item as HTMLElement;
+                const itemText = itemElement.dataset.text;
+                const itemType = itemElement.dataset.type;
+                
+                if (itemText === text && itemType === type) {
+                    const itemPosition = Number(itemElement.dataset.position || 0);
+                    const clickedPosition = this.getElementPosition(clickedElement);
+                    
+                    if (bestMatch === -1 || Math.abs(clickedPosition - itemPosition) < bestMatch) {
+                        bestMatch = Math.abs(clickedPosition - itemPosition);
+                        targetItem = itemElement;
+                    }
+                }
+            });
+        }
         
         if (targetItem) {
             this.highlightDockItem(targetItem);
@@ -359,6 +447,23 @@ export class FormattedTextNavigator {
         }
     }
     
+    /**
+     * 查找元素所在的块ID
+     */
+    private findBlockId(element: HTMLElement): string | null {
+        let currentElement = element;
+        
+        // 向上查找，寻找具有data-node-id的元素
+        while (currentElement && currentElement !== document.body) {
+            if (currentElement.getAttribute && currentElement.getAttribute('data-node-id')) {
+                return currentElement.getAttribute('data-node-id');
+            }
+            currentElement = currentElement.parentElement as HTMLElement;
+        }
+        
+        return null;
+    }
+
     /**
      * 获取元素在文档中的大致位置
      */
