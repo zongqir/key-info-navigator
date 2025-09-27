@@ -262,16 +262,20 @@ export class FormattedTextDock {
             const processor = this.parser.getFormatProcessor(firstItem.type);
             const config = processor.getConfig();
             
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                const displayText = items.length > 1 ? `${item.text} (${i + 1})` : item.text;
+            // 按位置排序同一组的项目，确保索引与DOM顺序一致
+            const sortedItems = [...items].sort((a, b) => a.position - b.position);
+            
+            for (let i = 0; i < sortedItems.length; i++) {
+                const item = sortedItems[i];
+                const displayText = sortedItems.length > 1 ? `${item.text} (${i + 1})` : item.text;
                 
                 html.push(`
                     <div class="formatted-text-dock__item" 
                          data-type="${item.type}"
                          data-text="${item.text}"
                          data-block-id="${item.blockId}"
-                         data-index="${i}">
+                         data-index="${i}"
+                         data-position="${item.position}">
                         <div class="formatted-text-dock__item-indicator" 
                              style="background-color: ${config.color}"></div>
                         <div class="formatted-text-dock__item-content">
@@ -315,22 +319,32 @@ export class FormattedTextDock {
     /**
      * 导航到文本位置
      */
-    private navigateToText(text: string, type: TextFormatType, index: number): void {
+    private navigateToText(text: string, type: TextFormatType, itemIndex: number): void {
         try {
+            this.log(`导航到文本: "${text}", 类型: ${type}, 项目索引: ${itemIndex}`);
+            
             const processor = this.parser.getFormatProcessor(type);
             const config = processor.getConfig();
             const selectors = config.htmlSelectors.join(',');
             
-            const elements = Array.from(document.querySelectorAll(selectors))
-                .filter(el => el.textContent?.trim() === text);
+            // 获取所有匹配的元素
+            const allTypeElements = Array.from(document.querySelectorAll(selectors));
+            this.log(`找到所有 ${type} 元素: ${allTypeElements.length} 个`);
+            
+            // 过滤出文本匹配的元素
+            const matchingElements = allTypeElements.filter(el => el.textContent?.trim() === text);
+            this.log(`文本匹配的元素: ${matchingElements.length} 个`);
 
-            if (elements.length === 0) {
+            if (matchingElements.length === 0) {
                 showMessage(`❌ ${this.i18n.textNotFound}: ${text}`, 3000, 'error');
                 return;
             }
 
-            const targetIndex = Math.min(index, elements.length - 1);
-            const target = elements[targetIndex];
+            // 根据在分组中的索引来找到对应的元素
+            const targetIndex = Math.min(itemIndex, matchingElements.length - 1);
+            const target = matchingElements[targetIndex];
+            
+            this.log(`选择目标元素索引: ${targetIndex}`);
             
             // 滚动到目标位置
             target.scrollIntoView({

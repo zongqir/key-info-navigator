@@ -164,12 +164,13 @@ export class TextFormatParser {
      * 过滤和排序结果
      */
     private filterAndSortResults(items: FormattedTextItem[], options: ParseOptions): FormattedTextItem[] {
-        // 去重
+        // 去重 - 包含位置信息，确保相同文本不同位置的项目都被保留
         const uniqueItems = new Map<string, FormattedTextItem>();
         
         for (const item of items) {
-            const key = `${item.type}_${item.text}_${item.blockId}`;
-            if (!uniqueItems.has(key) || uniqueItems.get(key)!.position > item.position) {
+            // 使用更精确的key，包含位置信息，避免相同文本被错误去重
+            const key = `${item.type}_${item.text}_${item.blockId}_${item.position}`;
+            if (!uniqueItems.has(key)) {
                 uniqueItems.set(key, item);
             }
         }
