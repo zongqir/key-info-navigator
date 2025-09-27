@@ -1,4 +1,5 @@
 import { showMessage } from 'siyuan';
+import { Logger } from '../utils/Logger';
 
 /**
  * 自定义备注对话框
@@ -208,15 +209,55 @@ export class MemoDialog {
             this.overlay.style.opacity = '0';
             this.overlay.style.display = 'flex';
             
+            // 确保弹窗在视口中居中显示，即使开发者工具打开
+            this.centerDialog();
+            
             setTimeout(() => {
                 if (this.overlay) {
                     this.overlay.style.opacity = '1';
                 }
                 if (this.dialog) {
-                    this.dialog.style.transform = 'translate(-50%, -50%) scale(1)';
+                    this.dialog.style.transform = 'scale(1)';
                 }
             }, 10);
         }
+    }
+
+    /**
+     * 将对话框居中显示，考虑开发者工具等因素
+     */
+    private centerDialog(): void {
+        if (!this.dialog || !this.overlay) return;
+
+        // 获取视口尺寸
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        // 重置对话框样式以获取真实尺寸
+        this.dialog.style.transform = 'scale(1)';
+        this.dialog.style.position = 'relative';
+        this.dialog.style.margin = 'auto';
+        
+        // 检查对话框是否会超出视口
+        const dialogRect = this.dialog.getBoundingClientRect();
+        const maxHeight = Math.min(viewportHeight * 0.8, dialogRect.height);
+        
+        // 设置最大高度避免超出视口
+        if (dialogRect.height > viewportHeight * 0.8) {
+            this.dialog.style.maxHeight = maxHeight + 'px';
+            this.dialog.style.overflowY = 'auto';
+        }
+        
+        // 确保弹窗在可见区域内
+        this.overlay.style.alignItems = 'center';
+        this.overlay.style.justifyContent = 'center';
+        this.overlay.style.padding = '20px';
+        this.overlay.style.boxSizing = 'border-box';
+        
+        // 重置transform为动画初始状态
+        this.dialog.style.transform = 'scale(0.9)';
+        
+        this.log('对话框已重新定位，视口尺寸:', viewportWidth, 'x', viewportHeight);
     }
 
     /**
@@ -232,8 +273,6 @@ export class MemoDialog {
      * 日志输出
      */
     private log(...args: any[]): void {
-        if (this.logger) {
-            this.logger('[MemoDialog]', ...args);
-        }
+        Logger.createModuleLogger('MemoDialog').log(...args);
     }
 }

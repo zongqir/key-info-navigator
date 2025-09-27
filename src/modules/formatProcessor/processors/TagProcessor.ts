@@ -161,17 +161,17 @@ export class TagProcessor extends BaseFormatProcessor {
      * 自定义渲染主要内容 - 替换默认的标签文本显示
      */
     renderMainContent(item: FormattedTextItem): string {
-        console.log('[TagProcessor] renderMainContent called with item:', item);
+        this.log('renderMainContent called with item:', item);
         
         if (!item.metadata) {
-            console.log('[TagProcessor] No metadata found, returning default text:', item.text);
+            this.log('No metadata found, returning default text:', item.text);
             return item.text;
         }
         
         const { tagName, blockContent } = item.metadata;
         const tagColor = this.getTagColor(tagName);
         
-        console.log('[TagProcessor] Rendering tag:', tagName, 'with color:', tagColor);
+        this.log('Rendering tag:', tagName, 'with color:', tagColor);
         
         // 截断块内容用于显示
         const truncatedContent = this.truncateText(blockContent, 80);
@@ -185,7 +185,7 @@ export class TagProcessor extends BaseFormatProcessor {
             </div>
         `;
         
-        console.log('[TagProcessor] Generated HTML:', result);
+        this.log('Generated HTML:', result);
         return result;
     }
 

@@ -37,5 +37,11 @@
   "removeFormat": "Remove Format",
   "removeFormatSuccess": "Format removed successfully",
   "removeFormatFailed": "Failed to remove format",
-  "reverseNavigationSuccess": "Located to sidebar item"
+  "reverseNavigationSuccess": "Located to sidebar item",
+  "settings": "Settings",
+  "general": "General",
+  "enableDebugLog": "Enable Debug Log",
+  "enableDebugLogDesc": "When enabled, detailed debug information will be output to the console, which helps troubleshooting but consumes more memory",
+  "saveSettings": "Save Settings",
+  "settingsSaved": "Settings saved"
 }
