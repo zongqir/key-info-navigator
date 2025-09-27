@@ -6,6 +6,7 @@ export enum TextFormatType {
     ITALIC = "italic", 
     UNDERLINE = "underline",
     HIGHLIGHT = "highlight",
+    MEMO = "memo",
 }
 
 /**
@@ -28,6 +29,10 @@ export interface FormattedTextItem {
     icon: string;
     /** 颜色 */
     color: string;
+    /** 备注内容（仅当type为MEMO时使用） */
+    memoContent?: string;
+    /** 原始DOM元素（用于精确定位） */
+    element?: HTMLElement;
 }
 
 /**

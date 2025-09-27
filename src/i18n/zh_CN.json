@@ -16,6 +16,7 @@
   "italic": "斜体",
   "underline": "下划线", 
   "highlight": "高亮",
+  "memo": "备注",
   "refresh": "刷新",
   "openDocumentFirst": "请先打开文档",
   "noFormattedText": "当前文档中没有找到格式化文字",

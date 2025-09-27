@@ -1,6 +1,7 @@
 import { fetchPost } from 'siyuan';
 import { IFormatProcessor, TextFormatType, FormattedTextItem, ParseOptions } from './interfaces';
 import { FormatProcessorFactory } from './FormatProcessorFactory';
+import { MemoProcessor } from './processors/MemoProcessor';
 
 /**
  * 文本格式解析器
@@ -63,12 +64,48 @@ export class TextFormatParser {
         const processors = FormatProcessorFactory.getProcessors(options.enabledFormats);
         const blockId = protyle.block?.rootID || "";
         
+        // 检查是否包含备注，如果包含则使用特殊处理
+        if (options.enabledFormats.includes(TextFormatType.MEMO)) {
+            return this.extractWithMemoSupport(protyle.wysiwyg.element, blockId, processors, options);
+        }
+        
         return this.extractFromHTML(
             protyle.wysiwyg.element.innerHTML, 
             blockId, 
             processors,
             options
         );
+    }
+    
+    /**
+     * 支持备注的提取方法
+     */
+    private extractWithMemoSupport(
+        element: HTMLElement,
+        blockId: string,
+        processors: IFormatProcessor[],
+        options: ParseOptions
+    ): FormattedTextItem[] {
+        const allItems: FormattedTextItem[] = [];
+        
+        // 分别处理备注和其他格式
+        const memoProcessor = processors.find(p => p.formatType === TextFormatType.MEMO) as MemoProcessor;
+        const otherProcessors = processors.filter(p => p.formatType !== TextFormatType.MEMO);
+        
+        // 如果有备注处理器，使用特殊的页面提取方法
+        if (memoProcessor) {
+            this.log('使用备注特殊提取方法');
+            const memoItems = memoProcessor.getAllMemosFromPage(element);
+            allItems.push(...memoItems);
+        }
+        
+        // 处理其他格式化文本
+        if (otherProcessors.length > 0) {
+            const otherItems = this.extractFromHTML(element.innerHTML, blockId, otherProcessors, options);
+            allItems.push(...otherItems);
+        }
+        
+        return this.filterAndSortResults(allItems, options);
     }
     
     /**

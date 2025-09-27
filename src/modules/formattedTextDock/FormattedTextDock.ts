@@ -12,6 +12,7 @@ export class FormattedTextDock {
         TextFormatType.ITALIC,
         TextFormatType.UNDERLINE,
         TextFormatType.HIGHLIGHT,
+        TextFormatType.MEMO,
     ];
     private currentBlockId = "";
     private refreshTimer?: NodeJS.Timeout;
@@ -285,11 +286,7 @@ export class FormattedTextDock {
                                 </svg>
                                 <span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>
                             </div>
-                            ${item.context ? `
-                                <div class="formatted-text-dock__item-context">
-                                    ${this.escapeHtml(this.truncateText(item.context, 80))}
-                                </div>
-                            ` : ''}
+                            ${this.renderItemDetails(item)}
                         </div>
                     </div>
                 `);
@@ -297,6 +294,35 @@ export class FormattedTextDock {
         }
         
         return html.join('');
+    }
+
+    /**
+     * 渲染项目详细信息
+     */
+    private renderItemDetails(item: FormattedTextItem): string {
+        if (item.type === TextFormatType.MEMO && item.memoContent) {
+            // 备注特殊显示
+            return `
+                <div class="formatted-text-dock__item-memo">
+                    <div class="formatted-text-dock__item-memo-content">
+                        ${this.escapeHtml(this.truncateText(item.memoContent, 120))}
+                    </div>
+                </div>
+                ${item.context ? `
+                    <div class="formatted-text-dock__item-context">
+                        ${this.escapeHtml(this.truncateText(item.context, 60))}
+                    </div>
+                ` : ''}
+            `;
+        } else if (item.context) {
+            // 普通格式化文本显示上下文
+            return `
+                <div class="formatted-text-dock__item-context">
+                    ${this.escapeHtml(this.truncateText(item.context, 80))}
+                </div>
+            `;
+        }
+        return '';
     }
 
     /**
@@ -323,6 +349,17 @@ export class FormattedTextDock {
         try {
             this.log(`导航到文本: "${text}", 类型: ${type}, 项目索引: ${itemIndex}`);
             
+            // 先尝试通过保存的元素引用直接定位（适用于备注）
+            const savedItem = this.findItemByTextAndIndex(text, type, itemIndex);
+            if (savedItem?.element) {
+                this.log('使用保存的DOM元素引用进行导航');
+                this.scrollToElement(savedItem.element);
+                this.highlightElement(savedItem.element);
+                showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
+                return;
+            }
+            
+            // 回退到传统的选择器查找方式
             const processor = this.parser.getFormatProcessor(type);
             const config = processor.getConfig();
             const selectors = config.htmlSelectors.join(',');
@@ -346,14 +383,7 @@ export class FormattedTextDock {
             
             this.log(`选择目标元素索引: ${targetIndex}`);
             
-            // 滚动到目标位置
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-                inline: 'center'
-            });
-
-            // 高亮效果
+            this.scrollToElement(target as HTMLElement);
             this.highlightElement(target as HTMLElement);
             
             showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
@@ -362,6 +392,32 @@ export class FormattedTextDock {
             this.log('导航失败:', error);
             showMessage(`❌ ${this.i18n.navigationFailed}: ${text}`, 3000, 'error');
         }
+    }
+
+    /**
+     * 通过文本和索引查找项目
+     */
+    private findItemByTextAndIndex(text: string, type: TextFormatType, index: number): FormattedTextItem | undefined {
+        // 从已解析的数据中查找匹配项
+        const sameTypeItems = this.formattedTexts.filter(item => 
+            item.type === type && item.text === text
+        );
+        
+        // 按位置排序
+        sameTypeItems.sort((a, b) => a.position - b.position);
+        
+        return sameTypeItems[index];
+    }
+
+    /**
+     * 滚动到元素位置
+     */
+    private scrollToElement(element: HTMLElement): void {
+        element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+        });
     }
 
     /**
@@ -436,6 +492,7 @@ export class FormattedTextDock {
             [TextFormatType.ITALIC]: this.i18n.italic,
             [TextFormatType.UNDERLINE]: this.i18n.underline,
             [TextFormatType.HIGHLIGHT]: this.i18n.highlight,
+            [TextFormatType.MEMO]: this.i18n.memo,
         };
         return names[type] || type;
     }

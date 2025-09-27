@@ -128,6 +128,26 @@
     word-break: break-word;
   }
 
+  &__item-memo {
+    margin-top: 4px;
+    
+    &-content {
+      font-size: 11px;
+      color: var(--b3-theme-on-background);
+      background: var(--b3-theme-surface-lighter);
+      padding: 4px 6px;
+      border-radius: 3px;
+      border-left: 2px solid #ff9800;
+      line-height: 1.3;
+      word-break: break-word;
+      max-height: 3.6em; // 大约3行
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+  }
+
   // 状态样式
   &__empty,
   &__loading {

@@ -9,6 +9,7 @@ export { BoldProcessor } from './processors/BoldProcessor';
 export { ItalicProcessor } from './processors/ItalicProcessor';
 export { UnderlineProcessor } from './processors/UnderlineProcessor';
 export { HighlightProcessor } from './processors/HighlightProcessor';
+export { MemoProcessor } from './processors/MemoProcessor';
 
 // 工厂和解析器
 export { FormatProcessorFactory } from './FormatProcessorFactory';
