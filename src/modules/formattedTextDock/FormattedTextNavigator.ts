@@ -30,10 +30,10 @@ export class FormattedTextNavigator {
             
             // 如果有保存的DOM元素引用，直接使用（适用于备注）
             if (savedItem?.element) {
-                this.scrollToElement(savedItem.element);
-                this.highlightElement(savedItem.element);
-                showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
-                return;
+            this.scrollToElement(savedItem.element);
+            this.highlightElement(savedItem.element);
+            // showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
+            return;
             }
             
             // 标签和待办事项通过块ID导航
@@ -60,7 +60,7 @@ export class FormattedTextNavigator {
             
             this.scrollToElement(target as HTMLElement);
             this.highlightElement(target as HTMLElement);
-            showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
+            // showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
 
         } catch (error) {
             this.log('导航失败:', error);
@@ -132,7 +132,7 @@ export class FormattedTextNavigator {
         if (contentElement) {
             this.scrollToElement(contentElement as HTMLElement);
             this.highlightElement(contentElement as HTMLElement);
-            showMessage(`✅ ${this.i18n.navigationSuccess}: ${item.text}`, 2000, 'info');
+            // showMessage(`✅ ${this.i18n.navigationSuccess}: ${item.text}`, 2000, 'info');
         } else {
             // 后备方案：使用第一个可见元素
             const fallbackElement = Array.from(allElements).find(el => {
@@ -143,7 +143,7 @@ export class FormattedTextNavigator {
             if (fallbackElement) {
                 this.scrollToElement(fallbackElement as HTMLElement);
                 this.highlightElement(fallbackElement as HTMLElement);
-                showMessage(`✅ ${this.i18n.navigationSuccess}: ${item.text}`, 2000, 'info');
+                // showMessage(`✅ ${this.i18n.navigationSuccess}: ${item.text}`, 2000, 'info');
             } else {
                 showMessage(`❌ ${this.i18n.textNotFound}: ${item.text}`, 3000, 'error');
             }
@@ -511,7 +511,7 @@ export class FormattedTextNavigator {
         const text = item.dataset.text || '';
         const type = item.dataset.type || '';
         const typeName = this.getFormatDisplayName(type as TextFormatType);
-        showMessage(`🎯 ${this.i18n.reverseNavigationSuccess || '已定位到侧边栏条目'}: ${typeName} "${text}"`, 2000, 'info');
+        // showMessage(`🎯 ${this.i18n.reverseNavigationSuccess || '已定位到侧边栏条目'}: ${typeName} "${text}"`, 2000, 'info');
     }
 
     /**
