@@ -103,18 +103,13 @@ export class TagProcessor extends BaseFormatProcessor {
         const items: FormattedTextItem[] = [];
         const config = this.getConfig();
         
-        this.log('TagProcessor.extractFromHTML called with:', { html: html.substring(0, 200) + '...', blockId });
-        
         // 查找标签元素
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const tagElements = doc.querySelectorAll(config.htmlSelectors[0]);
         
-        this.log('找到的标签元素数量:', tagElements.length);
-        
         tagElements.forEach((element, index) => {
             const text = element.textContent?.trim() || '';
-            this.log(`处理标签元素 ${index}:`, { text, element: element.outerHTML });
             
             if (text) {
                 // 从标签文本中提取标签名称（移除#号）
@@ -130,7 +125,6 @@ export class TagProcessor extends BaseFormatProcessor {
                     if (nodeId && nodeId !== blockId) {
                         // 找到了不同于根ID的段落ID
                         actualBlockId = nodeId;
-                        this.log(`找到标签"${tagName}"的真实段落ID: ${actualBlockId}`);
                         break;
                     }
                     currentElement = currentElement.parentElement;
@@ -145,8 +139,6 @@ export class TagProcessor extends BaseFormatProcessor {
                     context: element.parentElement?.textContent || "",
                     icon: config.icon,
                     color: this.getTagColor(tagName),
-                    // 不设置element属性，让导航器使用块ID导航
-                    // element: element as HTMLElement,
                     // 设置metadata用于胶囊状渲染
                     metadata: { 
                         tagName: tagName, 
@@ -154,7 +146,6 @@ export class TagProcessor extends BaseFormatProcessor {
                     }
                 };
                 
-                this.log('创建的HTML标签项:', item);
                 items.push(item);
             }
         });

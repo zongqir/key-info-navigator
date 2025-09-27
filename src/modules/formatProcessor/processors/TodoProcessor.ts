@@ -86,7 +86,6 @@ export class TodoProcessor extends BaseFormatProcessor {
                         if (nodeId && nodeId !== blockId) {
                             // 找到了不同于根ID的段落ID
                             actualBlockId = nodeId;
-                            this.log(`找到TODO"${text.substring(0, 20)}..."的真实段落ID: ${actualBlockId}`);
                             break;
                         }
                         currentElement = currentElement.parentElement;
