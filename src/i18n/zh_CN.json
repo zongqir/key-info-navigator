@@ -25,5 +25,12 @@
   "loadFailed": "加载失败，请重试",
   "textNotFound": "未找到文本",
   "navigationSuccess": "已定位到",
-  "navigationFailed": "定位失败"
+  "navigationFailed": "定位失败",
+  "addMemo": "添加备注",
+  "addMemoSuccess": "备注添加成功",
+  "addMemoFailed": "添加备注失败",
+  "textSelected": "文本已选中，请手动点击工具栏的备注按钮或使用快捷键 Ctrl+Shift+M",
+  "confirm": "确认",
+  "memoPlaceholder": "请输入备注内容...",
+  "memoTargetLabel": "为以下内容添加备注："
 }

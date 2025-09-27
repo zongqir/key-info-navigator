@@ -71,13 +71,16 @@
     display: flex;
     align-items: flex-start;
     padding: 8px 12px;
-    cursor: pointer;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
     position: relative;
 
     &:hover {
       background: var(--b3-list-hover);
+      
+      .formatted-text-dock__item-actions {
+        opacity: 1; // 悬停时显示操作按钮
+      }
     }
 
     &:active {
@@ -101,9 +104,32 @@
 
   &__item-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    justify-content: space-between;
     gap: 6px;
     margin-bottom: 2px;
+  }
+
+  &__item-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  &__item-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
   }
 
   &__item-icon {
@@ -152,6 +178,50 @@
         content: "💬 ";
         opacity: 0.7;
         margin-right: 2px;
+      }
+    }
+  }
+
+  // 操作按钮样式
+  &__action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: var(--b3-theme-surface);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: var(--b3-theme-primary);
+      transform: scale(1.1);
+      
+      .formatted-text-dock__action-icon {
+        color: var(--b3-theme-on-primary);
+      }
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  &__action-icon {
+    width: 12px;
+    height: 12px;
+    color: var(--b3-theme-on-surface);
+    transition: color 0.2s ease;
+  }
+
+  &__add-memo-btn {
+    &:hover {
+      background: #ff9800;
+      
+      .formatted-text-dock__action-icon {
+        color: white;
       }
     }
   }

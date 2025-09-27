@@ -86,6 +86,12 @@ export interface IFormatProcessor {
     
     /** 渲染项目详细内容（用于自定义显示） */
     renderItemDetails?(item: FormattedTextItem, displayText: string): string;
+    
+    /** 是否支持添加备注功能 */
+    supportAddMemo?(): boolean;
+    
+    /** 渲染操作按钮（如添加备注按钮） */
+    renderActionButtons?(item: FormattedTextItem, i18n?: any): string;
 }
 
 /**

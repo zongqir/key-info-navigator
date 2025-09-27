@@ -25,5 +25,12 @@
   "loadFailed": "Load failed, please try again",
   "textNotFound": "Text not found",
   "navigationSuccess": "Located to",
-  "navigationFailed": "Navigation failed"
+  "navigationFailed": "Navigation failed",
+  "addMemo": "Add Memo",
+  "addMemoSuccess": "Memo added successfully",
+  "addMemoFailed": "Failed to add memo",
+  "textSelected": "Text selected, please manually click the memo button in toolbar or use shortcut Ctrl+Shift+M",
+  "confirm": "Confirm",
+  "memoPlaceholder": "Please enter memo content...",
+  "memoTargetLabel": "Add memo to the following content:"
 }

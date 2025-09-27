@@ -30,6 +30,7 @@ import {
 } from "siyuan";
 import "./index.scss";
 import "./styles/formattedTextDock.scss";
+import "./styles/memoDialog.scss";
 import { FormattedTextDock } from "./modules/formattedTextDock";
 import {IMenuItem} from "siyuan/types";
 

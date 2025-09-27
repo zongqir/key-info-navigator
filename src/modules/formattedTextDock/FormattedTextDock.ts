@@ -1,5 +1,6 @@
-import { getAllEditor, showMessage } from "siyuan";
+import { getAllEditor, showMessage, fetchPost } from "siyuan";
 import { TextFormatParser, TextFormatType, FormattedTextItem, ParseOptions } from "../formatProcessor";
+import { MemoDialog } from "../memoDialog";
 
 /**
  * 格式化文本侧边栏
@@ -16,6 +17,7 @@ export class FormattedTextDock {
     ];
     private currentBlockId = "";
     private refreshTimer?: NodeJS.Timeout;
+    private memoDialog: MemoDialog;
 
     constructor(
         private element: HTMLElement,
@@ -23,6 +25,7 @@ export class FormattedTextDock {
         private logger?: (...args: any[]) => void
     ) {
         this.parser = new TextFormatParser(logger);
+        this.memoDialog = new MemoDialog(i18n, logger);
         this.initUI();
         this.refresh(true); // 初始化时强制刷新
     }
@@ -50,6 +53,9 @@ export class FormattedTextDock {
             clearTimeout(this.refreshTimer);
             this.refreshTimer = undefined;
         }
+        
+        // 关闭可能打开的备注对话框
+        this.memoDialog?.hide();
     }
 
     /**
@@ -294,6 +300,8 @@ export class FormattedTextDock {
                 const item = sortedItems[i];
                 const displayText = sortedItems.length > 1 ? `${item.text} (${i + 1})` : item.text;
                 
+                const actionButtons = processor.renderActionButtons ? processor.renderActionButtons(item, this.i18n) : '';
+                
                 html.push(`
                     <div class="formatted-text-dock__item" 
                          data-type="${item.type}"
@@ -305,10 +313,15 @@ export class FormattedTextDock {
                              style="background-color: ${config.color}"></div>
                         <div class="formatted-text-dock__item-content">
                             <div class="formatted-text-dock__item-header">
-                                <svg class="formatted-text-dock__item-icon" style="color: ${config.color}">
-                                    <use xlink:href="#${config.icon}"></use>
-                                </svg>
-                                <span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>
+                                <div class="formatted-text-dock__item-main">
+                                    <svg class="formatted-text-dock__item-icon" style="color: ${config.color}">
+                                        <use xlink:href="#${config.icon}"></use>
+                                    </svg>
+                                    <span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>
+                                </div>
+                                <div class="formatted-text-dock__item-actions">
+                                    ${actionButtons}
+                                </div>
                             </div>
                             ${this.renderItemDetails(item, displayText)}
                         </div>
@@ -357,18 +370,187 @@ export class FormattedTextDock {
      * 绑定项目点击事件
      */
     private bindItemEvents(container: HTMLElement): void {
+        // 绑定项目点击事件（导航）
         const items = container.querySelectorAll<HTMLElement>('.formatted-text-dock__item');
         
         items.forEach(item => {
-            item.addEventListener('click', () => {
-                const text = item.dataset.text || '';
-                const type = item.dataset.type as TextFormatType;
-                const index = Number(item.dataset.index || 0);
+            // 点击项目主体进行导航
+            const mainContent = item.querySelector('.formatted-text-dock__item-main');
+            if (mainContent) {
+                mainContent.addEventListener('click', () => {
+                    const text = item.dataset.text || '';
+                    const type = item.dataset.type as TextFormatType;
+                    const index = Number(item.dataset.index || 0);
+                    
+                    this.navigateToText(text, type, index);
+                });
+            }
+        });
+        
+        // 绑定添加备注按钮事件
+        const addMemoButtons = container.querySelectorAll<HTMLButtonElement>('.formatted-text-dock__add-memo-btn');
+        
+        addMemoButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 阻止事件冒泡，避免触发导航
                 
-                this.navigateToText(text, type, index);
+                const blockId = btn.dataset.blockId || '';
+                const text = btn.dataset.text || '';
+                
+                this.addMemoToText(blockId, text);
             });
         });
     }
+
+    /**
+     * 为文本添加备注
+     */
+    private async addMemoToText(blockId: string, text: string): Promise<void> {
+        try {
+            this.log(`开始为文本添加备注: "${text}", 块ID: ${blockId}`);
+            
+            // 显示自定义备注对话框
+            this.memoDialog.show(text, (memoContent: string) => {
+                this.saveMemoToText(blockId, text, memoContent);
+            });
+            
+        } catch (error) {
+            this.log('显示备注对话框失败:', error);
+            showMessage(`❌ ${this.i18n.addMemoFailed}: ${text}`, 3000, 'error');
+        }
+    }
+    
+    /**
+     * 保存备注到文本
+     */
+    private async saveMemoToText(blockId: string, text: string, memoContent: string): Promise<void> {
+        try {
+            this.log(`保存备注: "${text}" -> "${memoContent}"`);
+            
+            // 获取当前编辑器
+            const editor = getAllEditor()[0];
+            if (!editor?.protyle) {
+                showMessage('❌ 无法获取编辑器实例', 3000, 'error');
+                return;
+            }
+            
+            // 查找包含该文本的元素
+            const targetElement = this.findTextElement(text);
+            if (!targetElement) {
+                showMessage(`❌ ${this.i18n.textNotFound}: ${text}`, 3000, 'error');
+                return;
+            }
+            
+            // 将目标元素包装成备注元素
+            await this.wrapTextWithMemo(targetElement, text, memoContent);
+            
+            // 刷新列表显示最新的备注
+            setTimeout(() => {
+                this.refresh(true);
+            }, 500);
+            
+        } catch (error) {
+            this.log('保存备注失败:', error);
+            showMessage(`❌ ${this.i18n.addMemoFailed}: ${text}`, 3000, 'error');
+        }
+    }
+    
+    /**
+     * 将文本包装成备注元素
+     */
+    private async wrapTextWithMemo(element: HTMLElement, text: string, memoContent: string): Promise<void> {
+        try {
+            // 创建备注span元素
+            const memoSpan = document.createElement('span');
+            memoSpan.setAttribute('data-type', 'inline-memo');
+            memoSpan.setAttribute('data-inline-memo-content', memoContent);
+            memoSpan.textContent = text;
+            
+            // 复制原有的样式属性
+            if (element.className) {
+                memoSpan.className = element.className;
+            }
+            
+            // 复制原有的data属性（如果有）
+            Array.from(element.attributes).forEach(attr => {
+                if (attr.name.startsWith('data-') && attr.name !== 'data-type') {
+                    memoSpan.setAttribute(attr.name, attr.value);
+                }
+            });
+            
+            // 替换原元素
+            element.parentNode?.replaceChild(memoSpan, element);
+            
+            this.log('备注元素创建成功');
+            
+            // 如果可能的话，通过API更新到后端
+            await this.updateBlockContent();
+            
+        } catch (error) {
+            this.log('包装备注元素失败:', error);
+            throw error;
+        }
+    }
+    
+    /**
+     * 更新块内容到后端
+     */
+    private async updateBlockContent(): Promise<void> {
+        try {
+            const editor = getAllEditor()[0];
+            if (!editor?.protyle?.block) {
+                return;
+            }
+            
+            const blockId = editor.protyle.block.rootID;
+            const blockElement = editor.protyle.wysiwyg.element;
+            
+            if (!blockElement) {
+                return;
+            }
+            
+            // 获取更新后的HTML内容
+            const newContent = blockElement.innerHTML;
+            
+            // 调用思源API更新块内容
+            const response = await fetchPost('/api/block/updateBlock', {
+                id: blockId,
+                data: newContent,
+                dataType: 'dom'
+            });
+            
+            if (response.code === 0) {
+                this.log('块内容更新成功');
+            } else {
+                this.log('块内容更新失败:', response);
+            }
+            
+        } catch (error) {
+            this.log('更新块内容失败:', error);
+        }
+    }
+    
+    /**
+     * 查找文本元素
+     */
+    private findTextElement(text: string): HTMLElement | null {
+        // 查找所有可能包含该文本的元素
+        const selectors = [
+            'strong', 'b', 'em', 'i', 'u', 'mark',
+            '[data-type="strong"]', '[data-type="em"]', '[data-type="u"]', '[data-type="mark"]'
+        ];
+        
+        for (const selector of selectors) {
+            const elements = Array.from(document.querySelectorAll(selector));
+            const found = elements.find(el => el.textContent?.trim() === text);
+            if (found) {
+                return found as HTMLElement;
+            }
+        }
+        
+        return null;
+    }
+    
 
     /**
      * 导航到文本位置

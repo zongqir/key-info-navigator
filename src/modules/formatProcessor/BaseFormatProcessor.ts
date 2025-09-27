@@ -163,6 +163,36 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
     }
     
     /**
+     * 是否支持添加备注功能（默认支持）
+     */
+    public supportAddMemo(): boolean {
+        return true;
+    }
+    
+    /**
+     * 渲染操作按钮
+     */
+    public renderActionButtons(item: FormattedTextItem, i18n?: any): string {
+        if (!this.supportAddMemo()) {
+            return '';
+        }
+        
+        const title = i18n?.addMemo || '添加备注';
+        
+        return `
+            <button class="formatted-text-dock__action-btn formatted-text-dock__add-memo-btn" 
+                    data-block-id="${item.blockId}"
+                    data-text="${item.text}"
+                    data-action="add-memo"
+                    title="${title}">
+                <svg class="formatted-text-dock__action-icon">
+                    <use xlink:href="#iconMessage"></use>
+                </svg>
+            </button>
+        `;
+    }
+    
+    /**
      * 日志输出
      */
     protected log(...args: any[]): void {

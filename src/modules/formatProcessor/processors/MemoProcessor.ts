@@ -240,6 +240,13 @@ export class MemoProcessor extends BaseFormatProcessor {
     }
 
     /**
+     * 备注不需要添加备注功能
+     */
+    public supportAddMemo(): boolean {
+        return false;
+    }
+    
+    /**
      * 自定义渲染备注详细内容
      */
     public renderItemDetails(item: FormattedTextItem, displayText: string): string {
