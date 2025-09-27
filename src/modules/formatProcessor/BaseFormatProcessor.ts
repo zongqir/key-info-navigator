@@ -200,9 +200,7 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
                         data-text="${item.text}"
                         data-action="add-memo"
                         title="${addMemoTitle}">
-                    <svg class="formatted-text-dock__action-icon">
-                        <use xlink:href="#iconPlus"></use>
-                    </svg>
+                    <span style="font-size: 12px;">💭</span>
                 </button>
             `);
         }

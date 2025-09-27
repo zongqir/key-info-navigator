@@ -172,7 +172,7 @@
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-    opacity: 0;
+    opacity: 1; // 让按钮默认可见，便于调试
     transition: opacity 0.3s ease;
   }
 
