@@ -23,18 +23,22 @@ export class FormattedTextDock {
     ) {
         this.parser = new TextFormatParser(logger);
         this.initUI();
-        this.refresh();
+        this.refresh(true); // 初始化时强制刷新
     }
 
     /**
      * 文档变更时调用
      */
     public onDocumentChange(): void {
+        this.log('文档变更事件被触发');
         // 防抖，避免频繁刷新
         if (this.refreshTimer) {
             clearTimeout(this.refreshTimer);
         }
-        this.refreshTimer = setTimeout(() => this.refresh(), 500);
+        this.refreshTimer = setTimeout(() => {
+            this.log('自动刷新开始执行');
+            this.refresh(false); // 自动刷新可以使用缓存
+        }, 500);
     }
 
     /**
@@ -121,17 +125,20 @@ export class FormattedTextDock {
                 });
             });
 
-        // 刷新按钮事件
+        // 刷新按钮事件 - 强制刷新
         const refreshBtn = this.element.querySelector<HTMLButtonElement>('[data-action="refresh"]');
         if (refreshBtn) {
-            refreshBtn.addEventListener("click", () => this.refresh());
+            refreshBtn.addEventListener("click", () => {
+                this.log('手动刷新被触发');
+                this.refresh(true); // 强制刷新，跳过缓存
+            });
         }
     }
 
     /**
      * 刷新数据
      */
-    private async refresh(): Promise<void> {
+    private async refresh(force = false): Promise<void> {
         const editor = getAllEditor()[0];
         if (!editor?.protyle?.block) {
             this.showEmpty(this.i18n.openDocumentFirst);
@@ -139,8 +146,10 @@ export class FormattedTextDock {
         }
 
         const blockId = editor.protyle.block.rootID;
-        if (blockId === this.currentBlockId && this.formattedTexts.length > 0) {
-            // 如果是同一个文档且已有数据，直接重新渲染
+        
+        // 只有在自动刷新且数据已存在时才跳过重新获取
+        if (!force && blockId === this.currentBlockId && this.formattedTexts.length > 0) {
+            this.log('使用缓存数据，重新渲染列表');
             this.renderList();
             return;
         }
@@ -149,23 +158,37 @@ export class FormattedTextDock {
         this.showLoading();
 
         try {
+            this.log(`开始${force ? '强制' : '自动'}刷新，文档ID: ${blockId}`);
+            
             const options: ParseOptions = {
                 enabledFormats: this.enabledFormats,
                 maxResults: 200,
                 includeContext: true
             };
 
+            this.log('解析选项:', options);
+
             // 优先从编辑器实时获取
+            this.log('尝试从编辑器实时获取格式化文本...');
             const realtimeResults = this.parser.getCurrentEditorFormattedTexts(editor.protyle, options);
+            this.log(`实时解析结果: ${realtimeResults.length} 项`);
             
             // 如果实时结果为空，从数据库查询
-            this.formattedTexts = realtimeResults.length > 0 
-                ? realtimeResults 
-                : await this.parser.parseFormattedTexts(blockId, options);
+            if (realtimeResults.length === 0) {
+                this.log('实时解析无结果，从数据库查询...');
+                this.formattedTexts = await this.parser.parseFormattedTexts(blockId, options);
+                this.log(`数据库查询结果: ${this.formattedTexts.length} 项`);
+            } else {
+                this.formattedTexts = realtimeResults;
+            }
+
+            this.log(`最终获取到 ${this.formattedTexts.length} 个格式化文本项`);
 
             if (this.formattedTexts.length === 0) {
+                this.log('没有找到格式化文本，显示空状态');
                 this.showEmpty(this.i18n.noFormattedText);
             } else {
+                this.log('开始渲染列表');
                 this.renderList();
             }
 
@@ -179,24 +202,36 @@ export class FormattedTextDock {
      * 渲染列表
      */
     private renderList(): void {
+        this.log('开始渲染列表');
         const content = this.element.querySelector<HTMLElement>(".formatted-text-dock__content");
-        if (!content) return;
+        if (!content) {
+            this.log('未找到内容容器元素');
+            return;
+        }
 
         const activeFormats = this.getActiveFormats();
+        this.log('当前激活的格式:', activeFormats);
+        
         const filteredItems = this.formattedTexts.filter(item => activeFormats.includes(item.type));
+        this.log(`过滤后的项目数量: ${filteredItems.length}`);
 
         if (filteredItems.length === 0) {
+            this.log('没有匹配的格式化文本，显示空状态');
             this.showEmpty(this.i18n.noMatchingFormat);
             return;
         }
 
         const groupedItems = this.groupItems(filteredItems);
+        this.log(`分组后的项目数量: ${groupedItems.size}`);
+        
         const listHTML = this.createListHTML(groupedItems);
+        this.log('生成列表HTML完成');
 
         content.innerHTML = `<div class="formatted-text-dock__list">${listHTML}</div>`;
         
         // 绑定点击事件
         this.bindItemEvents(content);
+        this.log('列表渲染完成并绑定事件');
     }
 
     /**
@@ -333,10 +368,13 @@ export class FormattedTextDock {
         const index = this.enabledFormats.indexOf(type);
         if (index >= 0) {
             this.enabledFormats.splice(index, 1);
+            this.log(`禁用格式类型: ${type}`);
         } else {
             this.enabledFormats.push(type);
+            this.log(`启用格式类型: ${type}`);
         }
         
+        this.log('当前启用的格式类型:', this.enabledFormats);
         this.renderList();
     }
 
