@@ -116,12 +116,11 @@ export class FormattedTextUIRenderer {
                          data-block-id="${item.blockId}"
                          data-index="${i}"
                          data-position="${item.position}">
+                        <div class="formatted-text-dock__item-indicator" 
+                             style="background-color: ${config.color}"></div>
                         <div class="formatted-text-dock__item-content">
                             <div class="formatted-text-dock__item-header">
                                 <div class="formatted-text-dock__item-main">
-                                    <div class="formatted-text-dock__item-type-dot" 
-                                         style="background-color: ${config.color}"
-                                         title="${this.getFormatDisplayName(item.type)}"></div>
                                     <span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>
                                 </div>
                                 <div class="formatted-text-dock__item-actions">

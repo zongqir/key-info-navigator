@@ -12,7 +12,7 @@ export class MemoProcessor extends BaseFormatProcessor {
         htmlSelectors: ["span[data-type*='inline-memo']"],
         kramdownRegex: /\(\((.+?)\)\)/g, // 备注的Kramdown格式 ((文本))
         icon: "iconMessage",
-        color: "#d4a574", // 柔和的橙色
+        color: "#8b5cf6", // 现代紫色
         displayMode: DisplayMode.CUSTOM, // 自定义模式，使用特殊的备注显示逻辑
     };
 

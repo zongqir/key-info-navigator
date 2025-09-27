@@ -12,7 +12,7 @@ export class HighlightProcessor extends BaseFormatProcessor {
         htmlSelectors: ["mark", '[data-type="mark"]', '[data-type="textmark"]'],
         kramdownRegex: /==(.+?)==/g,
         icon: "iconHighlight",
-        color: "#f4e4a1", // 柔和的淡黄色
+        color: "#eab308", // 现代黄色
         displayMode: DisplayMode.SIMPLE, // 简单模式，只显示高亮内容
     };
 }

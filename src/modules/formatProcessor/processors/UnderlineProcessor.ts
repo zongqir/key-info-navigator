@@ -12,7 +12,7 @@ export class UnderlineProcessor extends BaseFormatProcessor {
         htmlSelectors: ["u", '[data-type="u"]'],
         kramdownRegex: /(~)(.*?)\1/g,
         icon: "iconUnderline",
-        color: "#8db4b8", // 柔和的青色
+        color: "#10b981", // 现代绿色
         displayMode: DisplayMode.SIMPLE, // 简单模式，只显示下划线内容
     };
 }
