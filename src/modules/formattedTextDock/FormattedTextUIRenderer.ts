@@ -54,12 +54,8 @@ export class FormattedTextUIRenderer {
             return `
                 <button class="format-filter active" 
                         data-format="${type}"
-                        title="${this.getFormatDisplayName(type)}"
-                        style="border-color:${config.color}">
-                    <div class="filter-dot" style="background:${config.color}"></div>
-                    <svg class="filter-icon">
-                        <use xlink:href="#${config.icon}"></use>
-                    </svg>
+                        title="${this.getFormatDisplayName(type)}">
+                    <div class="filter-circle" style="background-color:${config.color}"></div>
                 </button>
             `;
         }).join("");
