@@ -4,8 +4,8 @@
   "url": "https://github.com/zongqir/key-info-navigator",
   "version": "1.0.0",
   "minAppVersion": "3.3.0",
-  "backends": "all",
-  "frontends": "all",
+  "backends": ["all"],
+  "frontends": ["all"],
   "disabledInPublish": false,
   "displayName": {
     "default": "Key Info Navigator",
@@ -18,11 +18,6 @@
   "readme": {
     "default": "README.md",
     "zh_CN": "README_zh_CN.md"
-  },
-  "funding": {
-    "custom": [
-      "https://ld246.com/sponsor"
-    ]
   },
   "keywords": [
     "navigation",
