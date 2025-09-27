@@ -1,5 +1,5 @@
 import { BaseFormatProcessor } from '../BaseFormatProcessor';
-import { TextFormatType, FormatConfig, FormattedTextItem } from '../interfaces';
+import { TextFormatType, FormatConfig, FormattedTextItem, DisplayMode } from '../interfaces';
 
 /**
  * 备注格式处理器
@@ -13,6 +13,7 @@ export class MemoProcessor extends BaseFormatProcessor {
         kramdownRegex: /\(\((.+?)\)\)/g, // 备注的Kramdown格式 ((文本))
         icon: "iconMessage",
         color: "#ff9800",
+        displayMode: DisplayMode.CUSTOM, // 自定义模式，使用特殊的备注显示逻辑
     };
 
     /**
@@ -233,5 +234,37 @@ export class MemoProcessor extends BaseFormatProcessor {
             (memo.memoContent && memo.memoContent.includes(searchText)) || 
             memo.text.includes(searchText)
         );
+    }
+
+    /**
+     * 自定义渲染备注详细内容
+     */
+    public renderItemDetails(item: FormattedTextItem, displayText: string): string {
+        if (!item.memoContent) {
+            return '';
+        }
+
+        // 转义HTML的简单函数
+        const escapeHtml = (text: string): string => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
+        // 截断文本的简单函数  
+        const truncateText = (text: string, maxLength: number): string => {
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        };
+
+        return `
+            <div class="formatted-text-dock__item-memo">
+                <div class="formatted-text-dock__item-memo-target">
+                    ${escapeHtml(displayText)}
+                </div>
+                <div class="formatted-text-dock__item-memo-content">
+                    ${escapeHtml(truncateText(item.memoContent, 150))}
+                </div>
+            </div>
+        `;
     }
 }

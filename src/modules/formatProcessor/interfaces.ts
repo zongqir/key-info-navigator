@@ -36,6 +36,18 @@ export interface FormattedTextItem {
 }
 
 /**
+ * 显示模式枚举
+ */
+export enum DisplayMode {
+    /** 简单模式 - 只显示提取内容 */
+    SIMPLE = "simple",
+    /** 详细模式 - 显示内容+说明 */
+    DETAILED = "detailed",
+    /** 自定义模式 - 完全自定义显示 */
+    CUSTOM = "custom"
+}
+
+/**
  * 格式配置
  */
 export interface FormatConfig {
@@ -49,6 +61,8 @@ export interface FormatConfig {
     icon: string;
     /** 颜色 */
     color: string;
+    /** 显示模式 */
+    displayMode: DisplayMode;
 }
 
 /**
@@ -69,6 +83,9 @@ export interface IFormatProcessor {
     
     /** 验证文本是否匹配该格式 */
     matches(text: string): boolean;
+    
+    /** 渲染项目详细内容（用于自定义显示） */
+    renderItemDetails?(item: FormattedTextItem, displayText: string): string;
 }
 
 /**

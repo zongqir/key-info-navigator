@@ -286,7 +286,7 @@ export class FormattedTextDock {
                                 </svg>
                                 <span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>
                             </div>
-                            ${this.renderItemDetails(item)}
+                            ${this.renderItemDetails(item, displayText)}
                         </div>
                     </div>
                 `);
@@ -297,32 +297,36 @@ export class FormattedTextDock {
     }
 
     /**
-     * 渲染项目详细信息
+     * 渲染项目详细信息（多态实现）
      */
-    private renderItemDetails(item: FormattedTextItem): string {
-        if (item.type === TextFormatType.MEMO && item.memoContent) {
-            // 备注特殊显示
-            return `
-                <div class="formatted-text-dock__item-memo">
-                    <div class="formatted-text-dock__item-memo-content">
-                        ${this.escapeHtml(this.truncateText(item.memoContent, 120))}
-                    </div>
-                </div>
-                ${item.context ? `
+    private renderItemDetails(item: FormattedTextItem, displayText: string): string {
+        const processor = this.parser.getFormatProcessor(item.type);
+        const config = processor.getConfig();
+        
+        // 使用处理器的显示模式决定渲染方式
+        switch (config.displayMode) {
+            case 'simple':
+                // 简单模式：不显示额外信息
+                return '';
+                
+            case 'detailed':
+                // 详细模式：显示上下文信息
+                return item.context ? `
                     <div class="formatted-text-dock__item-context">
-                        ${this.escapeHtml(this.truncateText(item.context, 60))}
+                        ${this.escapeHtml(this.truncateText(item.context, 80))}
                     </div>
-                ` : ''}
-            `;
-        } else if (item.context) {
-            // 普通格式化文本显示上下文
-            return `
-                <div class="formatted-text-dock__item-context">
-                    ${this.escapeHtml(this.truncateText(item.context, 80))}
-                </div>
-            `;
+                ` : '';
+                
+            case 'custom':
+                // 自定义模式：使用处理器的自定义渲染
+                if (processor.renderItemDetails) {
+                    return processor.renderItemDetails(item, displayText);
+                }
+                return '';
+                
+            default:
+                return '';
         }
-        return '';
     }
 
     /**

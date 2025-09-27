@@ -1,5 +1,5 @@
 import { BaseFormatProcessor } from '../BaseFormatProcessor';
-import { TextFormatType, FormatConfig } from '../interfaces';
+import { TextFormatType, FormatConfig, DisplayMode } from '../interfaces';
 
 /**
  * 加粗格式处理器
@@ -13,5 +13,6 @@ export class BoldProcessor extends BaseFormatProcessor {
         kramdownRegex: /(\*\*|__)(.*?)\1/g,
         icon: "iconBold",
         color: "#d73a49",
+        displayMode: DisplayMode.SIMPLE, // 简单模式，只显示加粗内容
     };
 }
