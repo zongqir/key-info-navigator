@@ -11,7 +11,7 @@
   "confirmRemove": "Confirm to delete the data in ${name}?",
   "insertEmoji": "Insert Emoji",
   "removeSpace": "Remove Space",
-  "formattedTextNavigation": "Formatted Text Navigation",
+  "keyInformation": "Key Information",
   "bold": "Bold",
   "italic": "Italic",
   "underline": "Underline",

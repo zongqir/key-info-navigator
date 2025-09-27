@@ -155,8 +155,8 @@ export default class FormattedTextNavigatorPlugin extends Plugin {
             config: {
                 position: "RightTop",
                 size: {width: 280, height: 0},
-                icon: "iconList",
-                title: "格式化文字导航",
+                icon: "iconFocus",
+                title: "关键信息",
                 hotkey: "⌥⌘F",
             },
             data: {},

@@ -11,7 +11,7 @@
   "confirmRemove": "确认删除 ${name} 中的数据？",
   "insertEmoji": "插入表情",
   "removeSpace": "移除空格",
-  "formattedTextNavigation": "格式化文字导航",
+  "keyInformation": "关键信息",
   "bold": "加粗",
   "italic": "斜体",
   "underline": "下划线", 
