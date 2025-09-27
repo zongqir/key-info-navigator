@@ -34,7 +34,7 @@ export class TextFormatParser {
             const stmt = this.buildSqlQuery(rootBlockId, sqlTypes, options.maxResults);
             this.log('执行SQL查询:', stmt);
             
-            const response = await fetchPost("/api/query/sql", { stmt });
+            const response = await fetchPost("/api/query/sql", { stmt }) as any;
             
             if (response.code !== 0) {
                 this.log('SQL查询失败:', response);
