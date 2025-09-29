@@ -94,6 +94,48 @@ export class FormattedTextMemoManager {
     }
 
     /**
+     * 获取当前活跃的编辑器
+     */
+    private getCurrentActiveEditor(): any {
+        const editors = getAllEditor();
+        this.log(`获取到 ${editors.length} 个编辑器`);
+        
+        if (editors.length === 0) {
+            return null;
+        }
+        
+        // 如果只有一个编辑器，直接返回
+        if (editors.length === 1) {
+            this.log('只有一个编辑器，直接使用');
+            return editors[0];
+        }
+        
+        // 寻找当前活跃的编辑器
+        // 1. 尝试找到具有焦点的编辑器
+        for (const editor of editors) {
+            if (editor?.protyle?.element?.contains(document.activeElement)) {
+                this.log('找到具有焦点的编辑器');
+                return editor;
+            }
+        }
+        
+        // 2. 尝试找到最近被访问的编辑器（通过检查 element 的可见性）
+        for (const editor of editors) {
+            if (editor?.protyle?.element) {
+                const rect = editor.protyle.element.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                    this.log('找到可见的编辑器');
+                    return editor;
+                }
+            }
+        }
+        
+        // 3. 如果都没找到，返回第一个有效的编辑器
+        this.log('使用第一个有效的编辑器作为备选');
+        return editors.find(editor => editor?.protyle?.block) || editors[0];
+    }
+
+    /**
      * 保存备注到文本
      */
     public async saveMemoToText(blockId: string, text: string, memoContent: string): Promise<void> {
@@ -101,7 +143,7 @@ export class FormattedTextMemoManager {
             this.log(`保存备注: "${text}" -> "${memoContent}"`);
             
             // 获取当前编辑器
-            const editor = getAllEditor()[0];
+            const editor = this.getCurrentActiveEditor();
             if (!editor?.protyle) {
                 showMessage('❌ 无法获取编辑器实例', 3000, 'error');
                 return;
@@ -167,7 +209,7 @@ export class FormattedTextMemoManager {
      */
     public async updateBlockContent(): Promise<void> {
         try {
-            const editor = getAllEditor()[0];
+            const editor = this.getCurrentActiveEditor();
             if (!editor?.protyle?.block) {
                 return;
             }

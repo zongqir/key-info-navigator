@@ -103,17 +103,31 @@ export class FormattedTextDock {
     public onDocumentChange(): void {
         this.log('文档变更事件被触发');
         
-        // 使用防抖避免频繁刷新
-        const debouncedRefresh = FormattedTextUtils.debounce(() => {
-            this.log('自动刷新开始执行');
-            this.refresh(false); // 自动刷新可以使用缓存
-        }, 500);
-
+        // 清除之前的定时器
         if (this.refreshTimer) {
             clearTimeout(this.refreshTimer);
         }
         
-        debouncedRefresh();
+        // 使用较短的延迟时间来提高响应性，特别是对于 tab 切换
+        this.refreshTimer = window.setTimeout(() => {
+            this.log('延迟刷新开始执行');
+            
+            // 获取当前编辑器以检查是否真的发生了变化
+            const currentEditor = this.getCurrentActiveEditor();
+            const newBlockId = currentEditor?.protyle?.block?.rootID;
+            
+            if (newBlockId && newBlockId !== this.currentBlockId) {
+                this.log(`检测到文档切换: ${this.currentBlockId} -> ${newBlockId}`);
+                this.refresh(true); // 文档切换时强制刷新
+            } else if (newBlockId === this.currentBlockId) {
+                this.log('同一文档，使用缓存刷新');
+                this.refresh(false); // 同一文档可以使用缓存
+            } else {
+                this.log('无有效文档，跳过刷新');
+            }
+            
+            this.refreshTimer = undefined;
+        }, 200); // 减少延迟时间从 500ms 到 200ms 以提高响应性
     }
 
     /**
@@ -141,10 +155,52 @@ export class FormattedTextDock {
     }
 
     /**
+     * 获取当前活跃的编辑器
+     */
+    private getCurrentActiveEditor(): any {
+        const editors = getAllEditor();
+        this.log(`获取到 ${editors.length} 个编辑器`);
+        
+        if (editors.length === 0) {
+            return null;
+        }
+        
+        // 如果只有一个编辑器，直接返回
+        if (editors.length === 1) {
+            this.log('只有一个编辑器，直接使用');
+            return editors[0];
+        }
+        
+        // 寻找当前活跃的编辑器
+        // 1. 尝试找到具有焦点的编辑器
+        for (const editor of editors) {
+            if (editor?.protyle?.element?.contains(document.activeElement)) {
+                this.log('找到具有焦点的编辑器');
+                return editor;
+            }
+        }
+        
+        // 2. 尝试找到最近被访问的编辑器（通过检查 element 的可见性）
+        for (const editor of editors) {
+            if (editor?.protyle?.element) {
+                const rect = editor.protyle.element.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                    this.log('找到可见的编辑器');
+                    return editor;
+                }
+            }
+        }
+        
+        // 3. 如果都没找到，返回第一个有效的编辑器
+        this.log('使用第一个有效的编辑器作为备选');
+        return editors.find(editor => editor?.protyle?.block) || editors[0];
+    }
+
+    /**
      * 刷新数据
      */
     private async refresh(force = false): Promise<void> {
-        const editor = getAllEditor()[0];
+        const editor = this.getCurrentActiveEditor();
         if (!editor?.protyle?.block) {
             this.showEmpty(this.i18n.openDocumentFirst);
             return;

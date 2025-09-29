@@ -66,14 +66,50 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
 
         // 监听文档变更事件
         this.eventBus.on("switch-protyle", () => {
+            Logger.log('事件触发: switch-protyle');
             this.formattedTextDock?.onDocumentChange();
         });
         
         this.eventBus.on("loaded-protyle-dynamic", () => {
+            Logger.log('事件触发: loaded-protyle-dynamic');
             this.formattedTextDock?.onDocumentChange();
         });
         
         this.eventBus.on("loaded-protyle-static", () => {
+            Logger.log('事件触发: loaded-protyle-static');
+            this.formattedTextDock?.onDocumentChange();
+        });
+
+        // 添加更多 tab 切换相关的事件监听
+        this.eventBus.on("open-tab", () => {
+            Logger.log('事件触发: open-tab');
+            this.formattedTextDock?.onDocumentChange();
+        });
+
+        this.eventBus.on("close-tab", () => {
+            Logger.log('事件触发: close-tab');
+            this.formattedTextDock?.onDocumentChange();
+        });
+
+        this.eventBus.on("switch-tab", () => {
+            Logger.log('事件触发: switch-tab');
+            this.formattedTextDock?.onDocumentChange();
+        });
+
+        this.eventBus.on("layout-tab-switch", () => {
+            Logger.log('事件触发: layout-tab-switch');
+            this.formattedTextDock?.onDocumentChange();
+        });
+
+        // 监听编辑器焦点变化
+        this.eventBus.on("focus-protyle", () => {
+            Logger.log('事件触发: focus-protyle');
+            this.formattedTextDock?.onDocumentChange();
+        });
+
+        // 监听文档打开事件
+        this.eventBus.on("open-document", () => {
+            Logger.log('事件触发: open-document');
             this.formattedTextDock?.onDocumentChange();
         });
 
