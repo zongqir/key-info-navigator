@@ -1,0 +1,238 @@
+/* ==========================================================================
+   Dock 特定组件样式 (标签、Todo等)
+   ========================================================================== */
+
+.formatted-text-dock {
+  /* 标签特异化显示样式 - 单行布局 */
+  &__item-tag-inline {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 0;
+  }
+
+  &__tag-shape {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    border-radius: 16px; /* 稍微大一点的弧度 */
+    box-shadow: var(--kinfo-tag-shadow);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0; /* 防止标签被压缩 */
+    border: 1px solid var(--kinfo-tag-border);
+    
+    /* 添加光泽效果 */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--kinfo-tag-overlay);
+      transition: left 0.5s ease;
+    }
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--kinfo-tag-shadow-hover);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+    
+    /* 标签文字样式 */
+    .formatted-text-dock__tag-text {
+      font-size: 11px;
+      font-weight: 700; /* 更粗的字体 */
+      color: white;
+      text-shadow: var(--kinfo-tag-text-shadow);
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+  }
+
+  &__tag-block-text {
+    font-size: 12px;
+    color: var(--kinfo-text-secondary);
+    line-height: 1.4;
+    word-break: break-word;
+    flex: 1;
+    min-width: 0; /* 允许文本溢出时正确截断 */
+    
+    /* 文本溢出处理 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Todo特异化显示样式 - 勾选框布局 */
+.formatted-text-dock__item-todo-inline {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.formatted-text-dock__todo-checkbox-container {
+  position: relative;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  z-index: 10; /* 确保勾选框在最上层 */
+  
+  /* 增大点击区域 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    z-index: -1;
+  }
+}
+
+.formatted-text-dock__todo-checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.formatted-text-dock__todo-checkbox-custom {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: var(--kinfo-todo-checkbox-bg);
+  border: 2px solid var(--kinfo-todo-checkbox-border);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* 让点击事件穿透到容器 */
+  
+  &::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+}
+
+.formatted-text-dock__todo-checkbox-container:hover .formatted-text-dock__todo-checkbox-custom {
+  border-color: var(--kinfo-todo-checkbox-checked);
+  transform: scale(1.05);
+}
+
+.formatted-text-dock__todo-checkbox-container:active .formatted-text-dock__todo-checkbox-custom {
+  transform: scale(0.95);
+  border-color: var(--kinfo-todo-checkbox-checked);
+}
+
+.formatted-text-dock__todo-checkbox:checked ~ .formatted-text-dock__todo-checkbox-custom {
+  background-color: var(--kinfo-todo-checkbox-checked);
+  border-color: var(--kinfo-todo-checkbox-checked);
+  
+  &::after {
+    display: block;
+  }
+}
+
+.formatted-text-dock__todo-text {
+  font-size: 12px;
+  color: var(--kinfo-text-secondary);
+  line-height: 1.4;
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
+  transition: all 0.2s ease;
+  
+  &.completed {
+    color: var(--kinfo-todo-text-completed);
+    text-decoration: line-through;
+  }
+}
+
+/* Todo项目的hover效果 */
+.formatted-text-dock__item[data-type="todo"] {
+  &:hover .formatted-text-dock__todo-checkbox-custom {
+    border-color: var(--kinfo-todo-checkbox-checked);
+    box-shadow: var(--kinfo-todo-checkbox-shadow);
+  }
+}
+
+/* 格式过滤器样式 */
+.format-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  padding: 0;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &.active {
+    .filter-circle {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  &:not(.active) {
+    .filter-circle {
+      opacity: 0.4;
+      transform: scale(0.8);
+    }
+  }
+
+  .filter-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+    border: 2px solid var(--kinfo-tag-border);
+    box-shadow: var(--kinfo-shadow-sm);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .format-filter {
+    width: 20px;
+    height: 20px;
+
+    .filter-icon {
+      width: 10px;
+      height: 10px;
+    }
+  }
+}

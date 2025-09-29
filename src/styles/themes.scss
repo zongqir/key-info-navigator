@@ -1,0 +1,206 @@
+/* ==========================================================================
+   主题变量定义
+   支持明亮模式和暗色模式的CSS变量
+   ========================================================================== */
+
+/* 明亮主题变量 */
+:root, .theme-light {
+  /* 基础颜色 */
+  --kinfo-bg-primary: #ffffff;
+  --kinfo-bg-secondary: #f9fafb;
+  --kinfo-bg-tertiary: #f3f4f6;
+  --kinfo-bg-surface: #ffffff;
+  --kinfo-bg-surface-hover: #f9fafb;
+  --kinfo-bg-surface-active: #f3f4f6;
+  
+  /* 文本颜色 */
+  --kinfo-text-primary: #1f2937;
+  --kinfo-text-secondary: #374151;
+  --kinfo-text-tertiary: #6b7280;
+  --kinfo-text-muted: #9ca3af;
+  --kinfo-text-disabled: #d1d5db;
+  
+  /* 边框颜色 */
+  --kinfo-border-light: #f3f4f6;
+  --kinfo-border-normal: #e5e7eb;
+  --kinfo-border-strong: #d1d5db;
+  --kinfo-border-focus: #3b82f6;
+  
+  /* 阴影 */
+  --kinfo-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --kinfo-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --kinfo-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --kinfo-shadow-xl: 0 10px 15px rgba(0, 0, 0, 0.1);
+  
+  /* 交互色彩 */
+  --kinfo-primary: #3b82f6;
+  --kinfo-primary-hover: #2563eb;
+  --kinfo-primary-light: #dbeafe;
+  --kinfo-primary-lighter: #eff6ff;
+  
+  --kinfo-success: #10b981;
+  --kinfo-success-hover: #059669;
+  --kinfo-success-light: #d1fae5;
+  
+  --kinfo-warning: #f59e0b;
+  --kinfo-warning-hover: #d97706;
+  --kinfo-warning-light: #fef3c7;
+  
+  --kinfo-error: #ef4444;
+  --kinfo-error-hover: #dc2626;
+  --kinfo-error-light: #fee2e2;
+  
+  --kinfo-info: #06b6d4;
+  --kinfo-info-hover: #0891b2;
+  --kinfo-info-light: #cffafe;
+  
+  /* 备注相关 */
+  --kinfo-memo-bg: #f8fafc;
+  --kinfo-memo-border: #e5e7eb;
+  --kinfo-memo-text: #6b7280;
+  --kinfo-memo-accent: #ff9800;
+  --kinfo-memo-accent-hover: #f57c00;
+  --kinfo-memo-accent-light: #fff3e0;
+  
+  /* 标签相关 */
+  --kinfo-tag-shadow: 0 3px 6px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --kinfo-tag-shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
+  --kinfo-tag-border: rgba(255, 255, 255, 0.2);
+  --kinfo-tag-text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --kinfo-tag-overlay: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  
+  /* Todo相关 */
+  --kinfo-todo-checkbox-bg: #ffffff;
+  --kinfo-todo-checkbox-border: #d1d5db;
+  --kinfo-todo-checkbox-checked: #34a853;
+  --kinfo-todo-checkbox-shadow: 0 0 0 2px rgba(52, 168, 83, 0.1);
+  --kinfo-todo-text-completed: #9ca3af;
+  
+  /* 滚动条 */
+  --kinfo-scroll-track: #f1f5f9;
+  --kinfo-scroll-thumb: #cbd5e1;
+  --kinfo-scroll-thumb-hover: #94a3b8;
+}
+
+/* 暗色主题变量 */
+.theme-dark, [data-theme-mode="dark"] {
+  /* 基础颜色 */
+  --kinfo-bg-primary: #1e293b;
+  --kinfo-bg-secondary: #334155;
+  --kinfo-bg-tertiary: #475569;
+  --kinfo-bg-surface: #2d3748;
+  --kinfo-bg-surface-hover: #4a5568;
+  --kinfo-bg-surface-active: #2d3748;
+  
+  /* 文本颜色 */
+  --kinfo-text-primary: #f8fafc;
+  --kinfo-text-secondary: #e2e8f0;
+  --kinfo-text-tertiary: #cbd5e1;
+  --kinfo-text-muted: #94a3b8;
+  --kinfo-text-disabled: #64748b;
+  
+  /* 边框颜色 */
+  --kinfo-border-light: #475569;
+  --kinfo-border-normal: #64748b;
+  --kinfo-border-strong: #94a3b8;
+  --kinfo-border-focus: #60a5fa;
+  
+  /* 阴影 */
+  --kinfo-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --kinfo-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --kinfo-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --kinfo-shadow-xl: 0 10px 15px rgba(0, 0, 0, 0.4);
+  
+  /* 交互色彩 */
+  --kinfo-primary: #60a5fa;
+  --kinfo-primary-hover: #3b82f6;
+  --kinfo-primary-light: #1e3a8a;
+  --kinfo-primary-lighter: #1e40af;
+  
+  --kinfo-success: #34d399;
+  --kinfo-success-hover: #10b981;
+  --kinfo-success-light: #064e3b;
+  
+  --kinfo-warning: #fbbf24;
+  --kinfo-warning-hover: #f59e0b;
+  --kinfo-warning-light: #92400e;
+  
+  --kinfo-error: #f87171;
+  --kinfo-error-hover: #ef4444;
+  --kinfo-error-light: #991b1b;
+  
+  --kinfo-info: #22d3ee;
+  --kinfo-info-hover: #06b6d4;
+  --kinfo-info-light: #164e63;
+  
+  /* 备注相关 */
+  --kinfo-memo-bg: #374151;
+  --kinfo-memo-border: #64748b;
+  --kinfo-memo-text: #cbd5e1;
+  --kinfo-memo-accent: #ffb74d;
+  --kinfo-memo-accent-hover: #ffa726;
+  --kinfo-memo-accent-light: #5d4037;
+  
+  /* 标签相关 */
+  --kinfo-tag-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --kinfo-tag-shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --kinfo-tag-border: rgba(255, 255, 255, 0.1);
+  --kinfo-tag-text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  --kinfo-tag-overlay: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  
+  /* Todo相关 */
+  --kinfo-todo-checkbox-bg: #374151;
+  --kinfo-todo-checkbox-border: #64748b;
+  --kinfo-todo-checkbox-checked: #22c55e;
+  --kinfo-todo-checkbox-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+  --kinfo-todo-text-completed: #64748b;
+  
+  /* 滚动条 */
+  --kinfo-scroll-track: #475569;
+  --kinfo-scroll-thumb: #64748b;
+  --kinfo-scroll-thumb-hover: #94a3b8;
+}
+
+/* ==========================================================================
+   主题适配工具类
+   ========================================================================== */
+
+/* 主题转换动画 */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 禁用特定元素的主题转换动画 */
+.no-theme-transition,
+.no-theme-transition * {
+  transition: none !important;
+}
+
+/* 主题相关的工具类 */
+.kinfo-bg-primary { background-color: var(--kinfo-bg-primary); }
+.kinfo-bg-secondary { background-color: var(--kinfo-bg-secondary); }
+.kinfo-bg-surface { background-color: var(--kinfo-bg-surface); }
+
+.kinfo-text-primary { color: var(--kinfo-text-primary); }
+.kinfo-text-secondary { color: var(--kinfo-text-secondary); }
+.kinfo-text-tertiary { color: var(--kinfo-text-tertiary); }
+
+.kinfo-border { border-color: var(--kinfo-border-normal); }
+.kinfo-border-light { border-color: var(--kinfo-border-light); }
+.kinfo-border-strong { border-color: var(--kinfo-border-strong); }
+
+.kinfo-shadow-sm { box-shadow: var(--kinfo-shadow-sm); }
+.kinfo-shadow-md { box-shadow: var(--kinfo-shadow-md); }
+.kinfo-shadow-lg { box-shadow: var(--kinfo-shadow-lg); }
+
+/* 响应式暗色主题检测（系统偏好） */
+@media (prefers-color-scheme: dark) {
+  .theme-auto {
+    /* 当设置为自动主题时，跟随系统偏好 */
+    --kinfo-bg-primary: #1e293b;
+    --kinfo-bg-secondary: #334155;
+    --kinfo-text-primary: #f8fafc;
+    --kinfo-text-secondary: #e2e8f0;
+    /* ...其他暗色主题变量... */
+  }
+}

@@ -1,4 +1,7 @@
-/* 备注对话框样式 */
+/* ==========================================================================
+   备注对话框样式 - 重构版本
+   使用CSS变量支持主题切换
+   ========================================================================== */
 
 /* 遮罩层 */
 .memo-dialog-overlay {
@@ -17,11 +20,17 @@
   backdrop-filter: blur(2px);
 }
 
+/* 暗色主题遮罩 */
+.theme-dark .memo-dialog-overlay,
+[data-theme-mode="dark"] .memo-dialog-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
 /* 对话框主体 */
 .memo-dialog {
-  background: var(--b3-theme-background);
+  background: var(--kinfo-bg-primary);
   border-radius: 8px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--kinfo-shadow-xl);
   width: 90%;
   max-width: 520px;
   max-height: 80vh;
@@ -29,7 +38,7 @@
   position: relative;
   transform: scale(0.9);
   transition: transform 0.3s ease;
-  border: 1px solid var(--b3-border-color);
+  border: 1px solid var(--kinfo-border-normal);
   margin: auto;
 
   /* 头部 */
@@ -38,8 +47,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: 1px solid var(--b3-border-color);
-    background: var(--b3-theme-surface);
+    border-bottom: 1px solid var(--kinfo-border-normal);
+    background: var(--kinfo-bg-surface);
   }
 
   &__title {
@@ -48,13 +57,13 @@
     gap: 8px;
     font-size: 16px;
     font-weight: 600;
-    color: var(--b3-theme-on-background);
+    color: var(--kinfo-text-primary);
   }
 
   &__icon {
     width: 20px;
     height: 20px;
-    color: #ff9800;
+    color: var(--kinfo-memo-accent);
   }
 
   &__close {
@@ -68,11 +77,11 @@
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s ease;
-    color: var(--b3-theme-on-surface);
+    color: var(--kinfo-text-tertiary);
 
     &:hover {
-      background: var(--b3-list-hover);
-      color: var(--b3-theme-on-background);
+      background: var(--kinfo-bg-surface-hover);
+      color: var(--kinfo-text-primary);
     }
 
     svg {
@@ -91,21 +100,21 @@
   &__target {
     margin-bottom: 20px;
     padding: 12px;
-    background: var(--b3-theme-surface-lighter);
+    background: var(--kinfo-bg-surface);
     border-radius: 6px;
-    border-left: 4px solid #ff9800;
+    border-left: 4px solid var(--kinfo-memo-accent);
   }
 
   &__target-label {
     font-size: 12px;
-    color: var(--b3-theme-on-surface);
+    color: var(--kinfo-text-tertiary);
     margin-bottom: 6px;
     font-weight: 500;
   }
 
   &__target-text {
     font-size: 14px;
-    color: var(--b3-theme-on-background);
+    color: var(--kinfo-text-primary);
     font-weight: 500;
     line-height: 1.4;
     word-break: break-word;
@@ -119,7 +128,7 @@
     display: block;
     font-size: 13px;
     font-weight: 500;
-    color: var(--b3-theme-on-background);
+    color: var(--kinfo-text-primary);
     margin-bottom: 8px;
   }
 
@@ -127,10 +136,10 @@
     width: 100%;
     min-height: 100px;
     padding: 12px;
-    border: 2px solid var(--b3-border-color);
+    border: 2px solid var(--kinfo-border-normal);
     border-radius: 6px;
-    background: var(--b3-theme-background);
-    color: var(--b3-theme-on-background);
+    background: var(--kinfo-bg-primary);
+    color: var(--kinfo-text-primary);
     font-size: 14px;
     font-family: inherit;
     line-height: 1.5;
@@ -140,12 +149,12 @@
 
     &:focus {
       outline: none;
-      border-color: #ff9800;
+      border-color: var(--kinfo-memo-accent);
       box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
     }
 
     &::placeholder {
-      color: var(--b3-theme-on-surface);
+      color: var(--kinfo-text-tertiary);
       opacity: 0.6;
     }
   }
@@ -155,7 +164,7 @@
     justify-content: flex-end;
     margin-top: 6px;
     font-size: 12px;
-    color: var(--b3-theme-on-surface);
+    color: var(--kinfo-text-tertiary);
     opacity: 0.8;
   }
 
@@ -171,8 +180,8 @@
     justify-content: flex-end;
     gap: 12px;
     padding: 16px 20px;
-    border-top: 1px solid var(--b3-border-color);
-    background: var(--b3-theme-surface);
+    border-top: 1px solid var(--kinfo-border-normal);
+    background: var(--kinfo-bg-surface);
   }
 
   &__btn {
@@ -190,23 +199,24 @@
     height: 36px;
 
     &--secondary {
-      background: var(--b3-theme-surface);
-      color: var(--b3-theme-on-surface);
-      border: 1px solid var(--b3-border-color);
+      background: var(--kinfo-bg-surface);
+      color: var(--kinfo-text-tertiary);
+      border: 1px solid var(--kinfo-border-normal);
 
       &:hover {
-        background: var(--b3-list-hover);
-        border-color: var(--b3-theme-on-surface);
+        background: var(--kinfo-bg-surface-hover);
+        border-color: var(--kinfo-border-strong);
+        color: var(--kinfo-text-primary);
       }
     }
 
     &--primary {
-      background: #ff9800;
+      background: var(--kinfo-memo-accent);
       color: white;
       box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2);
 
       &:hover {
-        background: #f57c00;
+        background: var(--kinfo-memo-accent-hover);
         box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
         transform: translateY(-1px);
       }
@@ -217,14 +227,71 @@
       }
 
       &:disabled {
-        background: var(--b3-border-color);
-        color: var(--b3-theme-on-surface);
+        background: var(--kinfo-border-normal);
+        color: var(--kinfo-text-tertiary);
         opacity: 0.5;
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
       }
     }
+  }
+}
+
+/* 暗色主题特定样式 */
+.theme-dark .memo-dialog,
+[data-theme-mode="dark"] .memo-dialog {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+
+  .memo-dialog__target {
+    background: var(--kinfo-bg-secondary);
+    border-left-color: var(--kinfo-memo-accent);
+  }
+
+  .memo-dialog__textarea {
+    &:focus {
+      border-color: var(--kinfo-memo-accent);
+      box-shadow: 0 0 0 3px rgba(255, 183, 77, 0.15);
+    }
+  }
+}
+
+/* 滚动条样式 */
+.memo-dialog__body {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--kinfo-scroll-track);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--kinfo-scroll-thumb);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--kinfo-scroll-thumb-hover);
+    }
+  }
+}
+
+/* 动画 */
+@keyframes memo-dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes memo-dialog-scale-in {
+  from {
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -258,72 +325,11 @@
   }
 }
 
-/* 暗色主题适配 */
-[data-theme-mode="dark"] {
+/* 减少动画效果（适用于用户偏好） */
+@media (prefers-reduced-motion: reduce) {
+  .memo-dialog,
   .memo-dialog-overlay {
-    background: rgba(0, 0, 0, 0.7);
-  }
-
-  .memo-dialog {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-
-    &__target {
-      background: var(--b3-theme-surface);
-      border-left-color: #ffb74d;
-    }
-
-    &__textarea {
-      &:focus {
-        border-color: #ffb74d;
-        box-shadow: 0 0 0 3px rgba(255, 183, 77, 0.15);
-      }
-    }
-
-    .memo-dialog__btn--primary {
-      background: #ffb74d;
-
-      &:hover {
-        background: #ffa726;
-      }
-    }
-  }
-}
-
-/* 动画 */
-@keyframes memo-dialog-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes memo-dialog-scale-in {
-  from {
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-  to {
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-/* 滚动条样式 */
-.memo-dialog__body {
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--b3-scroll-color);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--b3-scroll-color);
-    border-radius: 3px;
-
-    &:hover {
-      background: var(--b3-scroll-color-hover);
-    }
+    transition: none !important;
+    animation: none !important;
   }
 }

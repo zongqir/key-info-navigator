@@ -1,0 +1,263 @@
+/* ==========================================================================
+   Dock 列表项样式
+   ========================================================================== */
+
+.formatted-text-dock {
+  /* 列表项基础样式 */
+  &__item {
+    display: flex;
+    align-items: flex-start;
+    padding: 14px 16px;
+    margin: 6px 2px 6px 0;
+    background: var(--kinfo-bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--kinfo-border-normal);
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--kinfo-bg-surface-hover);
+      border-color: var(--kinfo-border-strong);
+      box-shadow: var(--kinfo-shadow-md);
+      
+      .formatted-text-dock__item-actions {
+        opacity: 1;
+      }
+    }
+
+    &:active {
+      background: var(--kinfo-bg-surface-active);
+      transform: scale(0.995);
+    }
+    
+    /* 反向导航高亮样式 */
+    &--reverse-highlight {
+      background: var(--kinfo-primary-lighter) !important;
+      border-left-color: var(--kinfo-primary) !important;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+      animation: formatted-text-dock-reverse-highlight 2s ease-out;
+      
+      .formatted-text-dock__item-indicator {
+        background-color: var(--kinfo-primary) !important;
+      }
+      
+      .formatted-text-dock__item-text {
+        color: var(--kinfo-primary) !important;
+        font-weight: 600 !important;
+      }
+    }
+  }
+
+  /* 项目指示器 */
+  &__item-indicator {
+    width: 5px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* 项目内容区域 */
+  &__item-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__item-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+
+  &__item-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+    
+    /* 当包含标签内联内容时，移除默认的gap和padding */
+    .formatted-text-dock__item-tag-inline {
+      margin-top: 0;
+      width: 100%;
+    }
+  }
+
+  /* 项目操作按钮区域 */
+  &__item-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    opacity: 1; /* 让按钮默认可见，便于调试 */
+    transition: opacity 0.3s ease;
+  }
+
+  /* 项目文本 */
+  &__item-text {
+    font-weight: 400;
+    color: var(--kinfo-text-secondary);
+    word-break: break-word;
+    line-height: 1.4;
+    font-size: 13px;
+  }
+
+  /* 项目上下文信息 */
+  &__item-context {
+    font-size: 11px;
+    color: var(--kinfo-text-tertiary);
+    line-height: 1.3;
+    margin-top: 4px;
+    opacity: 0.9;
+    word-break: break-word;
+  }
+
+  /* 备注区域 */
+  &__item-memo {
+    margin-top: 8px;
+    
+    &-content {
+      font-size: 11px;
+      color: var(--kinfo-memo-text);
+      background: var(--kinfo-memo-bg);
+      padding: 8px 10px;
+      border-radius: 4px;
+      border-left: 2px solid var(--kinfo-memo-border);
+      line-height: 1.4;
+      word-break: break-word;
+      max-height: 5em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      
+      /* 备注内容的特殊样式 */
+      &::before {
+        content: "💭 ";
+        opacity: 0.7;
+        margin-right: 4px;
+        font-size: 10px;
+      }
+    }
+  }
+
+  /* 操作按钮样式 */
+  &__action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-left: 4px;
+    
+    &:hover {
+      background: var(--kinfo-bg-surface-hover);
+    }
+    
+    &:active {
+      background: var(--kinfo-bg-surface-active);
+      transform: scale(0.95);
+    }
+  }
+
+  &__action-icon {
+    width: 12px;
+    height: 12px;
+    color: var(--kinfo-text-tertiary);
+    transition: color 0.15s ease;
+  }
+
+  /* 添加备注按钮 */
+  &__add-memo-btn {
+    &:hover {
+      background: var(--kinfo-primary-light);
+      
+      .formatted-text-dock__action-icon {
+        color: var(--kinfo-primary);
+      }
+    }
+  }
+
+  /* 删除格式按钮 */
+  &__remove-format-btn {
+    &:hover {
+      background: var(--kinfo-error-light);
+      
+      .formatted-text-dock__action-icon {
+        color: var(--kinfo-error);
+      }
+    }
+  }
+
+  /* 高亮效果 */
+  &__highlight {
+    animation: formatted-text-dock-highlight 2s ease-out;
+  }
+  
+  /* 深蓝色波纹高亮效果 - 无边框版本 */
+  &__highlight-ripple {
+    position: relative;
+    animation: formatted-text-dock-ripple-bounce 2s ease-out;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, rgba(33, 150, 243, 0.6) 0%, rgba(33, 150, 243, 0.2) 50%, transparent 100%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: formatted-text-dock-ripple-wave 2s ease-out;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, rgba(33, 150, 243, 0.8) 0%, rgba(33, 150, 243, 0.3) 70%, transparent 100%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: formatted-text-dock-ripple-pulse 2s ease-out;
+      pointer-events: none;
+      z-index: 1001;
+    }
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .formatted-text-dock {
+    &__item {
+      padding: 6px 8px;
+    }
+
+    &__item-text {
+      font-size: 12px;
+    }
+
+    &__item-context {
+      font-size: 10px;
+    }
+  }
+}

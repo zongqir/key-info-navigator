@@ -1,0 +1,216 @@
+/* ==========================================================================
+   Key Info Navigator 主样式文件
+   支持明亮和暗色主题的CSS架构
+   ========================================================================== */
+
+/* 主题变量和基础配置 */
+@import 'themes';
+
+/* Dock 相关样式 */
+@import 'dock-base';
+@import 'dock-items';
+@import 'dock-components';
+@import 'dock-animations';
+
+/* 备注对话框样式 */
+@import 'memo-dialog-refactored';
+
+/* ==========================================================================
+   全局样式覆盖和插件特定样式
+   ========================================================================== */
+
+/* 插件根元素样式 */
+.key-info-navigator-plugin {
+  /* 确保主题变量正确应用 */
+  color: var(--kinfo-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
+               "Helvetica Neue", Arial, sans-serif;
+  
+  /* 默认为明亮主题，会被 ThemeManager 动态更新 */
+  &.theme-light {
+    color-scheme: light;
+  }
+  
+  &.theme-dark {
+    color-scheme: dark;
+  }
+}
+
+/* SiYuan 特定样式集成 */
+.formatted-text-dock {
+  /* 与 SiYuan 主题变量集成 */
+  --b3-theme-primary: var(--kinfo-primary);
+  --b3-theme-primary-light: var(--kinfo-primary-light);
+  --b3-theme-primary-lighter: var(--kinfo-primary-lighter);
+  --b3-theme-primary-rgb: 59, 130, 246; /* RGB 值用于 rgba */
+  
+  --b3-theme-background: var(--kinfo-bg-primary);
+  --b3-theme-surface: var(--kinfo-bg-surface);
+  --b3-theme-surface-lighter: var(--kinfo-bg-secondary);
+  --b3-theme-on-background: var(--kinfo-text-primary);
+  --b3-theme-on-surface: var(--kinfo-text-tertiary);
+  
+  --b3-border-color: var(--kinfo-border-normal);
+  --b3-list-hover: var(--kinfo-bg-surface-hover);
+  
+  --b3-scroll-color: var(--kinfo-scroll-thumb);
+  --b3-scroll-color-hover: var(--kinfo-scroll-thumb-hover);
+}
+
+/* 深色主题下的 SiYuan 变量覆盖 */
+.theme-dark .formatted-text-dock,
+[data-theme-mode="dark"] .formatted-text-dock {
+  --b3-theme-primary-rgb: 96, 165, 250; /* 暗色主题的 RGB 值 */
+}
+
+/* ==========================================================================
+   主题切换动画
+   ========================================================================== */
+
+/* 主题过渡动画 */
+.theme-transition {
+  * {
+    transition: background-color 0.3s ease, 
+                color 0.3s ease, 
+                border-color 0.3s ease, 
+                box-shadow 0.3s ease !important;
+  }
+}
+
+/* 主题切换时的淡入效果 */
+.theme-fade-in {
+  animation: theme-fade-in 0.5s ease-out;
+}
+
+@keyframes theme-fade-in {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   调试和开发工具样式
+   ========================================================================== */
+
+/* 开发模式下的调试边框 */
+.debug-mode {
+  .formatted-text-dock__item {
+    border: 2px dashed var(--kinfo-warning) !important;
+    
+    &::before {
+      content: "DEBUG";
+      position: absolute;
+      top: -12px;
+      left: 4px;
+      font-size: 8px;
+      color: var(--kinfo-warning);
+      background: var(--kinfo-bg-primary);
+      padding: 0 4px;
+      z-index: 1000;
+    }
+  }
+}
+
+/* 性能监控样式 */
+.performance-monitor {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: var(--kinfo-bg-secondary);
+  border: 1px solid var(--kinfo-border-normal);
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 10px;
+  color: var(--kinfo-text-secondary);
+  z-index: 10000;
+  
+  &__item {
+    margin: 2px 0;
+  }
+}
+
+/* ==========================================================================
+   打印样式
+   ========================================================================== */
+
+@media print {
+  .formatted-text-dock {
+    /* 打印时使用简化的黑白样式 */
+    color: #000 !important;
+    background: #fff !important;
+    
+    &__item {
+      border: 1px solid #ccc !important;
+      background: #fff !important;
+      box-shadow: none !important;
+      page-break-inside: avoid;
+    }
+    
+    &__header,
+    &__filters,
+    &__refresh,
+    &__item-actions {
+      display: none !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   高对比度模式支持
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+  .formatted-text-dock {
+    --kinfo-border-normal: #000;
+    --kinfo-text-primary: #000;
+    --kinfo-bg-primary: #fff;
+    
+    &__item {
+      border-width: 2px !important;
+    }
+  }
+  
+  .theme-dark .formatted-text-dock,
+  [data-theme-mode="dark"] .formatted-text-dock {
+    --kinfo-border-normal: #fff;
+    --kinfo-text-primary: #fff;
+    --kinfo-bg-primary: #000;
+  }
+}
+
+/* ==========================================================================
+   自定义滚动条全局样式
+   ========================================================================== */
+
+/* WebKit 浏览器滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--kinfo-scroll-track);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--kinfo-scroll-thumb);
+  border-radius: 4px;
+  
+  &:hover {
+    background: var(--kinfo-scroll-thumb-hover);
+  }
+  
+  &:active {
+    background: var(--kinfo-border-strong);
+  }
+}
+
+/* Firefox 滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--kinfo-scroll-thumb) var(--kinfo-scroll-track);
+}

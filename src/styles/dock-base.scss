@@ -1,0 +1,157 @@
+/* ==========================================================================
+   Dock 基础布局和结构样式
+   ========================================================================== */
+
+.formatted-text-dock {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+
+  /* 头部区域 */
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid var(--kinfo-border-normal);
+    background: var(--kinfo-bg-primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--kinfo-text-primary);
+
+    span {
+      font-size: 14px;
+    }
+  }
+
+  &__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--kinfo-text-tertiary);
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__filters {
+    display: flex;
+    gap: 4px;
+  }
+
+  /* 刷新按钮 */
+  &__refresh {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background: transparent;
+    border: none;
+    transition: all 0.15s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--kinfo-bg-surface-hover);
+    }
+
+    &:active {
+      background: var(--kinfo-bg-surface-active);
+      transform: scale(0.95);
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+      color: var(--kinfo-text-tertiary);
+    }
+  }
+
+  /* 内容区域 */
+  &__content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+
+  /* 状态样式 */
+  &__empty,
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    color: var(--kinfo-text-tertiary);
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  &__loading {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--kinfo-border-normal);
+    border-top: 2px solid var(--kinfo-primary);
+    border-radius: 50%;
+    animation: formatted-text-dock-spin 1s linear infinite;
+  }
+}
+
+/* 滚动条样式 */
+.formatted-text-dock__list {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--kinfo-scroll-track);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--kinfo-scroll-thumb);
+    border-radius: 3px;
+
+    &:hover {
+      background: var(--kinfo-scroll-thumb-hover);
+    }
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .formatted-text-dock {
+    font-size: 11px;
+
+    &__header {
+      padding: 6px 8px;
+    }
+
+    &__title {
+      font-size: 12px;
+    }
+  }
+}
