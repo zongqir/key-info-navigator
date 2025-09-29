@@ -1,7 +1,6 @@
 import { fetchPost } from 'siyuan';
 import { IFormatProcessor, TextFormatType, FormattedTextItem, ParseOptions } from './interfaces';
 import { FormatProcessorFactory } from './FormatProcessorFactory';
-import { MemoProcessor } from './processors/MemoProcessor';
 
 /**
  * 文本格式解析器
@@ -71,11 +70,7 @@ export class TextFormatParser {
         const processors = FormatProcessorFactory.getProcessors(options.enabledFormats);
         const blockId = protyle.block?.rootID || "";
         
-        // 检查是否包含备注，如果包含则使用特殊处理
-        if (options.enabledFormats.includes(TextFormatType.MEMO)) {
-            return this.extractWithMemoSupport(protyle.wysiwyg.element, blockId, processors, options);
-        }
-        
+        // 统一使用标准HTML提取方法，包括备注
         return this.extractFromHTML(
             protyle.wysiwyg.element.innerHTML, 
             blockId, 
@@ -84,108 +79,6 @@ export class TextFormatParser {
         );
     }
     
-    /**
-     * 支持备注的提取方法
-     */
-    private extractWithMemoSupport(
-        element: HTMLElement,
-        blockId: string,
-        processors: IFormatProcessor[],
-        options: ParseOptions
-    ): FormattedTextItem[] {
-        const allItems: FormattedTextItem[] = [];
-        
-        // 分别处理备注和其他格式
-        const memoProcessor = processors.find(p => p.formatType === TextFormatType.MEMO) as MemoProcessor;
-        const otherProcessors = processors.filter(p => p.formatType !== TextFormatType.MEMO);
-        
-        // 如果有备注处理器，使用特殊的页面提取方法
-        if (memoProcessor) {
-            this.log('使用备注特殊提取方法');
-            const memoItems = memoProcessor.getAllMemosFromPage(element);
-            // 🔧 修复：统一位置计算基准
-            memoItems.forEach(item => {
-                if (item.element) {
-                    item.position = this.calculateConsistentPosition(item.element, element);
-                }
-            });
-            this.log(`🔍 备注提取结果 (${memoItems.length}个):`);
-            memoItems.forEach((item, index) => {
-                this.log(`  ${index + 1}. [MEMO] "${item.text}" - 位置: ${item.position}, 块: ${item.blockId}`);
-            });
-            allItems.push(...memoItems);
-        }
-        
-        // 处理其他格式化文本
-        if (otherProcessors.length > 0) {
-            const otherItems = this.extractFromHTML(element.innerHTML, blockId, otherProcessors, options);
-            // 🔧 修复：重新计算位置以匹配真实DOM
-            otherItems.forEach(item => {
-                item.position = this.findElementPositionInRealDOM(item.text, item.type, element);
-            });
-            this.log(`🔍 其他格式提取结果 (${otherItems.length}个):`);
-            otherItems.forEach((item, index) => {
-                this.log(`  ${index + 1}. [${item.type}] "${item.text}" - 位置: ${item.position}, 块: ${item.blockId}`);
-            });
-            allItems.push(...otherItems);
-        }
-        
-        this.log(`🔍 合并前总计 ${allItems.length} 个项目，即将进行排序...`);
-        const sortedItems = this.filterAndSortResults(allItems, options);
-        this.log(`🔍 最终排序结果 (${sortedItems.length}个):`);
-        sortedItems.forEach((item, index) => {
-            this.log(`  ${index + 1}. [${item.type}] "${item.text}" - 位置: ${item.position}, 块: ${item.blockId}`);
-        });
-        
-        return sortedItems;
-    }
-    
-    /**
-     * 一致的位置计算方法（基于真实DOM）
-     */
-    private calculateConsistentPosition(targetElement: Element, containerElement: HTMLElement): number {
-        try {
-            // 获取容器内所有元素
-            const allElements = Array.from(containerElement.querySelectorAll('*'));
-            
-            // 找到目标元素在容器内的索引
-            const position = allElements.indexOf(targetElement as Element);
-            
-            return position >= 0 ? position : 0;
-        } catch (error) {
-            this.log('位置计算失败，使用时间戳:', error);
-            return Date.now() % 100000;
-        }
-    }
-    
-    /**
-     * 在真实DOM中查找元素位置（用于修正从HTML字符串提取的项目）
-     */
-    private findElementPositionInRealDOM(text: string, type: TextFormatType, containerElement: HTMLElement): number {
-        try {
-            const processor = FormatProcessorFactory.getProcessor(type);
-            const config = processor.getConfig();
-            
-            // 在真实DOM中查找匹配的元素
-            const elements = containerElement.querySelectorAll(config.htmlSelectors.join(','));
-            
-            for (let i = 0; i < elements.length; i++) {
-                const element = elements[i];
-                const elementText = this.cleanText(element.textContent || '');
-                
-                if (elementText === text) {
-                    // 找到匹配的元素，计算其在容器中的位置
-                    return this.calculateConsistentPosition(element, containerElement);
-                }
-            }
-            
-            // 如果没找到，使用时间戳
-            return Date.now() % 100000;
-        } catch (error) {
-            this.log('查找真实DOM位置失败:', error);
-            return Date.now() % 100000;
-        }
-    }
     
     /**
      * 清理文本
