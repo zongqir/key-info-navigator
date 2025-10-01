@@ -3,51 +3,145 @@
    ========================================================================== */
 
 .formatted-text-dock {
-  /* 列表项基础样式 */
+  /* 列表项基础样式 - 毛玻璃效果版本 */
   &__item {
     display: flex;
     align-items: flex-start;
-    padding: 14px 16px;
-    margin: 6px 2px 6px 0;
-    background: var(--kinfo-bg-primary);
-    border-radius: 6px;
-    border: 1px solid var(--kinfo-border-normal);
-    transition: all 0.2s ease;
+    padding: 16px 20px;
+    margin: 6px 8px;
+    background: var(--kinfo-glass-bg);
+    backdrop-filter: var(--kinfo-glass-backdrop-blur);
+    -webkit-backdrop-filter: var(--kinfo-glass-backdrop-blur);
+    border-radius: 12px;
+    border: 1px solid var(--kinfo-glass-border);
+    border-left: 4px solid transparent; /* 默认透明左边框 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     cursor: pointer;
+    box-shadow: var(--kinfo-glass-shadow);
+    
+    /* 添加细微的高光效果 */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--kinfo-glass-border), transparent);
+      border-radius: 12px 12px 0 0;
+      pointer-events: none;
+    }
 
     &:hover {
-      background: var(--kinfo-bg-surface-hover);
-      border-color: var(--kinfo-border-strong);
-      box-shadow: var(--kinfo-shadow-md);
+      background: var(--kinfo-glass-bg-hover);
+      backdrop-filter: var(--kinfo-glass-backdrop-blur-strong);
+      -webkit-backdrop-filter: var(--kinfo-glass-backdrop-blur-strong);
+      border-color: var(--kinfo-glass-border);
+      box-shadow: var(--kinfo-glass-shadow-hover);
+      transform: translateY(-2px) scale(1.01);
       
       .formatted-text-dock__item-actions {
         opacity: 1;
       }
+      
+      /* 增强高光效果 */
+      &::before {
+        opacity: 1.5;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      }
     }
 
     &:active {
-      background: var(--kinfo-bg-surface-active);
-      transform: scale(0.995);
+      transform: translateY(-1px) scale(1.005);
+      box-shadow: var(--kinfo-glass-shadow);
+    }
+    
+    /* 类型颜色标识 - 毛玻璃版本 */
+    &[data-type="bold"] {
+      border-left-color: #0969da;
+      background: linear-gradient(135deg, rgba(9, 105, 218, 0.1) 0%, var(--kinfo-glass-bg) 50%);
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(9, 105, 218, 0.15) 0%, var(--kinfo-glass-bg-hover) 50%);
+        border-left-color: #0969da;
+        box-shadow: var(--kinfo-glass-shadow-hover), 0 0 20px rgba(9, 105, 218, 0.2);
+      }
+    }
+    
+    &[data-type="italic"] {
+      border-left-color: #FFD700;
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, var(--kinfo-glass-bg) 50%);
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, var(--kinfo-glass-bg-hover) 50%);
+        border-left-color: #FFD700;
+        box-shadow: var(--kinfo-glass-shadow-hover), 0 0 20px rgba(255, 215, 0, 0.2);
+      }
+    }
+    
+    &[data-type="underline"] {
+      border-left-color: #8B5CF6;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, var(--kinfo-glass-bg) 50%);
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, var(--kinfo-glass-bg-hover) 50%);
+        border-left-color: #8B5CF6;
+        box-shadow: var(--kinfo-glass-shadow-hover), 0 0 20px rgba(139, 92, 246, 0.2);
+      }
+    }
+    
+    &[data-type="highlight"] {
+      border-left-color: #9a6700;
+      background: linear-gradient(135deg, rgba(154, 103, 0, 0.1) 0%, var(--kinfo-glass-bg) 50%);
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(154, 103, 0, 0.15) 0%, var(--kinfo-glass-bg-hover) 50%);
+        border-left-color: #9a6700;
+        box-shadow: var(--kinfo-glass-shadow-hover), 0 0 20px rgba(154, 103, 0, 0.2);
+      }
+    }
+    
+    &[data-type="memo"] {
+      border-left-color: #8250df;
+      background: linear-gradient(135deg, rgba(130, 80, 223, 0.1) 0%, var(--kinfo-glass-bg) 50%);
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(130, 80, 223, 0.15) 0%, var(--kinfo-glass-bg-hover) 50%);
+        border-left-color: #8250df;
+        box-shadow: var(--kinfo-glass-shadow-hover), 0 0 20px rgba(130, 80, 223, 0.2);
+      }
+    }
+    
+    &[data-type="tag"] {
+      border-left-color: #e85aad;
+      background: linear-gradient(135deg, rgba(232, 90, 173, 0.1) 0%, var(--kinfo-glass-bg) 50%);
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(232, 90, 173, 0.15) 0%, var(--kinfo-glass-bg-hover) 50%);
+        border-left-color: #e85aad;
+        box-shadow: var(--kinfo-glass-shadow-hover), 0 0 20px rgba(232, 90, 173, 0.2);
+      }
+    }
+    
+    &[data-type="todo"] {
+      border-left-color: #d1242f;
+      background: linear-gradient(135deg, rgba(209, 36, 47, 0.1) 0%, var(--kinfo-glass-bg) 50%);
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(209, 36, 47, 0.15) 0%, var(--kinfo-glass-bg-hover) 50%);
+        border-left-color: #d1242f;
+        box-shadow: var(--kinfo-glass-shadow-hover), 0 0 20px rgba(209, 36, 47, 0.2);
+      }
     }
     
     /* 反向导航高亮样式 */
     &--reverse-highlight {
       background: var(--kinfo-primary-lighter) !important;
       border-color: var(--kinfo-primary) !important;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+      border-left-color: var(--kinfo-primary) !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), 0 4px 12px rgba(59, 130, 246, 0.3);
       animation: formatted-text-dock-reverse-highlight 2s ease-out;
-      
-      .formatted-text-dock__item-indicator {
-        background-color: var(--kinfo-primary-lighter) !important;
-        border-color: var(--kinfo-primary) !important;
-        transform: translateY(-50%) scale(1.1) !important;
-        box-shadow: var(--kinfo-shadow-lg) !important;
-        
-        svg {
-          color: var(--kinfo-primary) !important;
-        }
-      }
       
       .formatted-text-dock__item-text {
         color: var(--kinfo-primary) !important;
@@ -56,15 +150,15 @@
     }
   }
 
-  /* 项目指示器 - 图标形式 */
+  /* 项目指示器 - 图标形式 (已隐藏) */
   &__item-indicator {
+    display: none; /* 隐藏图标指示器 */
     width: 28px;
     height: 28px;
     position: absolute;
     left: 8px;
     top: 50%;
     transform: translateY(-50%);
-    display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 6px;
@@ -90,7 +184,7 @@
   &__item-content {
     flex: 1;
     min-width: 0;
-    margin-left: 40px; /* 为图标预留空间 */
+    margin-left: 0; /* 移除图标预留空间 */
   }
 
   &__item-header {
@@ -130,13 +224,14 @@
     transition: opacity 0.3s ease;
   }
 
-  /* 项目文本 */
+  /* 项目文本 - 优化版本 */
   &__item-text {
-    font-weight: 400;
-    color: var(--kinfo-text-secondary);
+    font-weight: 500;
+    color: var(--kinfo-text-primary);
     word-break: break-word;
-    line-height: 1.4;
-    font-size: 13px;
+    line-height: 1.5;
+    font-size: 14px;
+    letter-spacing: 0.01em;
   }
 
   /* 项目上下文信息 */
@@ -166,6 +261,7 @@
       overflow: hidden;
       display: -webkit-box;
       -webkit-line-clamp: 3;
+      line-clamp: 3;
       -webkit-box-orient: vertical;
       
       /* 备注内容的特殊样式 */
@@ -325,7 +421,7 @@
     }
     
     &__item-content {
-      margin-left: 36px; /* 调整移动端的边距 */
+      margin-left: 0; /* 调整移动端的边距，移除图标空间 */
     }
 
     &__item-text {

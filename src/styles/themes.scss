@@ -79,6 +79,16 @@
   /* 备注相关 */
   --kinfo-memo-text: #6b7280;
   
+  /* 毛玻璃效果相关 */
+  --kinfo-glass-bg: rgba(255, 255, 255, 0.85);
+  --kinfo-glass-bg-hover: rgba(255, 255, 255, 0.9);
+  --kinfo-glass-bg-strong: rgba(255, 255, 255, 0.95);
+  --kinfo-glass-border: rgba(255, 255, 255, 0.2);
+  --kinfo-glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  --kinfo-glass-shadow-hover: 0 12px 40px rgba(31, 38, 135, 0.2);
+  --kinfo-glass-backdrop-blur: blur(20px);
+  --kinfo-glass-backdrop-blur-strong: blur(40px);
+
   /* 滚动条 */
   --kinfo-scroll-track: #f1f5f9;
   --kinfo-scroll-thumb: #cbd5e1;
@@ -161,6 +171,16 @@
   /* 备注相关 */
   --kinfo-memo-text: #9ca3af;
   
+  /* 毛玻璃效果相关 - 暗色主题优化 */
+  --kinfo-glass-bg: rgba(30, 41, 59, 0.85);
+  --kinfo-glass-bg-hover: rgba(30, 41, 59, 0.9);
+  --kinfo-glass-bg-strong: rgba(30, 41, 59, 0.95);
+  --kinfo-glass-border: rgba(255, 255, 255, 0.15);
+  --kinfo-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --kinfo-glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --kinfo-glass-backdrop-blur: blur(20px);
+  --kinfo-glass-backdrop-blur-strong: blur(40px);
+
   /* 滚动条 */
   --kinfo-scroll-track: #475569;
   --kinfo-scroll-thumb: #64748b;

@@ -23,9 +23,6 @@ export class FormattedTextUIRenderer {
             <div class="fn__flex-1 fn__flex-column formatted-text-dock">
                 <div class="formatted-text-dock__header">
                     <div class="formatted-text-dock__title">
-                        <svg class="formatted-text-dock__icon">
-                            <use xlink:href="#iconFocus"></use>
-                        </svg>
                         <span></span>
                     </div>
                     <div class="formatted-text-dock__controls">
@@ -139,9 +136,6 @@ export class FormattedTextUIRenderer {
                          data-block-id="${item.blockId}"
                          data-index="${i}"
                          data-position="${item.position}">
-                        <div class="formatted-text-dock__item-indicator" style="color: ${config.color}">
-                            ${this.getFormatIcon(item.type)}
-                        </div>
                         <div class="formatted-text-dock__item-content">
                             <div class="formatted-text-dock__item-header">
                                 <div class="formatted-text-dock__item-main">
@@ -281,7 +275,7 @@ export class FormattedTextUIRenderer {
      * 获取带特定颜色的图标（用于BIU）
      */
     public getFormatIconWithColor(type: TextFormatType, color: string): string {
-        const icons = {
+        const icons: Partial<Record<TextFormatType, string>> = {
             [TextFormatType.BOLD]: `
                 <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: ${color}; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; border-radius: 4px; line-height: 1; padding: 0; margin: 0; text-align: center; vertical-align: middle;">B</div>
             `,
