@@ -13,7 +13,7 @@ export class TodoProcessor extends BaseFormatProcessor {
         htmlSelectors: ["div[data-subtype='t']", "li[data-subtype='t']"],
         kramdownRegex: /^\s*[-*+]\s*\[[ x]\]/m,
         icon: "iconStop",
-        color: "#dc2626",
+        color: "#d1242f", // 现代简约红色
         displayMode: DisplayMode.CUSTOM
     };
     
@@ -55,7 +55,7 @@ export class TodoProcessor extends BaseFormatProcessor {
                 position: position,
                 context: this.truncateText(content, 80),
                 icon: isCompleted ? "iconStop" : "iconStop",
-                color: isCompleted ? "#dc2626" : "#dc2626",
+                color: isCompleted ? "#d1242f" : "#d1242f",
                 metadata: { 
                     isCompleted: isCompleted,
                     originalContent: block.content || ""
@@ -134,7 +134,7 @@ export class TodoProcessor extends BaseFormatProcessor {
                         position: index,
                         context: element.parentElement?.textContent || "",
                         icon: isCompleted ? "iconStop" : "iconStop",
-                        color: isCompleted ? "#dc2626" : "#dc2626",
+                        color: isCompleted ? "#d1242f" : "#d1242f",
                         metadata: { 
                             isCompleted: isCompleted,
                             originalContent: element.outerHTML || ""

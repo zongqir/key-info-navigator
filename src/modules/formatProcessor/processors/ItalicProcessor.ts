@@ -12,7 +12,7 @@ export class ItalicProcessor extends BaseFormatProcessor {
         htmlSelectors: ["em", "i", '[data-type="em"]'],
         kramdownRegex: /(?<!\*)\*([^*]+?)\*(?!\*)|(?<!_)_([^_]+?)_(?!_)/g,
         icon: "iconItalic",
-        color: "#f59e0b", // 现代橙色
+        color: "#FFD700", // 金黄色
         displayMode: DisplayMode.SIMPLE, // 简单模式，只显示斜体内容
     };
 }

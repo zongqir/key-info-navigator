@@ -16,7 +16,7 @@ export class MemoProcessor extends BaseFormatProcessor {
         htmlSelectors: ["span[data-type='inline-memo']", "span[data-inline-memo-content]"],
         kramdownRegex: /(.+?)\((.+?)\)/g, // 匹配：划线文本(备注内容)
         icon: "iconMessage",
-        color: "#8b5cf6",
+        color: "#8250df", // 现代简约紫色
         displayMode: DisplayMode.CUSTOM
     };
 

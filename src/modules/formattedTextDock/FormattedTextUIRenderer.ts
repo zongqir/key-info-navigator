@@ -47,7 +47,27 @@ export class FormattedTextUIRenderer {
      * 创建过滤器HTML
      */
     public createFiltersHTML(): string {
-        return this.enabledFormats.map(type => {
+        const textFormats = [TextFormatType.BOLD, TextFormatType.ITALIC, TextFormatType.UNDERLINE];
+        const otherFormats = this.enabledFormats.filter(type => !textFormats.includes(type));
+        
+        const textFormatButtons = textFormats
+            .filter(type => this.enabledFormats.includes(type))
+            .map(type => {
+                const processor = this.parser.getFormatProcessor(type);
+                const config = processor.getConfig();
+                
+                return `
+                    <button class="format-filter active" 
+                            data-format="${type}"
+                            title="${this.getFormatDisplayName(type)}">
+                        <div class="filter-icon">
+                            ${this.getFormatIconWithColor(type, config.color)}
+                        </div>
+                    </button>
+                `;
+            }).join("");
+        
+        const otherFormatButtons = otherFormats.map(type => {
             const processor = this.parser.getFormatProcessor(type);
             const config = processor.getConfig();
             
@@ -55,10 +75,17 @@ export class FormattedTextUIRenderer {
                 <button class="format-filter active" 
                         data-format="${type}"
                         title="${this.getFormatDisplayName(type)}">
-                    <div class="filter-circle" style="background-color:${config.color}"></div>
+                    <div class="filter-icon" style="color:${config.color}">
+                        ${this.getFormatIcon(type)}
+                    </div>
                 </button>
             `;
         }).join("");
+        
+        const separator = textFormatButtons && otherFormatButtons ? 
+            '<div class="filter-separator"></div>' : '';
+        
+        return textFormatButtons + separator + otherFormatButtons;
     }
 
     /**
@@ -112,8 +139,9 @@ export class FormattedTextUIRenderer {
                          data-block-id="${item.blockId}"
                          data-index="${i}"
                          data-position="${item.position}">
-                        <div class="formatted-text-dock__item-indicator" 
-                             style="background-color: ${config.color}"></div>
+                        <div class="formatted-text-dock__item-indicator" style="color: ${config.color}">
+                            ${this.getFormatIcon(item.type)}
+                        </div>
                         <div class="formatted-text-dock__item-content">
                             <div class="formatted-text-dock__item-header">
                                 <div class="formatted-text-dock__item-main">
@@ -214,6 +242,58 @@ export class FormattedTextUIRenderer {
             [TextFormatType.TODO]: this.i18n.todo || "待办",
         };
         return names[type] || type;
+    }
+
+    /**
+     * 获取格式类型对应的统一大小图标
+     */
+    public getFormatIcon(type: TextFormatType): string {
+        const icons = {
+            [TextFormatType.BOLD]: `
+                <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 16px; width: 16px; background: currentColor; color: white; font-weight: 900; font-family: Arial, sans-serif; border-radius: 2px;">B</div>
+            `,
+            [TextFormatType.ITALIC]: `
+                <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 16px; width: 16px; background: currentColor; color: white; font-style: italic; font-weight: bold; font-family: Arial, sans-serif; border-radius: 2px;">I</div>
+            `,
+            [TextFormatType.UNDERLINE]: `
+                <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 16px; width: 16px; background: currentColor; color: white; text-decoration: underline; font-weight: bold; font-family: Arial, sans-serif; border-radius: 2px;">U</div>
+            `,
+            [TextFormatType.HIGHLIGHT]: `
+                <div style="font-size: 20px; display: flex; align-items: center; justify-content: center; height: 20px;">✨</div>
+            `,
+            [TextFormatType.MEMO]: `
+                <div style="font-size: 20px; display: flex; align-items: center; justify-content: center; height: 20px;">📝</div>
+            `,
+            [TextFormatType.TAG]: `
+                <div style="font-size: 20px; display: flex; align-items: center; justify-content: center; height: 20px;">🏷️</div>
+            `,
+            [TextFormatType.TODO]: `
+                <div style="font-size: 20px; display: flex; align-items: center; justify-content: center; height: 20px;">✅</div>
+            `
+        };
+        
+        return icons[type] || `
+            <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 16px;">●</div>
+        `;
+    }
+
+    /**
+     * 获取带特定颜色的图标（用于BIU）
+     */
+    public getFormatIconWithColor(type: TextFormatType, color: string): string {
+        const icons = {
+            [TextFormatType.BOLD]: `
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: ${color}; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; border-radius: 4px; line-height: 1; padding: 0; margin: 0; text-align: center; vertical-align: middle;">B</div>
+            `,
+            [TextFormatType.ITALIC]: `
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #FFD700; color: white; font-style: italic; font-weight: bold; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; border-radius: 4px; line-height: 1; padding: 0; margin: 0; text-align: center; vertical-align: middle;">I</div>
+            `,
+            [TextFormatType.UNDERLINE]: `
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #8B5CF6; color: white; text-decoration: underline; font-weight: bold; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; border-radius: 4px; line-height: 1; padding: 0; margin: 0; text-align: center; vertical-align: middle; text-underline-offset: 1px;">U</div>
+            `
+        };
+        
+        return icons[type] || this.getFormatIcon(type);
     }
 
     /**

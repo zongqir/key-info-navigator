@@ -12,7 +12,7 @@ export class TagProcessor extends BaseFormatProcessor {
         htmlSelectors: ["span[data-type='tag']"],
         kramdownRegex: /#[\w\u4e00-\u9fa5]+/g,
         icon: "iconCube",
-        color: "#f9a8d4",
+        color: "#e85aad", // 现代简约玫瑰色
         displayMode: DisplayMode.CUSTOM
     };
     

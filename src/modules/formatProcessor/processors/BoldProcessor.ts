@@ -12,7 +12,7 @@ export class BoldProcessor extends BaseFormatProcessor {
         htmlSelectors: ["strong", "b", '[data-type="strong"]'],
         kramdownRegex: /(\*\*|__)(.*?)\1/g,
         icon: "iconBold",
-        color: "#3b82f6", // 现代蓝色
+        color: "#0969da", // 现代简约深蓝
         displayMode: DisplayMode.SIMPLE, // 简单模式，只显示加粗内容
     };
 }

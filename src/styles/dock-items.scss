@@ -34,12 +34,19 @@
     /* 反向导航高亮样式 */
     &--reverse-highlight {
       background: var(--kinfo-primary-lighter) !important;
-      border-left-color: var(--kinfo-primary) !important;
+      border-color: var(--kinfo-primary) !important;
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
       animation: formatted-text-dock-reverse-highlight 2s ease-out;
       
       .formatted-text-dock__item-indicator {
-        background-color: var(--kinfo-primary) !important;
+        background-color: var(--kinfo-primary-lighter) !important;
+        border-color: var(--kinfo-primary) !important;
+        transform: translateY(-50%) scale(1.1) !important;
+        box-shadow: var(--kinfo-shadow-lg) !important;
+        
+        svg {
+          color: var(--kinfo-primary) !important;
+        }
       }
       
       .formatted-text-dock__item-text {
@@ -49,20 +56,41 @@
     }
   }
 
-  /* 项目指示器 */
+  /* 项目指示器 - 图标形式 */
   &__item-indicator {
-    width: 5px;
-    height: 100%;
+    width: 28px;
+    height: 28px;
     position: absolute;
-    left: 0;
-    top: 0;
-    border-radius: 0 4px 4px 0;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: var(--kinfo-bg-primary);
+    border: 1px solid var(--kinfo-border-normal);
+    box-shadow: var(--kinfo-shadow-sm);
+    transition: all 0.2s ease;
+    
+    svg {
+      width: 16px;
+      height: 16px;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+    
+    /* Hover效果 */
+    .formatted-text-dock__item:hover & {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: var(--kinfo-shadow-md);
+    }
   }
 
   /* 项目内容区域 */
   &__item-content {
     flex: 1;
     min-width: 0;
+    margin-left: 40px; /* 为图标预留空间 */
   }
 
   &__item-header {
@@ -282,7 +310,22 @@
 @media (max-width: 768px) {
   .formatted-text-dock {
     &__item {
-      padding: 6px 8px;
+      padding: 8px 12px;
+    }
+    
+    &__item-indicator {
+      width: 24px;
+      height: 24px;
+      left: 6px;
+      
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+    
+    &__item-content {
+      margin-left: 36px; /* 调整移动端的边距 */
     }
 
     &__item-text {
