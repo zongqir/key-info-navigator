@@ -43,5 +43,9 @@
   "enableDebugLog": "Enable Debug Log",
   "enableDebugLogDesc": "When enabled, detailed debug information will be output to the console, which helps troubleshooting but consumes more memory",
   "saveSettings": "Save Settings",
-  "settingsSaved": "Settings saved"
+  "settingsSaved": "Settings saved",
+  "documentReadonly": "Document is locked, please unlock first",
+  "documentLocked": "Document locked",
+  "documentUnlocked": "Document unlocked",
+  "unlockPrompt": "The current document is read-only. Please click the 🔒 lock button in the breadcrumb to unlock before editing"
 }

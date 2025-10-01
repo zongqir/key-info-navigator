@@ -4,6 +4,7 @@ import { TextFormatParser } from "../formatProcessor/TextFormatParser";
 import { FormattedTextNavigator } from "./FormattedTextNavigator";
 import { FormattedTextMemoManager } from "./FormattedTextMemoManager";
 import { TodoProcessor } from "../formatProcessor/processors/TodoProcessor";
+import { DocumentReadonlyChecker } from "../utils/DocumentReadonlyChecker";
 
 /**
  * 格式化文本事件处理器
@@ -85,6 +86,16 @@ export class FormattedTextEventHandler {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation(); // 阻止事件冒泡，避免触发导航
                 
+                // 检查文档是否处于只读状态
+                if (DocumentReadonlyChecker.checkDocumentReadonly()) {
+                    this.log('🔒 文档处于只读状态，禁止添加备注操作');
+                    DocumentReadonlyChecker.showUnlockPrompt(
+                        showMessage,
+                        this.i18n.unlockPrompt || DocumentReadonlyChecker.getUnlockPromptMessage()
+                    );
+                    return;
+                }
+                
                 const blockId = btn.dataset.blockId || '';
                 const text = btn.dataset.text || '';
                 
@@ -108,6 +119,16 @@ export class FormattedTextEventHandler {
         removeFormatButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation(); // 阻止事件冒泡，避免触发导航
+                
+                // 检查文档是否处于只读状态
+                if (DocumentReadonlyChecker.checkDocumentReadonly()) {
+                    this.log('🔒 文档处于只读状态，禁止删除格式操作');
+                    DocumentReadonlyChecker.showUnlockPrompt(
+                        showMessage,
+                        this.i18n.unlockPrompt || DocumentReadonlyChecker.getUnlockPromptMessage()
+                    );
+                    return;
+                }
                 
                 const blockId = btn.dataset.blockId || '';
                 const text = btn.dataset.text || '';

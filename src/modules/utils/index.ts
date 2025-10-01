@@ -2,3 +2,4 @@
 export { Logger } from './Logger';
 export { EditorUtils } from './EditorUtils';
 export { ThemeManager, ThemeMode } from './ThemeManager';
+export { DocumentReadonlyChecker } from './DocumentReadonlyChecker';

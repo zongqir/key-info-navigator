@@ -1,4 +1,5 @@
 import { IFormatProcessor, TextFormatType, FormattedTextItem, FormatConfig } from './interfaces';
+import { DocumentReadonlyChecker } from '../utils/DocumentReadonlyChecker';
 
 /**
  * 抽象格式处理器基类
@@ -181,16 +182,23 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
     public renderActionButtons(item: FormattedTextItem, i18n?: any): string {
         const buttons: string[] = [];
         
+        // 检查文档是否处于只读状态
+        const isReadonly = DocumentReadonlyChecker.checkDocumentReadonly();
+        const disabledClass = isReadonly ? ' formatted-text-dock__action-btn--disabled' : '';
+        const disabledAttr = isReadonly ? ' disabled' : '';
+        
         // 删除格式化按钮（所有类型都支持）
-        const deleteTitle = i18n?.removeFormat || '删除格式';
+        const deleteTitle = isReadonly 
+            ? (i18n?.documentReadonly || '文档已锁定，请先解锁') 
+            : (i18n?.removeFormat || '删除格式');
         buttons.push(`
-            <button class="formatted-text-dock__action-btn formatted-text-dock__remove-format-btn" 
+            <button class="formatted-text-dock__action-btn formatted-text-dock__remove-format-btn${disabledClass}" 
                     data-block-id="${item.blockId}"
                     data-text="${item.text}"
                     data-type="${item.type}"
                     data-position="${item.position}"
                     data-action="remove-format"
-                    title="${deleteTitle}">
+                    title="${deleteTitle}"${disabledAttr}>
                 <svg class="formatted-text-dock__action-icon">
                     <use xlink:href="#iconTrashcan"></use>
                 </svg>
@@ -199,13 +207,15 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
         
         // 添加备注按钮（只有支持的类型才显示）
         if (this.supportAddMemo()) {
-            const addMemoTitle = i18n?.addMemo || '添加备注';
+            const addMemoTitle = isReadonly 
+                ? (i18n?.documentReadonly || '文档已锁定，请先解锁') 
+                : (i18n?.addMemo || '添加备注');
             buttons.push(`
-                <button class="formatted-text-dock__action-btn formatted-text-dock__add-memo-btn" 
+                <button class="formatted-text-dock__action-btn formatted-text-dock__add-memo-btn${disabledClass}" 
                         data-block-id="${item.blockId}"
                         data-text="${item.text}"
                         data-action="add-memo"
-                        title="${addMemoTitle}">
+                        title="${addMemoTitle}"${disabledAttr}>
                     <span style="font-size: 12px;">💭</span>
                 </button>
             `);

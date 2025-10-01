@@ -5,7 +5,7 @@ import { FormattedTextEventHandler } from "./FormattedTextEventHandler";
 import { FormattedTextNavigator } from "./FormattedTextNavigator";
 import { FormattedTextMemoManager } from "./FormattedTextMemoManager";
 import { FormattedTextUtils } from "./FormattedTextUtils";
-import { Logger, EditorUtils } from "../utils";
+import { Logger, EditorUtils, DocumentReadonlyChecker } from "../utils";
 
 /**
  * 格式化文本侧边栏 - 重构版本
@@ -32,6 +32,9 @@ export class FormattedTextDock {
     private eventHandler!: FormattedTextEventHandler;
     private navigator!: FormattedTextNavigator;
     private memoManager!: FormattedTextMemoManager;
+    
+    // 状态监听器
+    private readonlyStateChangeHandler: (isReadonly: boolean) => void;
 
     constructor(
         private element: HTMLElement,
@@ -41,6 +44,12 @@ export class FormattedTextDock {
         this.log('构造函数开始初始化');
         this.parser = new TextFormatParser(logger);
         
+        // 初始化状态变化处理器
+        this.readonlyStateChangeHandler = (isReadonly: boolean) => {
+            this.log(`🔄 [FormattedTextDock] 文档状态变化: ${isReadonly ? '🔒 锁定' : '✏️ 解锁'}`);
+            this.onReadonlyStateChange(isReadonly);
+        };
+        
         // 初始化功能模块
         this.log('初始化功能模块');
         this.initModules();
@@ -48,6 +57,10 @@ export class FormattedTextDock {
         // 初始化UI和功能
         this.log('初始化UI');
         this.initUI();
+        
+        // 添加文档状态变化监听器
+        this.log('添加文档状态变化监听器');
+        DocumentReadonlyChecker.addStateChangeListener(this.readonlyStateChangeHandler);
         
         this.log('开始初始刷新');
         this.refresh(true); // 初始化时强制刷新
@@ -131,17 +144,39 @@ export class FormattedTextDock {
     }
 
     /**
+     * 处理文档只读状态变化
+     */
+    private onReadonlyStateChange(isReadonly: boolean): void {
+        this.log(`🔄 [FormattedTextDock] 处理状态变化: ${isReadonly ? '🔒 锁定' : '✏️ 解锁'} - 开始刷新dock`);
+        
+        // 状态变化时强制刷新dock来更新按钮状态
+        this.renderList();
+        
+        this.log('🔄 [FormattedTextDock] 状态变化处理完成');
+    }
+
+    /**
      * 销毁组件
      */
     public destroy(): void {
+        this.log('🔄 [FormattedTextDock] 开始销毁组件');
+        
         if (this.refreshTimer) {
             clearTimeout(this.refreshTimer);
             this.refreshTimer = undefined;
         }
         
+        // 移除文档状态变化监听器
+        if (this.readonlyStateChangeHandler) {
+            this.log('🔄 [FormattedTextDock] 移除状态变化监听器');
+            DocumentReadonlyChecker.removeStateChangeListener(this.readonlyStateChangeHandler);
+        }
+        
         // 销毁各个模块
         this.memoManager?.destroy();
         this.navigator?.destroy();
+        
+        this.log('🔄 [FormattedTextDock] 组件销毁完成');
     }
 
     /**

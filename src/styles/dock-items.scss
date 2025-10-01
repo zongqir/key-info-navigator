@@ -172,6 +172,39 @@
       background: var(--kinfo-bg-surface-active);
       transform: scale(0.95);
     }
+    
+    /* 禁用状态样式 */
+    &--disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+      
+      .formatted-text-dock__action-icon {
+        color: var(--kinfo-text-disabled);
+      }
+      
+      /* 移除禁用状态下的hover效果 */
+      &:hover {
+        background: transparent;
+        transform: none;
+      }
+      
+      &:active {
+        background: transparent;
+        transform: none;
+      }
+      
+      /* 添加一个锁定图标的提示 */
+      &::before {
+        content: '🔒';
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        font-size: 10px;
+        opacity: 0.6;
+        pointer-events: none;
+      }
+    }
   }
 
   &__action-icon {
