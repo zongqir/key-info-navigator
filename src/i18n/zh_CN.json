@@ -47,5 +47,6 @@
   "documentReadonly": "文档已锁定，请先解锁",
   "documentLocked": "文档已锁定",
   "documentUnlocked": "文档已解锁",
-  "unlockPrompt": "当前文档处于只读状态，请先点击面包屑中的🔒锁定按钮解锁后再进行编辑操作"
+  "unlockPrompt": "当前文档处于只读状态，请先点击面包屑中的🔒锁定按钮解锁后再进行编辑操作",
+  "dockTitle": "关键信息导航"
 }

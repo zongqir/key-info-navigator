@@ -47,5 +47,6 @@
   "documentReadonly": "Document is locked, please unlock first",
   "documentLocked": "Document locked",
   "documentUnlocked": "Document unlocked",
-  "unlockPrompt": "The current document is read-only. Please click the 🔒 lock button in the breadcrumb to unlock before editing"
+  "unlockPrompt": "The current document is read-only. Please click the 🔒 lock button in the breadcrumb to unlock before editing",
+  "dockTitle": "Key Info Navigator"
 }
