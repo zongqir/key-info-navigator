@@ -3,162 +3,161 @@
    ========================================================================== */
 
 .formatted-text-dock {
-  /* 列表项基础样式 - 纯色美化版本 */
+  /* 现代化卡片设计 - 极简立体风格 */
   &__item {
     display: flex;
     align-items: flex-start;
-    padding: 18px 24px;
-    margin: 8px 12px;
-    background: var(--kinfo-glass-bg);
-    backdrop-filter: var(--kinfo-glass-backdrop-blur);
-    -webkit-backdrop-filter: var(--kinfo-glass-backdrop-blur);
-    border-radius: 16px;
-    border: 1px solid var(--kinfo-glass-border);
-    border-left: 5px solid transparent; /* 增加左边框宽度 */
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 16px 20px;
+    margin: 6px 8px;
+    background: var(--kinfo-bg-primary);
+    border-radius: 12px;
+    border: 1px solid var(--kinfo-border-light);
+    border-left: 4px solid transparent;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     cursor: pointer;
-    box-shadow: var(--kinfo-glass-shadow), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-    transform-style: preserve-3d;
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      0 1px 3px rgba(0, 0, 0, 0.06);
     
-    /* 简化的高光效果 */
+    /* 简洁的顶部高光 */
     &::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.4);
-      border-radius: 16px 16px 0 0;
-      pointer-events: none;
-      z-index: 2;
-    }
-    
-    /* 底部反光效果 - 纯色版本 */
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 20%;
-      right: 20%;
+      left: 4px;
+      right: 4px;
       height: 1px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 0 0 16px 16px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 12px 12px 0 0;
       pointer-events: none;
-      z-index: 2;
     }
 
     &:hover {
-      background: var(--kinfo-glass-bg-hover);
-      backdrop-filter: var(--kinfo-glass-backdrop-blur-strong);
-      -webkit-backdrop-filter: var(--kinfo-glass-backdrop-blur-strong);
-      border-color: var(--kinfo-glass-border);
-      box-shadow: var(--kinfo-glass-shadow-hover), 
-                  inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                  inset 0 -1px 0 rgba(0, 0, 0, 0.1),
-                  0 0 30px rgba(255, 255, 255, 0.1);
-      transform: translateY(-3px) scale(1.02) rotateX(2deg);
+      background: var(--kinfo-bg-surface-hover);
+      border-color: var(--kinfo-border-normal);
+      box-shadow: 
+        0 8px 25px rgba(0, 0, 0, 0.1),
+        0 3px 10px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
       
       .formatted-text-dock__item-actions {
         opacity: 1;
       }
       
-      /* 增强高光效果 - 纯色版本 */
       &::before {
-        opacity: 1.5;
-        background: rgba(255, 255, 255, 0.6);
-      }
-      
-      &::after {
-        opacity: 1.5;
-        background: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.9);
       }
     }
 
     &:active {
-      transform: translateY(-1px) scale(1.01) rotateX(1deg);
-      box-shadow: var(--kinfo-glass-shadow);
-      transition: transform 0.1s ease;
+      transform: translateY(-1px);
+      box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.08),
+        0 2px 6px rgba(0, 0, 0, 0.06);
+      transition: all 0.1s ease;
     }
     
-    /* 类型颜色标识 - 只保留边框颜色 */
+    /* 类型颜色标识 - 现代极简风格 */
     &[data-type="bold"] {
       border-left-color: #0969da;
       
+      /* 加粗类型的文本显示为粗体 */
+      .formatted-text-dock__item-text {
+        font-weight: 700;
+      }
+      
       &:hover {
         border-left-color: #0969da;
-        box-shadow: var(--kinfo-glass-shadow-hover), 
-                    0 0 25px rgba(9, 105, 218, 0.3),
-                    inset 0 1px 0 rgba(9, 105, 218, 0.2);
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.1),
+          0 3px 10px rgba(0, 0, 0, 0.08),
+          -2px 0 8px rgba(9, 105, 218, 0.15);
       }
     }
     
     &[data-type="italic"] {
-      border-left-color: #FFD700;
+      border-left-color: #FF6B6B;
+      
+      /* 斜体类型的文本显示为斜体 */
+      .formatted-text-dock__item-text {
+        font-style: italic;
+      }
       
       &:hover {
-        border-left-color: #FFD700;
-        box-shadow: var(--kinfo-glass-shadow-hover), 
-                    0 0 25px rgba(255, 215, 0, 0.3),
-                    inset 0 1px 0 rgba(255, 215, 0, 0.2);
+        border-left-color: #FF6B6B;
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.1),
+          0 3px 10px rgba(0, 0, 0, 0.08),
+          -2px 0 8px rgba(255, 107, 107, 0.15);
       }
     }
     
     &[data-type="underline"] {
       border-left-color: #8B5CF6;
       
+      /* 下划线类型的文本显示下划线 */
+      .formatted-text-dock__item-text {
+        text-decoration: underline;
+        text-decoration-color: #8B5CF6;
+        text-underline-offset: 2px;
+        text-decoration-thickness: 1px;
+      }
+      
       &:hover {
         border-left-color: #8B5CF6;
-        box-shadow: var(--kinfo-glass-shadow-hover), 
-                    0 0 25px rgba(139, 92, 246, 0.3),
-                    inset 0 1px 0 rgba(139, 92, 246, 0.2);
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.1),
+          0 3px 10px rgba(0, 0, 0, 0.08),
+          -2px 0 8px rgba(139, 92, 246, 0.15);
       }
     }
     
     &[data-type="highlight"] {
-      border-left-color: #9a6700;
+      border-left-color: #FF8C00;
       
       &:hover {
-        border-left-color: #9a6700;
-        box-shadow: var(--kinfo-glass-shadow-hover), 
-                    0 0 25px rgba(154, 103, 0, 0.3),
-                    inset 0 1px 0 rgba(154, 103, 0, 0.2);
+        border-left-color: #FF8C00;
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.1),
+          0 3px 10px rgba(0, 0, 0, 0.08),
+          -2px 0 8px rgba(255, 140, 0, 0.15);
       }
     }
     
     &[data-type="memo"] {
-      border-left-color: #8250df;
+      border-left-color: #20B2AA;
       
       &:hover {
-        border-left-color: #8250df;
-        box-shadow: var(--kinfo-glass-shadow-hover), 
-                    0 0 25px rgba(130, 80, 223, 0.3),
-                    inset 0 1px 0 rgba(130, 80, 223, 0.2);
+        border-left-color: #20B2AA;
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.1),
+          0 3px 10px rgba(0, 0, 0, 0.08),
+          -2px 0 8px rgba(32, 178, 170, 0.15);
       }
     }
     
     &[data-type="tag"] {
-      border-left-color: #e85aad;
+      border-left-color: #FFD700;
       
       &:hover {
-        border-left-color: #e85aad;
-        box-shadow: var(--kinfo-glass-shadow-hover), 
-                    0 0 25px rgba(232, 90, 173, 0.3),
-                    inset 0 1px 0 rgba(232, 90, 173, 0.2);
+        border-left-color: #FFD700;
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.1),
+          0 3px 10px rgba(0, 0, 0, 0.08),
+          -2px 0 8px rgba(255, 215, 0, 0.15);
       }
     }
     
     &[data-type="todo"] {
-      border-left-color: #d1242f;
+      border-left-color: #32CD32;
       
       &:hover {
-        border-left-color: #d1242f;
-        box-shadow: var(--kinfo-glass-shadow-hover), 
-                    0 0 25px rgba(209, 36, 47, 0.3),
-                    inset 0 1px 0 rgba(209, 36, 47, 0.2);
+        border-left-color: #32CD32;
+        box-shadow: 
+          0 8px 25px rgba(0, 0, 0, 0.1),
+          0 3px 10px rgba(0, 0, 0, 0.08),
+          -2px 0 8px rgba(50, 205, 50, 0.15);
       }
     }
     
@@ -177,55 +176,25 @@
     }
   }
 
-  /* 项目指示器 - 图标形式 (已隐藏) */
-  &__item-indicator {
-    display: none; /* 隐藏图标指示器 */
-    width: 28px;
-    height: 28px;
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    background: var(--kinfo-bg-primary);
-    border: 1px solid var(--kinfo-border-normal);
-    box-shadow: var(--kinfo-shadow-sm);
-    transition: all 0.2s ease;
-    
-    svg {
-      width: 16px;
-      height: 16px;
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-    }
-    
-    /* Hover效果 */
-    .formatted-text-dock__item:hover & {
-      transform: translateY(-50%) scale(1.05);
-      box-shadow: var(--kinfo-shadow-md);
-    }
-  }
-
-  /* 项目内容区域 */
+  /* 项目内容区域 - 优化层次 */
   &__item-content {
     flex: 1;
     min-width: 0;
-    margin-left: 0; /* 移除图标预留空间 */
+    margin-left: 0;
   }
 
   &__item-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 6px;
-    margin-bottom: 2px;
+    gap: 12px;
+    margin-bottom: 4px;
   }
 
   &__item-main {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex: 1;
     min-width: 0;
     cursor: pointer;
@@ -241,40 +210,38 @@
     }
   }
 
-  /* 项目操作按钮区域 */
+  /* 项目操作按钮区域 - 现代化风格 */
   &__item-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-shrink: 0;
-    opacity: 1; /* 让按钮默认可见，便于调试 */
-    transition: opacity 0.3s ease;
+    opacity: 0;
+    transition: opacity 0.2s ease;
   }
 
-  /* 项目文本 - 纯色优化版本 */
+  /* 项目文本 - 现代化优化版本 */
   &__item-text {
     font-weight: 500;
     color: var(--kinfo-text-primary);
     word-break: break-word;
-    line-height: 1.6;
+    line-height: 1.5;
     font-size: 14px;
-    letter-spacing: 0.02em;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    letter-spacing: 0.01em;
+    margin: 0;
+    padding: 0;
   }
   
-  /* 项目上下文信息 - 纯色版本 */
+  /* 项目上下文信息 - 现代化版本 */
   &__item-context {
     font-size: 12px;
     color: var(--kinfo-text-tertiary);
     line-height: 1.4;
-    margin-top: 6px;
-    opacity: 0.8;
+    margin-top: 4px;
+    opacity: 0.85;
     word-break: break-word;
     font-weight: 400;
-    letter-spacing: 0.01em;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.03);
-    transition: opacity 0.3s ease, color 0.3s ease;
+    letter-spacing: 0.005em;
   }
 
   /* 备注区域 */
@@ -307,27 +274,30 @@
     }
   }
 
-  /* 操作按钮样式 */
+  /* 操作按钮样式 - 现代化版本 */
   &__action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
     border: none;
-    background: transparent;
-    border-radius: 3px;
+    background: var(--kinfo-bg-surface);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.15s ease;
-    margin-left: 4px;
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid var(--kinfo-border-light);
     
     &:hover {
       background: var(--kinfo-bg-surface-hover);
+      border-color: var(--kinfo-border-normal);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
     }
     
     &:active {
-      background: var(--kinfo-bg-surface-active);
-      transform: scale(0.95);
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
     }
     
     /* 禁用状态样式 */
@@ -339,42 +309,21 @@
       .formatted-text-dock__action-icon {
         color: var(--kinfo-text-disabled);
       }
-      
-      /* 移除禁用状态下的hover效果 */
-      &:hover {
-        background: transparent;
-        transform: none;
-      }
-      
-      &:active {
-        background: transparent;
-        transform: none;
-      }
-      
-      /* 添加一个锁定图标的提示 */
-      &::before {
-        content: '🔒';
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        font-size: 10px;
-        opacity: 0.6;
-        pointer-events: none;
-      }
     }
   }
 
   &__action-icon {
-    width: 12px;
-    height: 12px;
-    color: var(--kinfo-text-tertiary);
-    transition: color 0.15s ease;
+    width: 14px;
+    height: 14px;
+    color: var(--kinfo-text-secondary);
+    transition: color 0.2s ease;
   }
 
   /* 添加备注按钮 */
   &__add-memo-btn {
     &:hover {
       background: var(--kinfo-primary-light);
+      border-color: var(--kinfo-primary);
       
       .formatted-text-dock__action-icon {
         color: var(--kinfo-primary);
@@ -386,6 +335,7 @@
   &__remove-format-btn {
     &:hover {
       background: var(--kinfo-error-light);
+      border-color: var(--kinfo-error);
       
       .formatted-text-dock__action-icon {
         color: var(--kinfo-error);

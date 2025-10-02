@@ -7,80 +7,34 @@
   display: flex;
   flex-direction: column;
   font-size: 12px;
-  position: relative;
-  
-  /* 为整个dock添加微妙的毛玻璃背景 */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--kinfo-glass-bg);
-    backdrop-filter: var(--kinfo-glass-backdrop-blur);
-    -webkit-backdrop-filter: var(--kinfo-glass-backdrop-blur);
-    z-index: -1;
-    pointer-events: none;
-  }
+  background: var(--kinfo-bg-primary);
 
-  /* 头部区域 - 毛玻璃效果优化版本（无渐变） */
+  /* 头部区域 - 现代极简版本 */
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--kinfo-glass-border);
-    background: var(--kinfo-glass-bg-strong);
-    backdrop-filter: var(--kinfo-glass-backdrop-blur-strong);
-    -webkit-backdrop-filter: var(--kinfo-glass-backdrop-blur-strong);
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--kinfo-border-light);
+    background: var(--kinfo-bg-primary);
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: var(--kinfo-glass-shadow);
-    
-    /* 简化的高光效果 */
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: var(--kinfo-glass-border);
-      opacity: 0.8;
-      pointer-events: none;
-    }
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   &__title {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     font-weight: 600;
     color: var(--kinfo-text-primary);
-    font-size: 16px;
-    letter-spacing: 0.03em;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    position: relative;
+    font-size: 15px;
+    letter-spacing: 0.01em;
 
     span {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
-      position: relative;
-      
-      /* 添加微妙的下划线装饰 - 纯色版本 */
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: -4px;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--kinfo-primary);
-        opacity: 0.6;
-        border-radius: 1px;
-      }
     }
   }
 
@@ -141,7 +95,7 @@
   &__list {
     flex: 1;
     overflow-y: auto;
-    padding: 12px 16px;
+    padding: 8px 12px;
   }
 
   /* 状态样式 */
