@@ -32,6 +32,9 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
         Logger.setDebugEnabled(this.settings.enableDebugLog);
         Logger.log('插件启动，调试模式:', this.settings.enableDebugLog ? '开启' : '关闭');
 
+        // 暴露全局控制接口（用于控制台调试）
+        this.exposeGlobalControls();
+
         // 初始化主题管理器
         this.themeManager = ThemeManager.getInstance(Logger.log);
         await this.initializeTheme();
@@ -151,6 +154,53 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
     }
 
     /**
+     * 暴露全局控制接口
+     * 在控制台中可以使用以下命令：
+     * - KeyInfoNavigator.toggleDebug() - 切换调试日志
+     * - KeyInfoNavigator.enableDebug() - 开启调试日志
+     * - KeyInfoNavigator.disableDebug() - 关闭调试日志
+     * - KeyInfoNavigator.getDebugStatus() - 查看当前状态
+     */
+    private exposeGlobalControls(): void {
+        // 使用 window 对象暴露控制接口
+        (window as any).KeyInfoNavigator = {
+            toggleDebug: () => {
+                this.toggleDebugMode();
+                return `调试日志已${this.settings.enableDebugLog ? '开启' : '关闭'}`;
+            },
+            enableDebug: () => {
+                if (!this.settings.enableDebugLog) {
+                    this.toggleDebugMode();
+                }
+                return '调试日志已开启 ✅';
+            },
+            disableDebug: () => {
+                if (this.settings.enableDebugLog) {
+                    this.toggleDebugMode();
+                }
+                return '调试日志已关闭 🔇';
+            },
+            getDebugStatus: () => {
+                return {
+                    enabled: this.settings.enableDebugLog,
+                    message: this.settings.enableDebugLog ? 
+                        '调试日志: 开启 ✅ (控制台会输出详细信息)' : 
+                        '调试日志: 关闭 🔇 (仅输出错误信息)'
+                };
+            }
+        };
+
+        console.log('%c[Key Info Navigator] 控制台调试接口已就绪', 'color: #4CAF50; font-weight: bold;');
+        console.log('%c使用方法:', 'color: #2196F3; font-weight: bold;');
+        console.log('  KeyInfoNavigator.toggleDebug()    - 切换调试模式');
+        console.log('  KeyInfoNavigator.enableDebug()    - 开启调试日志');
+        console.log('  KeyInfoNavigator.disableDebug()   - 关闭调试日志');
+        console.log('  KeyInfoNavigator.getDebugStatus() - 查看当前状态');
+        console.log(`%c当前状态: ${this.settings.enableDebugLog ? '调试日志已开启 ✅' : '调试日志已关闭 🔇'}`, 
+            this.settings.enableDebugLog ? 'color: #FF9800;' : 'color: #9E9E9E;');
+    }
+
+    /**
      * 切换调试模式
      */
     public toggleDebugMode(): void {
@@ -158,12 +208,11 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
         Logger.setDebugEnabled(this.settings.enableDebugLog);
         this.saveSettings();
         
-        Logger.log('调试模式已', this.settings.enableDebugLog ? '开启' : '关闭');
-        // 显示状态消息
+        // 在控制台输出状态变更（不受日志开关控制）
         const message = this.settings.enableDebugLog ? 
             '🔧 调试日志已开启，将在控制台输出详细信息' : 
             '🔇 调试日志已关闭，减少内存占用';
-        // 可以在这里添加一个消息显示，但现在先简化
+        console.log(`[Key Info Navigator] ${message}`);
     }
 
     /**
@@ -270,6 +319,12 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
         if (this.themeManager) {
             this.themeManager.destroy();
             this.themeManager = undefined;
+        }
+
+        // 清理全局控制接口
+        if ((window as any).KeyInfoNavigator) {
+            delete (window as any).KeyInfoNavigator;
+            console.log('[Key Info Navigator] 控制台调试接口已清理');
         }
     }
 
