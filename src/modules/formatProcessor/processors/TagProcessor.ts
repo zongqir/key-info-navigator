@@ -35,6 +35,13 @@ export class TagProcessor extends BaseFormatProcessor {
     }
     
     /**
+     * 标签不支持添加备注（标签本身就是块级标记）
+     */
+    public supportAddMemo(): boolean {
+        return false;
+    }
+    
+    /**
      * 根据标签名称获取颜色
      */
     private getTagColor(tagName: string): string {

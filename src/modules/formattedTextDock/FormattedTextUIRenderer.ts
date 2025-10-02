@@ -27,9 +27,9 @@ export class FormattedTextUIRenderer {
                     </div>
                     <div class="formatted-text-dock__controls">
                         <div class="formatted-text-dock__filters">${filtersHTML}</div>
-                        <button class="formatted-text-dock__refresh b3-button b3-button--outline" 
+                        <button class="formatted-text-dock__refresh b3-button" 
                                 title="${this.i18n.refresh}" data-action="refresh">
-                            <svg><use xlink:href="#iconRefresh"></use></svg>
+                            <span style="font-size: 18px;">♻️</span>
                         </button>
                     </div>
                 </div>

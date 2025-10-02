@@ -21,6 +21,13 @@ export class TodoProcessor extends BaseFormatProcessor {
         super(logger);
     }
     
+    /**
+     * Todo不支持添加备注（todo本身就是任务项）
+     */
+    public supportAddMemo(): boolean {
+        return false;
+    }
+    
     extractFromSpan(span: any, blockId = ""): FormattedTextItem[] {
         // Todo块处理器主要通过块查询，span提取作为补充
         return [];
