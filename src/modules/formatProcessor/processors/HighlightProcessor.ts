@@ -8,7 +8,7 @@ export class HighlightProcessor extends BaseFormatProcessor {
     public readonly formatType = TextFormatType.HIGHLIGHT;
     
     protected readonly config: FormatConfig = {
-        sqlType: ["mark", "textmark"],
+        sqlType: ["mark"],  // 移除 "textmark"，只保留 "mark"
         htmlSelectors: ["mark", '[data-type="mark"]', '[data-type="textmark"]'],
         kramdownRegex: /==(.+?)==/g,
         icon: "iconHighlight",

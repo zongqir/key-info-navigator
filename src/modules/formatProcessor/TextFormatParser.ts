@@ -22,17 +22,28 @@ export class TextFormatParser {
         options: ParseOptions
     ): Promise<FormattedTextItem[]> {
         try {
+            console.log('========================================');
+            console.log('🔍 [SQL查询] 开始解析格式化文本');
+            console.log('  ├─ rootBlockId:', rootBlockId);
+            console.log('  ├─ enabledFormats:', options.enabledFormats);
+            console.log('  └─ maxResults:', options.maxResults);
+            console.log('========================================');
+            
             const allItems: FormattedTextItem[] = [];
             
             // 直接查询标签块
             if (options.enabledFormats.includes(TextFormatType.TAG)) {
+                console.log('📋 [SQL查询] 查询标签块...');
                 const tagItems = await this.queryTagBlocks(rootBlockId, options.maxResults);
+                console.log(`  ✅ 查到 ${tagItems.length} 个标签`);
                 allItems.push(...tagItems);
             }
             
             // 直接查询Todo块
             if (options.enabledFormats.includes(TextFormatType.TODO)) {
+                console.log('📋 [SQL查询] 查询待办块...');
                 const todoItems = await this.queryTodoBlocks(rootBlockId, options.maxResults);
+                console.log(`  ✅ 查到 ${todoItems.length} 个待办`);
                 allItems.push(...todoItems);
             }
             
@@ -42,14 +53,31 @@ export class TextFormatParser {
             );
             
             if (spanFormats.length > 0) {
+                console.log('📋 [SQL查询] 查询 spans (加粗/斜体/高亮/备注等)...');
+                console.log('  ├─ 格式类型:', spanFormats);
                 const processors = FormatProcessorFactory.getProcessors(spanFormats);
                 const spanItems = await this.querySpans(rootBlockId, processors, options);
+                console.log(`  ✅ 查到 ${spanItems.length} 个格式化文本`);
                 allItems.push(...spanItems);
             }
+            
+            console.log('');
+            console.log('🎉 [SQL查询] 查询完成！');
+            console.log(`  总计: ${allItems.length} 个格式化文本`);
+            console.log('  详情:');
+            const summary: Record<string, number> = {};
+            allItems.forEach(item => {
+                summary[item.type] = (summary[item.type] || 0) + 1;
+            });
+            Object.entries(summary).forEach(([type, count]) => {
+                console.log(`    - ${type}: ${count} 个`);
+            });
+            console.log('========================================');
             
             return allItems;
             
         } catch (error) {
+            console.error('❌ [SQL查询] 解析格式化文本时出错:', error);
             this.log('解析格式化文本时出错:', error);
             return [];
         }
@@ -135,10 +163,21 @@ export class TextFormatParser {
      * 构建SQL查询语句
      */
     private buildSqlQuery(rootBlockId: string, sqlTypes: string[], maxResults?: number): string {
-        const typeConditions = sqlTypes.map(t => `'${t}'`).join(",");
+        // spans 表的 type 是 "textmark em"、"textmark strong" 这样的格式
+        // 需要添加 textmark 前缀
+        const actualTypes = sqlTypes.map(t => {
+            // 如果已经有 textmark 前缀，就不加了
+            if (t.startsWith('textmark ')) {
+                return t;
+            }
+            // 否则添加 textmark 前缀
+            return `textmark ${t}`;
+        });
+        
+        const typeConditions = actualTypes.map(t => `'${t}'`).join(",");
         const limit = maxResults ? `LIMIT ${maxResults}` : 'LIMIT 200';
         
-        return `
+        const stmt = `
             SELECT *
             FROM spans
             WHERE root_id = "${rootBlockId}"
@@ -146,6 +185,10 @@ export class TextFormatParser {
             ORDER BY block_id, start_offset
             ${limit}
         `.trim();
+        
+        console.log('📝 [SQL] spans 查询语句:', stmt);
+        
+        return stmt;
     }
     
     /**
@@ -164,6 +207,10 @@ export class TextFormatParser {
             return [];
         }
         
+        console.log('🔄 [处理结果] 开始处理 spans 数据...');
+        console.log('  ├─ spans 数量:', spans.length);
+        console.log('  └─ processors 数量:', processors.length);
+        
         for (const span of spans) {
             // 检查span是否为有效对象
             if (!span || typeof span !== 'object') {
@@ -171,19 +218,42 @@ export class TextFormatParser {
                 continue;
             }
             
+            console.log('📋 [处理] span:', { type: span.type, content: span.content?.substring(0, 20) });
+            
             for (const processor of processors) {
                 try {
                     const config = processor.getConfig();
-                    if (config.sqlType.includes(span.type)) {
+                    console.log('  🔍 检查 processor:', processor.formatType, 'sqlType:', config.sqlType);
+                    
+                    // 精确匹配：span.type 必须完全等于 sqlType 中的某一个，或者包含完整的关键词
+                    const isMatch = config.sqlType.some(sqlType => {
+                        // 完整格式匹配，如 "textmark em" === "textmark em"
+                        if (span.type === sqlType) return true;
+                        // 或者 span.type 包含完整的关键词（用空格分隔）
+                        const spanTypeParts = span.type.split(' ');
+                        return spanTypeParts.includes(sqlType);
+                    });
+                    
+                    console.log('  ├─ span.type:', span.type);
+                    console.log('  ├─ 是否匹配:', isMatch);
+                    
+                    if (isMatch) {
+                        console.log('  ✅ 匹配成功！调用 extractFromSpan...');
                         const items = processor.extractFromSpan(span);
-                        allItems.push(...items);
-                        break; // 避免重复处理同一个span
+                        console.log('  ├─ 提取到', items.length, '个项目');
+                        if (items.length > 0) {
+                            allItems.push(...items);
+                            break; // 找到匹配的处理器并成功提取后才 break
+                        }
                     }
                 } catch (error) {
+                    console.error(`  ❌ ${processor.formatType}处理器Span提取失败:`, error);
                     this.log(`${processor.formatType}处理器Span提取失败:`, error);
                 }
             }
         }
+        
+        console.log('🎉 [处理结果] 处理完成，提取到', allItems.length, '个项目');
         
         return this.filterAndSortResults(allItems, options);
     }
@@ -240,22 +310,40 @@ export class TextFormatParser {
         this.log('执行Span SQL查询:', stmt);
         
         try {
-            const response = await fetchPost("/api/query/sql", { stmt }) as any;
+            // 使用原生 fetch（fetchPost 有问题）
+            const fetchResponse = await fetch('/api/query/sql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ stmt })
+            });
+            const response = await fetchResponse.json();
+            
+            console.log('📥 [SQL响应] spans 查询响应:', response);
+            console.log('  ├─ code:', response?.code);
+            console.log('  ├─ msg:', response?.msg);
+            console.log('  ├─ data 类型:', Array.isArray(response?.data) ? 'Array' : typeof response?.data);
+            console.log('  └─ data 长度:', response?.data?.length);
             
             if (!response) {
-                this.log('Span SQL查询无响应');
+                console.warn('⚠️ [SQL响应] Span SQL查询无响应');
                 return [];
             }
             
             if (response.code !== 0) {
-                this.log('Span SQL查询失败:', response);
+                console.warn('⚠️ [SQL响应] Span SQL查询失败:', response);
                 return [];
             }
             
             // 确保response.data是有效数组
             if (!response.data || !Array.isArray(response.data)) {
-                this.log('Span SQL查询返回无效数据:', response.data);
+                console.warn('⚠️ [SQL响应] Span SQL查询返回无效数据:', response.data);
                 return [];
+            }
+            
+            if (response.data.length > 0) {
+                console.log('📋 [SQL响应] spans 原始数据（前3条）:', response.data.slice(0, 3));
             }
             
             return this.processQueryResults(response.data, processors, options);
@@ -283,7 +371,15 @@ export class TextFormatParser {
         `.trim();
         
         try {
-            const response = await fetchPost("/api/query/sql", { stmt }) as any;
+            // 使用原生 fetch（fetchPost 有问题）
+            const fetchResponse = await fetch('/api/query/sql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ stmt })
+            });
+            const response = await fetchResponse.json();
             
             if (!response) {
                 this.log('标签块查询无响应');
@@ -318,28 +414,49 @@ export class TextFormatParser {
             SELECT *
             FROM blocks
             WHERE root_id = "${rootBlockId}"
+              AND type = "i"
               AND subtype = "t"
             ORDER BY created ASC
             ${limit}
         `.trim();
         
+        console.log('📝 [SQL] 待办查询语句:', stmt);
+        
         try {
-            const response = await fetchPost("/api/query/sql", { stmt }) as any;
+            // 使用原生 fetch（fetchPost 有问题，返回 undefined）
+            const fetchResponse = await fetch('/api/query/sql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ stmt })
+            });
+            const response = await fetchResponse.json();
+            
+            console.log('📥 [SQL响应] 待办查询响应:', response);
+            console.log('  ├─ code:', response?.code);
+            console.log('  ├─ msg:', response?.msg);
+            console.log('  ├─ data 类型:', Array.isArray(response?.data) ? 'Array' : typeof response?.data);
+            console.log('  └─ data 长度:', response?.data?.length);
             
             if (!response) {
-                this.log('Todo块查询无响应');
+                console.warn('⚠️ [SQL响应] Todo块查询无响应');
                 return [];
             }
             
             if (response.code !== 0) {
-                this.log('Todo块查询失败:', response);
+                console.warn('⚠️ [SQL响应] Todo块查询失败:', response);
                 return [];
             }
             
             // 确保response.data是有效数组
             if (!response.data || !Array.isArray(response.data)) {
-                this.log('Todo块查询返回无效数据:', response.data);
+                console.warn('⚠️ [SQL响应] Todo块查询返回无效数据:', response.data);
                 return [];
+            }
+            
+            if (response.data.length > 0) {
+                console.log('📋 [SQL响应] 待办原始数据（前3条）:', response.data.slice(0, 3));
             }
             
             return this.processTodoBlocks(response.data);
@@ -421,14 +538,15 @@ export class TextFormatParser {
             
             this.log('🔍 [TextFormatParser] 块的subtype:', block.subtype);
             
-            if (block.subtype === 't') {
+            // 严格检查：subtype 必须是字符串 "t"，排除 null、undefined 等
+            if (block.subtype === 't' && typeof block.subtype === 'string') {
                 this.log('✅ [TextFormatParser] 确认是Todo块，调用TodoProcessor');
                 // 使用TodoProcessor的extractFromBlock方法，传递块索引
                 const todoItems = todoProcessor.extractFromBlock(block, index);
                 this.log('🎯 [TextFormatParser] TodoProcessor返回的项目:', todoItems);
                 items.push(...todoItems);
             } else {
-                this.log('⚠️ [TextFormatParser] 不是Todo块，subtype:', block.subtype);
+                this.log('⚠️ [TextFormatParser] 不是Todo块或subtype无效，subtype:', block.subtype, 'type:', typeof block.subtype);
             }
         });
         

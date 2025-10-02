@@ -71,8 +71,17 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
      */
     protected isValidSpan(span: any): boolean {
         if (!span || !span.content) return false;
-        return this.config.sqlType.includes(span.type) && 
-               !!this.cleanText(span.content);
+        
+        // 修复：span.type 是 "textmark strong" 格式，需要部分匹配
+        const isTypeMatch = this.config.sqlType.some(sqlType => {
+            // 完整匹配
+            if (span.type === sqlType) return true;
+            // 或者按空格分割后匹配
+            const spanTypeParts = span.type.split(' ');
+            return spanTypeParts.includes(sqlType);
+        });
+        
+        return isTypeMatch && !!this.cleanText(span.content);
     }
     
     /**

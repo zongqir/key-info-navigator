@@ -10,7 +10,7 @@ export class TodoProcessor extends BaseFormatProcessor {
     
     protected readonly config: FormatConfig = {
         sqlType: [], // Todo块通过blocks表查询，不使用spans
-        htmlSelectors: ["div[data-subtype='t']", "li[data-subtype='t']"],
+        htmlSelectors: ["[data-subtype='t']"],
         kramdownRegex: /^\s*[-*+]\s*\[[ x]\]/m,
         icon: "iconStop",
         color: "#d1242f", // 现代简约红色

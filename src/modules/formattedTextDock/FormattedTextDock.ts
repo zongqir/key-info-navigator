@@ -227,19 +227,10 @@ export class FormattedTextDock {
 
             this.log('解析选项:', options);
 
-            // 优先从编辑器实时获取
-            this.log('尝试从编辑器实时获取格式化文本...');
-            const realtimeResults = this.parser.getCurrentEditorFormattedTexts(editor.protyle, options);
-            this.log(`实时解析结果: ${realtimeResults.length} 项`);
-            
-            // 如果实时结果为空，从数据库查询
-            if (realtimeResults.length === 0) {
-                this.log('实时解析无结果，从数据库查询...');
-                this.formattedTexts = await this.parser.parseFormattedTexts(blockId, options);
-                this.log(`数据库查询结果: ${this.formattedTexts.length} 项`);
-            } else {
-                this.formattedTexts = realtimeResults;
-            }
+            // 从数据库 SQL 查询
+            this.log('从数据库查询格式化文本...');
+            this.formattedTexts = await this.parser.parseFormattedTexts(blockId, options);
+            this.log(`数据库查询结果: ${this.formattedTexts.length} 项`);
             
             // 详细日志：分析标签数据
             const tagItems = this.formattedTexts.filter(item => item.type === TextFormatType.TAG);

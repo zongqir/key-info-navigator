@@ -8,7 +8,7 @@ export class BoldProcessor extends BaseFormatProcessor {
     public readonly formatType = TextFormatType.BOLD;
     
     protected readonly config: FormatConfig = {
-        sqlType: ["strong", "textmark"],
+        sqlType: ["strong"],  // 移除 "textmark"，只保留 "strong"
         htmlSelectors: ["strong", "b", '[data-type="strong"]'],
         kramdownRegex: /(\*\*|__)(.*?)\1/g,
         icon: "iconBold",

@@ -30,8 +30,16 @@ export class MemoProcessor extends BaseFormatProcessor {
         
         this.log('提取备注span数据:', span);
         
-        // span.content 是被标记的文本（划线部分）
-        const markedText = this.cleanText(span.content || '');
+        // 从 markdown 中提取被标记的文本（括号外的部分）
+        let markedText = '';
+        if (span.markdown) {
+            // 格式：fwefwefwe<sup>(fwefewfwe)</sup>
+            // 移除 <sup>...</sup> 部分，保留前面的文本
+            const match = span.markdown.match(/^(.+?)<sup>/);
+            markedText = match ? this.cleanText(match[1]) : this.cleanText(span.content || '');
+        } else {
+            markedText = this.cleanText(span.content || '');
+        }
         
         // 备注内容可能在不同的字段中
         const memoContent = this.extractMemoContent(span);
@@ -112,14 +120,34 @@ export class MemoProcessor extends BaseFormatProcessor {
      * 从span数据中提取备注内容
      */
     private extractMemoContent(span: any): string {
-        // 尝试多个可能的字段
-        return span.memo_content || 
+        console.log('🔍 [备注提取] span 完整数据:', span);
+        console.log('  ├─ span.content:', span.content);
+        console.log('  ├─ span.markdown:', span.markdown);
+        console.log('  ├─ span.memo:', span.memo);
+        console.log('  ├─ span.memo_content:', span.memo_content);
+        console.log('  ├─ span.ial:', span.ial);
+        console.log('  └─ 所有字段:', Object.keys(span));
+        
+        // 优先从 markdown 字段提取（格式：划线文本(备注内容)）
+        if (span.markdown) {
+            const extracted = this.extractMemoFromMarkdown(span.markdown);
+            if (extracted) {
+                console.log('  ✅ 从 markdown 提取到备注内容:', extracted);
+                return extracted;
+            }
+        }
+        
+        // 备用方案：尝试其他字段
+        const memoContent = span.memo_content || 
                span.memo || 
                span['inline-memo-content'] || 
                span.attrs?.memo || 
                span.attrs?.['memo-content'] ||
-               this.extractMemoFromMarkdown(span.markdown || span.content || '') ||
+               this.extractMemoFromMarkdown(span.content || '') ||
                '';
+        
+        console.log('  ✅ 提取到的备注内容:', memoContent);
+        return memoContent;
     }
 
     /**
@@ -140,7 +168,9 @@ export class MemoProcessor extends BaseFormatProcessor {
      * 格式：划线文本(备注内容)
      */
     private extractMemoFromMarkdown(markdown: string): string {
-        const match = markdown.match(/\((.+?)\)$/);
+        // 格式：fwefwefwe<sup>(fwefewfwe)</sup>
+        // 提取 <sup>(...)</sup> 中的括号内容
+        const match = markdown.match(/<sup>\((.+?)\)<\/sup>/);
         return match ? match[1] : '';
     }
 
@@ -239,8 +269,14 @@ export class MemoProcessor extends BaseFormatProcessor {
     protected isValidSpan(span: any): boolean {
         if (!span || !span.content) return false;
         
-        // 检查类型是否为inline-memo
-        const isCorrectType = this.config.sqlType.includes(span.type);
+        // 修复：span.type 是 "textmark inline-memo" 格式，需要部分匹配
+        const isCorrectType = this.config.sqlType.some(sqlType => {
+            // 完整匹配
+            if (span.type === sqlType) return true;
+            // 或者按空格分割后匹配
+            const spanTypeParts = span.type.split(' ');
+            return spanTypeParts.includes(sqlType);
+        });
         
         // 检查是否有有效的文本内容
         const hasValidContent = !!this.cleanText(span.content);
