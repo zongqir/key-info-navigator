@@ -24,7 +24,7 @@
     pointer-events: none;
   }
 
-  /* 头部区域 - 毛玻璃效果优化版本 */
+  /* 头部区域 - 毛玻璃效果优化版本（无渐变） */
   &__header {
     display: flex;
     align-items: center;
@@ -39,7 +39,7 @@
     z-index: 100;
     box-shadow: var(--kinfo-glass-shadow);
     
-    /* 添加细微的内发光效果 */
+    /* 简化的高光效果 */
     &::before {
       content: '';
       position: absolute;
@@ -47,7 +47,8 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, var(--kinfo-glass-border), transparent);
+      background: var(--kinfo-glass-border);
+      opacity: 0.8;
       pointer-events: none;
     }
   }
@@ -55,14 +56,31 @@
   &__title {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     font-weight: 600;
     color: var(--kinfo-text-primary);
     font-size: 16px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
 
     span {
       font-size: 16px;
+      font-weight: 600;
+      position: relative;
+      
+      /* 添加微妙的下划线装饰 - 纯色版本 */
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--kinfo-primary);
+        opacity: 0.6;
+        border-radius: 1px;
+      }
     }
   }
 

@@ -241,6 +241,203 @@
   animation: formatted-text-dock-pulse 2s ease-in-out infinite;
 }
 
+/* ==========================================================================
+   高级美化动画效果
+   ========================================================================== */
+
+/* 精致的入场动画 */
+@keyframes dock-premium-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9) rotateX(10deg);
+    filter: blur(5px) brightness(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-3px) scale(1.02) rotateX(-2deg);
+    filter: blur(1px) brightness(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+    filter: blur(0) brightness(1);
+  }
+}
+
+/* 高级悬浮动画 */
+@keyframes dock-premium-float {
+  0%, 100% {
+    transform: translateY(0px) rotateZ(0deg);
+    box-shadow: var(--kinfo-glass-shadow);
+  }
+  25% {
+    transform: translateY(-2px) rotateZ(0.5deg);
+    box-shadow: var(--kinfo-glass-shadow-hover);
+  }
+  50% {
+    transform: translateY(-1px) rotateZ(0deg);
+    box-shadow: var(--kinfo-glass-shadow);
+  }
+  75% {
+    transform: translateY(-2px) rotateZ(-0.3deg);
+    box-shadow: var(--kinfo-glass-shadow-hover);
+  }
+}
+
+/* 闪烁光效动画 - 纯色版本 */
+@keyframes dock-shimmer-premium {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 彩色光晕呼吸 */
+@keyframes dock-glow-breathe {
+  0%, 100% {
+    filter: brightness(1) saturate(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.1));
+  }
+  50% {
+    filter: brightness(1.15) saturate(1.3) drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+  }
+}
+
+/* 边框动画 - 移除渐变 */
+@keyframes dock-border-flow {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* 微妙的3D倾斜效果 */
+@keyframes dock-3d-tilt {
+  0%, 100% {
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+  }
+  25% {
+    transform: perspective(1000px) rotateX(1deg) rotateY(0.5deg);
+  }
+  50% {
+    transform: perspective(1000px) rotateX(0deg) rotateY(1deg);
+  }
+  75% {
+    transform: perspective(1000px) rotateX(-0.5deg) rotateY(0deg);
+  }
+}
+
+/* 高级文字显示动画 */
+@keyframes dock-text-premium-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    filter: blur(2px);
+    letter-spacing: 3px;
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateY(-2px) scale(1.02);
+    filter: blur(0.5px);
+    letter-spacing: 1px;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+    letter-spacing: normal;
+  }
+}
+
+/* 高级工具类 */
+.dock-premium-animate {
+  animation: dock-premium-entrance 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.dock-premium-float {
+  animation: dock-premium-float 6s ease-in-out infinite;
+}
+
+.dock-shimmer-premium {
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.4);
+    background-size: 200% 100%;
+    animation: dock-shimmer-premium 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: inherit;
+    opacity: 0;
+  }
+}
+
+.dock-glow-breathe {
+  animation: dock-glow-breathe 4s ease-in-out infinite;
+}
+
+.dock-gradient-flow {
+  /* 移除渐变流动效果 */
+  animation: none;
+}
+
+.dock-3d-tilt {
+  animation: dock-3d-tilt 10s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.dock-text-premium {
+  animation: dock-text-premium-reveal 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.dock-border-flow {
+  /* 移除边框流动效果 */
+  animation: none;
+  border: 1px solid;
+}
+
+/* 简化的闪烁动画 - 纯色版本 */
+@keyframes dock-text-subtle-shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Staggered动画延迟 */
+.dock-stagger-1 { animation-delay: 0.1s; }
+.dock-stagger-2 { animation-delay: 0.2s; }
+.dock-stagger-3 { animation-delay: 0.3s; }
+.dock-stagger-4 { animation-delay: 0.4s; }
+.dock-stagger-5 { animation-delay: 0.5s; }
+.dock-stagger-6 { animation-delay: 0.6s; }
+
+/* 高性能GPU加速 */
+.dock-gpu-accelerated {
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
 /* 减少动画效果（适用于用户偏好） */
 @media (prefers-reduced-motion: reduce) {
   .formatted-text-dock *,
