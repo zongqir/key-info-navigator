@@ -65,14 +65,16 @@
   box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.08); /* 恢复轻微阴影 */
   transform: translateY(100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+  overflow: visible; /* 改为visible，让内容可以正常滚动 */
   
   /* 设置合理的高度范围 */
   min-height: 200px; /* 确保最小高度，支持拖拽操作 */
   max-height: calc(100vh - 100px); /* 留出更多空间给思源笔记界面 */
   
-  /* 避免影响文档滚动 */
-  overscroll-behavior: contain;
+  /* 移动端优化 */
+  overscroll-behavior: contain; /* 避免影响文档滚动 */
+  touch-action: pan-y; /* 只允许垂直滑动，提升触摸响应 */
+  -webkit-tap-highlight-color: transparent; /* 移除iOS点击高亮 */
 }
 
 /* 拖拽手柄 */
@@ -156,8 +158,38 @@
   display: none;
   flex: 1;
   min-height: 300px; /* 确保最小高度，即使内容少也能正常拖拽 */
-  overflow: hidden;
+  overflow-y: auto; /* 允许垂直滚动 */
+  overflow-x: hidden; /* 禁止水平滚动 */
   padding: 0; /* 完全移除padding，让内容直接贴边 */
+  
+  /* 移动端滚动优化 */
+  -webkit-overflow-scrolling: touch; /* iOS平滑滚动 */
+  overscroll-behavior-y: contain; /* 防止滚动链，避免页面滚动 */
+  scroll-behavior: smooth; /* 平滑滚动行为 */
+  
+  /* Android滚动优化 */
+  scrollbar-width: thin; /* Firefox细滚动条 */
+  scrollbar-color: var(--kinfo-text-tertiary) transparent; /* Firefox滚动条颜色 */
+  
+  /* Webkit滚动条样式（Chrome, Safari, Edge） */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--kinfo-text-tertiary);
+    border-radius: 2px;
+    opacity: 0.5;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--kinfo-text-secondary);
+    opacity: 0.8;
+  }
   
   .formatted-text-dock {
     height: 100%;
@@ -206,14 +238,14 @@
     }
     
     &__filters {
-      gap: 0px; /* 手机端图标间距为0，完全紧贴 */
+      gap: 0px; /* 手机端图标间距稍微增加，避免换行 */
       
       /* 手机端过滤器按钮优化 */
       .filter-btn {
-        min-width: 48px; /* 大幅增加BIU按钮宽度，让字母有更多空间 */
+        min-width: 40px; /* 减少按钮宽度，让更多按钮能放在一行 */
         height: 32px; /* 统一按钮高度 */
-        padding: 6px 12px; /* 增加左右内边距，让字母不拥挤 */
-        font-size: 14px; /* 适中的字体大小 */
+        padding: 6px 8px; /* 减少内边距，节省空间 */
+        font-size: 13px; /* 稍微减小字体，节省空间 */
         border-radius: 6px;
         display: flex;
         align-items: center;
@@ -231,12 +263,79 @@
       padding: 2px 2px; /* 进一步减少列表内边距，让内容更靠近顶部 */
       height: 100%;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      
+      /* 移动端滚动优化 - iOS和Android通用 */
+      -webkit-overflow-scrolling: touch; /* iOS平滑滚动 */
+      overscroll-behavior-y: contain; /* 防止滚动链，避免页面滚动 */
+      scroll-behavior: smooth; /* 平滑滚动行为 */
+      
+      /* Android Chrome滚动优化 */
+      scrollbar-width: thin; /* Firefox细滚动条 */
+      scrollbar-color: var(--kinfo-text-tertiary) transparent;
+      
+      /* Webkit滚动条样式（Android Chrome, iOS Safari） */
+      &::-webkit-scrollbar {
+        width: 3px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: var(--kinfo-text-tertiary);
+        border-radius: 2px;
+        opacity: 0.4;
+      }
+      
+      &::-webkit-scrollbar-thumb:active {
+        background: var(--kinfo-text-secondary);
+        opacity: 0.7;
+      }
     }
   }
 }
 
-/* 状态样式 */
+/* 手机端滚动修复 - 针对实际的DOM结构 */
+.mobile-bottom-sheet.state-full {
+  .bottom-sheet-full-content {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 90vh !important; /* 强制设置固定高度 */
+    max-height: 90vh !important;
+    overflow: hidden !important; /* 外层禁止滚动 */
+  }
+  
+  .formatted-text-dock {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    
+    &__header {
+      flex-shrink: 0 !important; /* 头部不收缩 */
+    }
+    
+    &__content {
+      flex: 1 !important;
+      overflow-y: auto !important; /* 内容区域允许滚动 */
+      overflow-x: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: thin !important;
+      
+      /* 强制显示滚动条用于测试 */
+      &::-webkit-scrollbar {
+        width: 8px !important;
+        background: rgba(0,0,0,0.1) !important;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.5) !important;
+        border-radius: 4px !important;
+      }
+    }
+  }
+}
 .mobile-bottom-sheet {
   /* PEEK 状态 - 只显示预览内容 */
   &.state-peek {
@@ -312,14 +411,14 @@
   /* 进一步优化小屏幕设备的按钮显示 */
   .mobile-bottom-sheet .formatted-text-dock {
     &__filters {
-      gap: 0px; /* 小屏幕下图标间距为0，完全紧贴 */
-      flex-wrap: wrap; /* 允许换行 */
+      gap: 0px; /* 小屏幕下图标间距稍微增加，避免换行 */
+      flex-wrap: nowrap; /* 不允许换行，保持单行显示 */
       
       .filter-btn {
-        min-width: 52px; /* 小屏幕下进一步增加按钮宽度，让BIU字母更宽松 */
-        height: 36px; /* 增加按钮高度 */
-        padding: 8px 14px; /* 大幅增加左右内边距 */
-        font-size: 15px; /* 稍大的字体 */
+        min-width: 38px; /* 小屏幕下减少按钮宽度，确保单行显示 */
+        height: 32px; /* 统一高度 */
+        padding: 6px 6px; /* 减少内边距，节省空间 */
+        font-size: 12px; /* 小字体，节省空间 */
         font-weight: 500; /* 增加字体粗细 */
       }
     }

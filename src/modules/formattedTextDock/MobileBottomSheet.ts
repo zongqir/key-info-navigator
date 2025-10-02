@@ -154,7 +154,15 @@ export class MobileBottomSheet {
         // 创建完整内容容器
         this.fullContent = document.createElement('div');
         this.fullContent.className = 'bottom-sheet-full-content';
-        this.fullContent.innerHTML = this.uiRenderer.createMainHTML();
+        
+        // 创建带滚动的真正内容
+        const mainHTML = this.uiRenderer.createMainHTML();
+        this.fullContent.innerHTML = `
+            <div style="height: 70vh; overflow-y: scroll; -webkit-overflow-scrolling: touch; background: var(--kinfo-bg-primary);">
+                ${mainHTML}
+            </div>
+        `;
+        
         console.log('[MobileBottomSheet] 📄 创建完整内容容器:', this.fullContent);
         
         // 组装DOM结构
@@ -365,11 +373,76 @@ export class MobileBottomSheet {
     }
 
     /**
-     * 触摸开始（仅用于向下拖拽收回）
+     * 创建测试滚动内容（用于调试滚动问题）
+     */
+    private createTestScrollContent(): string {
+        const testItems = Array.from({length: 50}, (_, i) => 
+            `<div style="padding: 10px; border-bottom: 1px solid #eee;">测试项目 ${i + 1} - 这是一个测试滚动的长文本内容</div>`
+        ).join('');
+        
+        return `
+            <div style="
+                display: flex; 
+                flex-direction: column; 
+                height: 300px; 
+                background: #f5f5f5; 
+                border: 2px solid red;
+            ">
+                <div style="
+                    padding: 10px; 
+                    background: #333; 
+                    color: white; 
+                    flex-shrink: 0;
+                ">滚动测试头部</div>
+                <div style="
+                    flex: 1; 
+                    overflow-y: auto; 
+                    overflow-x: hidden;
+                    background: white;
+                    border: 2px solid blue;
+                ">
+                    ${testItems}
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * 设置滚动样式（确认工作状态）
+     */
+    private forceScrollStyles(): void {
+        console.log('[MobileBottomSheet] 🔧 确认滚动容器状态');
+        
+        setTimeout(() => {
+            const scrollDiv = this.container.querySelector('div[style*="overflow-y: scroll"]');
+            if (scrollDiv) {
+                const formattedDock = scrollDiv.querySelector('.formatted-text-dock');
+                console.log('[MobileBottomSheet] ✅ 找到滚动容器，高度:', (scrollDiv as HTMLElement).offsetHeight);
+                console.log('[MobileBottomSheet] 📜 内容高度:', (scrollDiv as HTMLElement).scrollHeight);
+                console.log('[MobileBottomSheet] 🎯 formatted-text-dock存在:', !!formattedDock);
+                
+                // 确保事件绑定
+                if (formattedDock) {
+                    this.eventHandler.bindEvents();
+                    console.log('[MobileBottomSheet] 🔗 重新绑定事件处理器');
+                }
+            } else {
+                console.error('[MobileBottomSheet] ❌ 没有找到滚动容器');
+            }
+        }, 200);
+    }
+
+    /**
+     * 触摸开始（仅用于向下拖拽收回，不干扰内容滚动）
      */
     private handleTouchStart(e: TouchEvent): void {
         // 如果是handle区域，不处理拖拽（由双击处理）
         if ((e.target as Element).closest('.bottom-sheet-handle')) {
+            return;
+        }
+        
+        // 如果是内容区域，不处理拖拽，让它自由滚动
+        if ((e.target as Element).closest('.formatted-text-dock__content')) {
             return;
         }
         
@@ -385,10 +458,15 @@ export class MobileBottomSheet {
     }
 
     /**
-     * 触摸移动（仅用于向下拖拽收回）
+     * 触摸移动（仅用于向下拖拽收回，不干扰内容滚动）
      */
     private handleTouchMove(e: TouchEvent): void {
         if (!this.isDragging || e.touches.length !== 1) return;
+        
+        // 如果是内容区域，不处理拖拽
+        if ((e.target as Element).closest('.formatted-text-dock__content')) {
+            return;
+        }
         
         const currentY = e.touches[0].clientY;
         const deltaY = currentY - this.startY;
@@ -407,7 +485,7 @@ export class MobileBottomSheet {
     }
 
     /**
-     * 触摸结束（仅用于向下拖拽收回）
+     * 触摸结束（仅用于向下拖拽收回，不干扰内容滚动）
      */
     private handleTouchEnd(e: TouchEvent): void {
         if (!this.isDragging) return;
@@ -514,6 +592,13 @@ export class MobileBottomSheet {
         
         // 更新背景遮罩
         this.updateBackdrop(state);
+        
+        // 如果是FULL状态，强制设置滚动样式
+        if (state === BottomSheetState.FULL) {
+            setTimeout(() => {
+                this.forceScrollStyles();
+            }, 100);
+        }
     }
 
     /**
