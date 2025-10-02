@@ -41,7 +41,7 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
             config: {
                 position: "RightTop",
                 size: {width: 280, height: 0},
-                icon: "iconFocus",
+                icon: "iconLocation",
                 title: this.i18n.dockTitle,
                 hotkey: "⌥⌘F",
             },
