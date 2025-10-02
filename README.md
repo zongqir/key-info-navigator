@@ -2,7 +2,18 @@
 
 # Key Info Navigator
 
+> Current Version: v2.0.0 | Release Date: 2025-10-02
+
 A plugin that helps you quickly locate and navigate key information in SiYuan notes. Display important content in your documents through a sidebar to make your reading and editing more efficient.
+
+## ✨ What's New in v2.0.0
+
+- 🐛 Fixed dock monitoring issue for real-time synchronization
+- 🎨 Enhanced UI customization capabilities with improved visual design
+- 📍 Updated dock icon to location marker for better representation
+- ♻️ Optimized refresh button icon for better visual experience
+- 🏷️ Smart button display: Auto-hide memo buttons for tags and TODOs
+- ✅ Fixed tag deletion functionality for smoother operations
 
 ## Features
 

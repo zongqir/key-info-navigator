@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.0.0 2025-10-02
+
+### 🐛 Bug Fixes
+* 修复不会监听dock的问题 - Fixed dock monitoring issue
+
+### ✨ Features
+* UI调整能力增强 - Enhanced UI customization capabilities
+* 更换dock图标为定位标记 - Changed dock icon to location marker
+* 优化刷新按钮图标 - Optimized refresh button icon
+* 标签和TODO项移除备注按钮 - Removed memo button for tags and TODOs
+* 修复标签删除功能 - Fixed tag deletion functionality
+* 优化项目间距和视觉效果 - Improved item spacing and visual effects
+
 ## v0.4.2 2025-08-26
 
 * [Upgrade ESLint to 9.33.0](https://github.com/siyuan-note/plugin-sample/issues/30)
