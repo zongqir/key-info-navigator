@@ -221,36 +221,26 @@ export class FormattedTextNavigator {
         const target = event.target as HTMLElement;
         if (!target) return;
         
-        console.log('🖱️ [反向导航] 页面点击', target);
-        
         // 检查是否点击了侧边栏本身，如果是则不处理
         if (this.element.contains(target)) {
-            console.log('  ⏭️ 点击的是侧边栏本身，跳过');
             return;
         }
         
         // 查找点击元素所在的块
         const blockElement = this.findBlockElement(target);
         if (!blockElement) {
-            console.log('  ⏭️ 未找到块元素');
             return;
         }
-        
-        console.log('  ✅ 找到块元素:', blockElement.getAttribute('data-node-id'));
         
         // 查找该块中的所有格式化文本
         const formattedElements = this.findAllFormattedElementsInBlock(blockElement);
         if (formattedElements.length === 0) {
-            console.log('  ⏭️ 该块中没有格式化元素');
             return;
         }
-        
-        console.log(`  ✅ 找到 ${formattedElements.length} 个格式化元素`);
         
         // 如果只有一个格式化元素，直接定位
         if (formattedElements.length === 1) {
             const formatInfo = formattedElements[0];
-            console.log('  🎯 只有1个元素，直接定位:', formatInfo);
             this.locateInDock(formatInfo.text, formatInfo.type, formatInfo.element);
             return;
         }
@@ -268,7 +258,6 @@ export class FormattedTextNavigator {
             }
         }
         
-        console.log('  🎯 多个元素，选择最近的:', closestElement);
         this.locateInDock(closestElement.text, closestElement.type, closestElement.element);
     }
     
@@ -282,7 +271,6 @@ export class FormattedTextNavigator {
         let temp: HTMLElement | null = element;
         while (temp && temp !== document.body) {
             if (temp.getAttribute && temp.getAttribute('data-subtype') === 't' && temp.getAttribute('data-node-id')) {
-                console.log('  ✅ 找到待办项块（优先）:', temp.getAttribute('data-node-id'));
                 return temp;
             }
             temp = temp.parentElement;
@@ -305,16 +293,10 @@ export class FormattedTextNavigator {
     private findAllFormattedElementsInBlock(blockElement: HTMLElement): Array<{text: string, type: TextFormatType, element: HTMLElement}> {
         const results: Array<{text: string, type: TextFormatType, element: HTMLElement}> = [];
         
-        console.log('🔍 [反向导航] 查找块中的格式化元素');
-        console.log('  ├─ 块ID:', blockElement.getAttribute('data-node-id'));
-        console.log('  ├─ data-subtype:', blockElement.getAttribute('data-subtype'));
-        console.log('  └─ 启用的格式:', this.enabledFormats);
-        
         // 特殊处理：如果块本身就是待办项，直接把它作为一个格式化元素
         if (blockElement.getAttribute('data-subtype') === 't' && this.enabledFormats.includes(TextFormatType.TODO)) {
             const text = blockElement.textContent?.trim();
             if (text) {
-                console.log('  ✅ 块本身是待办项，直接添加');
                 results.push({
                     text,
                     type: TextFormatType.TODO,
@@ -332,12 +314,10 @@ export class FormattedTextNavigator {
             for (const selector of config.htmlSelectors) {
                 try {
                     const elements = blockElement.querySelectorAll(selector);
-                    console.log(`  🔍 格式 ${formatType}，选择器 "${selector}"，找到 ${elements.length} 个元素`);
                     
                     elements.forEach(element => {
                         const text = element.textContent?.trim();
                         if (text) {
-                            console.log(`    ✅ 添加元素: text="${text.substring(0, 20)}", type=${formatType}`);
                             results.push({
                                 text,
                                 type: formatType,
@@ -347,13 +327,11 @@ export class FormattedTextNavigator {
                     });
                 } catch (error) {
                     // 忽略无效的选择器
-                    console.warn(`    ⚠️ 选择器 "${selector}" 无效:`, error);
                     continue;
                 }
             }
         }
         
-        console.log(`  📋 总共找到 ${results.length} 个格式化元素`);
         return results;
     }
 
@@ -441,14 +419,8 @@ export class FormattedTextNavigator {
     private locateInDock(text: string, type: TextFormatType, clickedElement: HTMLElement): void {
         this.log(`在侧边栏中定位: "${text}", 类型: ${type}`);
         
-        console.log('🔍 [定位侧边栏] 开始定位');
-        console.log('  ├─ 文本:', text);
-        console.log('  ├─ 类型:', type);
-        console.log('  └─ 点击元素:', clickedElement);
-        
         // 查找侧边栏中匹配的条目
         const dockItems = this.element.querySelectorAll('.formatted-text-dock__item');
-        console.log(`  📋 侧边栏共有 ${dockItems.length} 个条目`);
         
         let targetItem: HTMLElement | null = null;
         
@@ -456,29 +428,18 @@ export class FormattedTextNavigator {
         if (type === TextFormatType.TAG || type === TextFormatType.TODO) {
             // 找到点击元素所在的块ID
             const clickedBlockId = this.findBlockId(clickedElement);
-            console.log(`  🎯 标签/待办模式，使用块ID + 类型匹配（不需要文本匹配）`);
-            console.log(`    ├─ 点击的块ID: ${clickedBlockId}`);
-            console.log(`    └─ 类型: ${type}`);
             
             dockItems.forEach((item) => {
                 const itemElement = item as HTMLElement;
-                const itemText = itemElement.dataset.text;
                 const itemType = itemElement.dataset.type;
                 const itemBlockId = itemElement.dataset.blockId;
                 
-                console.log(`    检查条目: text="${itemText}", type=${itemType}, blockId=${itemBlockId}`);
-                
                 // 只需要匹配：类型和块ID（不需要文本匹配，因为标签/待办的文本格式可能不同）
                 if (itemType === type && itemBlockId === clickedBlockId) {
-                    console.log(`    ✅ 找到匹配！（块ID + 类型）`);
                     targetItem = itemElement;
                     return;
                 }
             });
-            
-            if (!targetItem) {
-                console.log(`  ❌ 未找到匹配的条目`);
-            }
         } else {
             // 其他格式使用位置匹配
             let bestMatch = -1;

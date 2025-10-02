@@ -120,19 +120,10 @@ export class MemoProcessor extends BaseFormatProcessor {
      * 从span数据中提取备注内容
      */
     private extractMemoContent(span: any): string {
-        console.log('🔍 [备注提取] span 完整数据:', span);
-        console.log('  ├─ span.content:', span.content);
-        console.log('  ├─ span.markdown:', span.markdown);
-        console.log('  ├─ span.memo:', span.memo);
-        console.log('  ├─ span.memo_content:', span.memo_content);
-        console.log('  ├─ span.ial:', span.ial);
-        console.log('  └─ 所有字段:', Object.keys(span));
-        
         // 优先从 markdown 字段提取（格式：划线文本(备注内容)）
         if (span.markdown) {
             const extracted = this.extractMemoFromMarkdown(span.markdown);
             if (extracted) {
-                console.log('  ✅ 从 markdown 提取到备注内容:', extracted);
                 return extracted;
             }
         }
@@ -146,7 +137,6 @@ export class MemoProcessor extends BaseFormatProcessor {
                this.extractMemoFromMarkdown(span.content || '') ||
                '';
         
-        console.log('  ✅ 提取到的备注内容:', memoContent);
         return memoContent;
     }
 
