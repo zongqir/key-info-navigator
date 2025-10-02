@@ -30,10 +30,18 @@ export class FormattedTextNavigator {
             
             // 如果有保存的DOM元素引用，直接使用（适用于备注）
             if (savedItem?.element) {
-            this.scrollToElement(savedItem.element);
-            this.highlightElement(savedItem.element);
-            // showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
-            return;
+                // 找到包含该元素的块（用于弹动效果）
+                const blockElement = this.findBlockElement(savedItem.element);
+                
+                this.scrollToElement(savedItem.element);
+                // 对块元素应用高亮和弹动效果（inline元素无法弹动）
+                if (blockElement) {
+                    this.highlightElement(blockElement);
+                } else {
+                    this.highlightElement(savedItem.element);
+                }
+                // showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
+                return;
             }
             
             // 标签和待办事项通过块ID导航
@@ -56,10 +64,18 @@ export class FormattedTextNavigator {
             }
 
             const targetIndex = Math.min(itemIndex, matchingElements.length - 1);
-            const target = matchingElements[targetIndex];
+            const target = matchingElements[targetIndex] as HTMLElement;
             
-            this.scrollToElement(target as HTMLElement);
-            this.highlightElement(target as HTMLElement);
+            // 找到包含该元素的块（用于弹动效果）
+            const blockElement = this.findBlockElement(target);
+            
+            this.scrollToElement(target);
+            // 对块元素应用高亮和弹动效果（inline元素无法弹动）
+            if (blockElement) {
+                this.highlightElement(blockElement);
+            } else {
+                this.highlightElement(target);
+            }
             // showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
 
         } catch (error) {

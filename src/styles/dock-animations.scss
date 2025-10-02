@@ -72,27 +72,27 @@
 @keyframes formatted-text-dock-ripple-bounce {
   0% {
     background-color: transparent;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
   15% {
-    background-color: rgba(33, 150, 243, 0.1);
-    transform: scale(1.05);
+    background-color: rgba(33, 150, 243, 0.15);
+    transform: scale(1.05) translateY(-15px);
   }
   30% {
-    background-color: rgba(33, 150, 243, 0.15);
-    transform: scale(1.02);
+    background-color: rgba(33, 150, 243, 0.12);
+    transform: scale(1.02) translateY(0);
   }
-  50% {
-    background-color: rgba(33, 150, 243, 0.1);
-    transform: scale(1.03);
+  45% {
+    background-color: rgba(33, 150, 243, 0.08);
+    transform: scale(1.01) translateY(-3px);
   }
-  70% {
+  60% {
     background-color: rgba(33, 150, 243, 0.05);
-    transform: scale(1.01);
+    transform: scale(1) translateY(0);
   }
   100% {
     background-color: transparent;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
