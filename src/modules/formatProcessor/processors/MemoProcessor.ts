@@ -154,32 +154,31 @@ export class MemoProcessor extends BaseFormatProcessor {
     }
 
     /**
-     * 自定义渲染主要内容 - 显示划线文本 + 备注内容
+     * 自定义渲染主要内容 - 只显示划线文本
      */
     public renderMainContent(item: FormattedTextItem): string {
         const markedText = item.text;
-        const memoContent = item.memoContent || '';
         
-        if (!memoContent) {
-            // 如果没有备注内容，只显示标记文本
-            return `<span class="formatted-text-dock__memo-text">${this.escapeHtml(markedText)}</span>`;
-        }
-        
-        // 显示：标记文本 + 备注内容
-        return `
-            <div class="formatted-text-dock__memo-container">
-                <span class="formatted-text-dock__memo-marked-text">${this.escapeHtml(markedText)}</span>
-                <span class="formatted-text-dock__memo-separator"> → </span>
-                <span class="formatted-text-dock__memo-content">${this.escapeHtml(memoContent)}</span>
-            </div>
-        `;
+        // 只显示被标记的文本，备注内容在详细信息中显示
+        return `<span class="formatted-text-dock__memo-marked-text">${this.escapeHtml(markedText)}</span>`;
     }
 
     /**
-     * 自定义渲染详细内容 - 返回空，因为主内容已经包含所有信息
+     * 自定义渲染详细内容 - 显示备注卡片（无缩进版本）
      */
     public renderItemDetails(item: FormattedTextItem, displayText: string): string {
-        return ''; // 主内容已经显示了所有信息
+        const memoContent = item.memoContent || '';
+        
+        if (!memoContent) {
+            return ''; // 没有备注内容就不显示卡片
+        }
+        
+        // 渲染备注卡片
+        return `
+            <div class="formatted-text-dock__item-memo">
+                <div class="formatted-text-dock__item-memo-content">${this.escapeHtml(memoContent)}</div>
+            </div>
+        `;
     }
 
     /**
