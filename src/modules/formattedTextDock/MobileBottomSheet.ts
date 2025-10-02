@@ -54,6 +54,8 @@ export class MobileBottomSheet {
     private currentState: BottomSheetState = BottomSheetState.PEEK;
     private isDragging = false;
     private startY = 0;
+    private lastTapTime = 0; // 用于检测双击
+    private tapTimeout: number | null = null; // 双击超时
     
     // 状态监听器
     private readonlyStateChangeHandler: (isReadonly: boolean) => void;
@@ -224,7 +226,19 @@ export class MobileBottomSheet {
      * 绑定事件
      */
     private bindEvents(): void {
-        // 触摸事件
+        // 双击handle事件（主要交互方式）
+        const handle = this.sheetContainer.querySelector('.bottom-sheet-handle') as HTMLElement;
+        if (handle) {
+            handle.addEventListener('touchstart', this.handleHandleTouch.bind(this), { passive: false });
+            handle.addEventListener('click', this.handleHandleClick.bind(this));
+        }
+        
+        // 点击横杠区域展开（在HALF状态下）
+        if (handle) {
+            handle.addEventListener('touchend', this.handleHandleExpandClick.bind(this));
+        }
+        
+        // 触摸事件（用于向下拖拽收回）
         this.sheetContainer.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
         this.sheetContainer.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
         this.sheetContainer.addEventListener('touchend', this.handleTouchEnd.bind(this));
@@ -236,9 +250,8 @@ export class MobileBottomSheet {
         
         // 背景点击关闭
         this.backdrop.addEventListener('click', () => {
-            if (this.currentState !== BottomSheetState.PEEK) {
-                this.setState(BottomSheetState.PEEK);
-            }
+            console.log(`[MobileBottomSheet] 🎯 背景点击，收回面板`);
+            this.setState(BottomSheetState.PEEK);
         });
         
         // 绑定内容区域的事件
@@ -246,23 +259,133 @@ export class MobileBottomSheet {
     }
 
     /**
-     * 触摸开始
+     * 处理handle双击/点击事件
+     */
+    private handleHandleTouch(e: TouchEvent): void {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const currentTime = Date.now();
+        const timeDiff = currentTime - this.lastTapTime;
+        
+        console.log(`[MobileBottomSheet] 👆 Handle触摸，时间差: ${timeDiff}ms，当前状态: ${this.currentState}`);
+        
+        if (timeDiff < 300) { // 双击检测
+            console.log(`[MobileBottomSheet] 👆👆 检测到双击Handle`);
+            // 清除单击延时
+            if (this.tapTimeout) {
+                clearTimeout(this.tapTimeout);
+                this.tapTimeout = null;
+            }
+            this.handleDoubleClick();
+        } else {
+            // 单击，设置延时检测
+            if (this.tapTimeout) {
+                clearTimeout(this.tapTimeout);
+            }
+            this.tapTimeout = window.setTimeout(() => {
+                console.log(`[MobileBottomSheet] 👆 单击Handle（延时确认），当前状态: ${this.currentState}`);
+                this.handleSingleClick();
+            }, 300);
+        }
+        
+        this.lastTapTime = currentTime;
+    }
+    
+    /**
+     * 处理handle展开点击事件（touchend）
+     */
+    private handleHandleExpandClick(e: TouchEvent): void {
+        // 只在HALF状态下处理单击展开
+        if (this.currentState !== BottomSheetState.HALF) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log(`[MobileBottomSheet] 🎯 Handle区域单击展开，当前状态: ${this.currentState}`);
+        
+        // 延时处理，避免与双击冲突
+        setTimeout(() => {
+            if (this.currentState === BottomSheetState.HALF) {
+                console.log(`[MobileBottomSheet] 📤 单击Handle展开到FULL状态`);
+                this.setState(BottomSheetState.FULL);
+            }
+        }, 350); // 稍微延时，确保双击检测完成
+    }
+    
+    /**
+     * 处理单击事件
+     */
+    private handleSingleClick(): void {
+        console.log(`[MobileBottomSheet] 👆 执行单击操作，当前状态: ${this.currentState}`);
+        
+        if (this.currentState === BottomSheetState.HALF) {
+            // 在HALF状态下单击 → 完全展开（FULL状态）
+            console.log(`[MobileBottomSheet] 📤 单击展开到FULL状态`);
+            this.setState(BottomSheetState.FULL);
+        }
+        // 其他状态下单击不做任何操作
+    }
+    
+    /**
+     * 处理handle点击事件（桌面端）
+     */
+    private handleHandleClick(e: MouseEvent): void {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const currentTime = Date.now();
+        const timeDiff = currentTime - this.lastTapTime;
+        
+        console.log(`[MobileBottomSheet] 🖱️ Handle点击，时间差: ${timeDiff}ms`);
+        
+        if (timeDiff < 300) { // 双击检测
+            console.log(`[MobileBottomSheet] 🖱️🖱️ 检测到双击Handle`);
+            this.handleDoubleClick();
+        }
+        
+        this.lastTapTime = currentTime;
+    }
+    
+    /**
+     * 处理双击事件
+     */
+    private handleDoubleClick(): void {
+        console.log(`[MobileBottomSheet] ✨ 执行双击操作，当前状态: ${this.currentState}`);
+        
+        if (this.currentState === BottomSheetState.PEEK) {
+            // 从PEEK状态双击 → 显示预览头部（HALF状态）
+            console.log(`[MobileBottomSheet] 📤 双击展开到预览状态`);
+            this.setState(BottomSheetState.HALF);
+        } else {
+            // 从其他状态双击 → 收回到PEEK状态
+            console.log(`[MobileBottomSheet] 📥 双击收回到PEEK状态`);
+            this.setState(BottomSheetState.PEEK);
+        }
+    }
+
+    /**
+     * 触摸开始（仅用于向下拖拽收回）
      */
     private handleTouchStart(e: TouchEvent): void {
+        // 如果是handle区域，不处理拖拽（由双击处理）
+        if ((e.target as Element).closest('.bottom-sheet-handle')) {
+            return;
+        }
+        
+        // 只有在非PEEK状态下才允许拖拽收回
+        if (this.currentState === BottomSheetState.PEEK) return;
         if (e.touches.length !== 1) return;
         
         this.isDragging = true;
         this.startY = e.touches[0].clientY;
         this.startTranslateY = this.currentTranslateY;
         
-        // 阻止默认滚动行为（仅在handle区域）
-        if ((e.target as Element).closest('.bottom-sheet-handle')) {
-            e.preventDefault();
-        }
+        console.log(`[MobileBottomSheet] 👆 开始拖拽收回: Y=${e.touches[0].clientY}`);
     }
 
     /**
-     * 触摸移动
+     * 触摸移动（仅用于向下拖拽收回）
      */
     private handleTouchMove(e: TouchEvent): void {
         if (!this.isDragging || e.touches.length !== 1) return;
@@ -270,19 +393,21 @@ export class MobileBottomSheet {
         const currentY = e.touches[0].clientY;
         const deltaY = currentY - this.startY;
         
-        // 只在handle区域或者向下滑动时处理
-        const isHandleArea = (e.target as Element).closest('.bottom-sheet-handle');
-        const isSwipingDown = deltaY > 0;
+        // 只允许向下拖拽（deltaY > 0）
+        if (deltaY <= 0) return;
         
-        if (isHandleArea || isSwipingDown) {
-            // 简化处理：只记录滑动方向和距离，最终状态在touchend时确定
-            console.log(`[MobileBottomSheet] 👆 滑动: deltaY=${deltaY}px`);
-            e.preventDefault();
-        }
+        console.log(`[MobileBottomSheet] 👆 向下拖拽: deltaY=${deltaY}`);
+        
+        // 计算新的位置
+        const newTranslateY = this.startTranslateY + deltaY;
+        this.updatePosition(newTranslateY);
+        this.currentTranslateY = newTranslateY;
+        
+        e.preventDefault();
     }
 
     /**
-     * 触摸结束
+     * 触摸结束（仅用于向下拖拽收回）
      */
     private handleTouchEnd(e: TouchEvent): void {
         if (!this.isDragging) return;
@@ -290,11 +415,18 @@ export class MobileBottomSheet {
         this.isDragging = false;
         
         const deltaY = e.changedTouches[0].clientY - this.startY;
-        const velocity = Math.abs(deltaY);
         
-        console.log(`[MobileBottomSheet] 🏁 触摸结束: deltaY=${deltaY}px, velocity=${velocity}`);
+        console.log(`[MobileBottomSheet] 👆 拖拽结束: deltaY=${deltaY}`);
         
-        this.determineTargetState(deltaY, velocity);
+        // 如果向下拖拽超过50px，则收回到PEEK状态
+        if (deltaY > 50) {
+            console.log(`[MobileBottomSheet] 📥 向下拖拽收回到PEEK状态`);
+            this.setState(BottomSheetState.PEEK);
+        } else {
+            // 否则回弹到当前状态
+            console.log(`[MobileBottomSheet] 🔄 回弹到当前状态`);
+            this.updatePositionForState(this.currentState);
+        }
     }
 
     /**
@@ -404,7 +536,7 @@ export class MobileBottomSheet {
                 translateY = '50%'; // 半屏
                 break;
             case BottomSheetState.FULL:
-                translateY = '80px'; // 增加顶部空间，确保不遮挡闪卡等重要内容
+                translateY = '10vh'; // 使用视口高度单位，占用90%的屏幕高度
                 break;
             default:
                 translateY = 'calc(100% - 12px)'; // 默认PEEK状态，极致压缩

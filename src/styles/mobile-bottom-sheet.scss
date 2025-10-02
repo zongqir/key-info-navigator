@@ -67,7 +67,8 @@
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   
-  /* 移除最小高度限制，让它可以更薄 */
+  /* 设置合理的高度范围 */
+  min-height: 200px; /* 确保最小高度，支持拖拽操作 */
   max-height: calc(100vh - 100px); /* 留出更多空间给思源笔记界面 */
   
   /* 避免影响文档滚动 */
@@ -78,9 +79,9 @@
 .bottom-sheet-handle {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* 让手柄条靠近顶部 */
-  height: 4px; /* 进一步减少手柄区域高度 */
-  padding: 0; /* 移除所有内边距 */
+  align-items: center; /* 居中对齐 */
+  height: 40px; /* 再次增大手柄区域高度，便于拖拽 */
+  padding: 16px 0; /* 再次增大上下内边距，扩大可点击区域 */
   cursor: grab;
   
   &:active {
@@ -89,17 +90,18 @@
 }
 
 .handle-bar {
-  width: 28px; /* 稍微减少宽度 */
-  height: 1px; /* 减少到1px高度，极细 */
+  width: 80px; /* 再次增大宽度，更容易看到和拖拽 */
+  height: 8px; /* 再次增大高度，更容易拖拽 */
   background: var(--kinfo-text-tertiary);
-  border-radius: 0.5px;
-  opacity: 0.4; /* 降低透明度 */
+  border-radius: 4px;
+  opacity: 0.8; /* 进一步提高透明度，更明显 */
   transition: all 0.2s ease;
 }
 
 .bottom-sheet-handle:hover .handle-bar {
   opacity: 1;
-  width: 48px;
+  width: 90px; /* hover时进一步增大 */
+  height: 10px; /* hover时增加高度 */
 }
 
 /* 预览内容区域 (PEEK 状态) */
@@ -153,11 +155,13 @@
 .bottom-sheet-full-content {
   display: none;
   flex: 1;
+  min-height: 300px; /* 确保最小高度，即使内容少也能正常拖拽 */
   overflow: hidden;
   padding: 0; /* 完全移除padding，让内容直接贴边 */
   
   .formatted-text-dock {
     height: 100%;
+    min-height: 300px; /* 确保dock本身也有最小高度 */
     background: transparent;
     
     &__header {
@@ -276,23 +280,25 @@
     }
     
     .bottom-sheet-handle {
-      height: 2px; /* 在FULL状态下保留handle但做得极薄 */
-      padding: 0;
+      height: 28px; /* FULL状态下保持足够大的拖拽区域 */
+      padding: 8px 0; /* 保持足够的内边距 */
       
       .handle-bar {
-        width: 100px; /* 在FULL状态下让handle bar更小更薄 */
-        height: 10px;
-        opacity: 0.3;
+        width: 50px; /* FULL状态下足够大的handle bar宽度 */
+        height: 5px; /* 足够大的高度 */
+        opacity: 0.6; /* 适中的透明度 */
       }
     }
     
     .bottom-sheet-full-content {
       display: flex;
-      max-height: calc(100vh - 120px); /* 增加顶部空间，确保不遮挡闪卡 */
+      max-height: 90vh; /* 使用90%的视口高度，充分利用屏幕空间 */
+      min-height: 60vh; /* 设置最小高度，确保即使内容少也有足够空间 */
     }
     
     .bottom-sheet-container {
-      max-height: calc(100vh - 120px); /* 增加顶部空间，确保不遮挡闪卡 */
+      max-height: 90vh; /* 使用90%的视口高度，充分利用屏幕空间 */
+      min-height: 60vh; /* 设置最小高度，确保即使内容少也有足够空间 */
     }
   }
 }
