@@ -30,25 +30,11 @@ import { getActiveEditor } from 'siyuan';
 export function getCurrentActiveReadonlyButton(): HTMLElement | null {
     try {
         const currentEditor = getActiveEditor(false);
-        Logger.log("🔍 [ReadonlyButton] getActiveEditor 返回:", currentEditor);
-        
         const currentProtyle = currentEditor?.protyle;
-        Logger.log("🔍 [ReadonlyButton] protyle:", currentProtyle);
-        Logger.log("🔍 [ReadonlyButton] protyle.element:", currentProtyle?.element);
         
         const readonlyButton = currentProtyle?.element?.querySelector(
             ".protyle-breadcrumb > button[data-type='readonly']"
         ) as HTMLButtonElement;
-        
-        Logger.log("🔍 [ReadonlyButton] 找到的按钮:", readonlyButton);
-        
-        if (readonlyButton) {
-            Logger.log("🔍 [ReadonlyButton] 按钮的 data-subtype:", readonlyButton?.dataset.subtype);
-            Logger.log("🔍 [ReadonlyButton] 按钮的 aria-label:", readonlyButton?.getAttribute('aria-label'));
-            Logger.log("🔍 [ReadonlyButton] 按钮的图标:", readonlyButton?.querySelector('use')?.getAttribute('xlink:href'));
-        } else {
-            Logger.warn("⚠️ [ReadonlyButton] 未找到锁按钮");
-        }
         
         return readonlyButton;
         
@@ -72,14 +58,12 @@ export function isCurrentDocumentReadonly(): boolean {
         const readonlyBtn = getCurrentActiveReadonlyButton() as HTMLButtonElement;
         
         if (!readonlyBtn) {
-            Logger.warn('⚠️ [ReadonlyButton] 未找到当前活跃文档的锁按钮，假设文档可编辑');
             return false; // 找不到锁按钮时，保守处理，认为可编辑（非只读）
         }
         
         // 🎯 优先使用 dataset.subtype 判断（更准确直接）
         const subtype = readonlyBtn.dataset.subtype || '';
         const iconHref = readonlyBtn.querySelector('use')?.getAttribute('xlink:href') || '';
-        const ariaLabel = readonlyBtn.getAttribute('aria-label') || '';
         
         // 判断逻辑：
         // 1. 如果有 data-subtype 属性，优先使用（更准确）
@@ -96,17 +80,6 @@ export function isCurrentDocumentReadonly(): boolean {
             // 兜底使用图标判断
             isReadonly = iconHref !== '#iconUnlock';
         }
-        
-        const isEditable = !isReadonly;
-        
-        Logger.log('🔐 [ReadonlyButton] 当前文档状态:', {
-            'data-subtype': subtype || '(无)',
-            '图标href': iconHref,
-            'aria-label': ariaLabel,
-            '判断依据': subtype ? 'data-subtype ✅' : 'iconHref ⚠️',
-            '是否只读': isReadonly ? '🔒 是（锁定）' : '✏️ 否（解锁）',
-            '是否可编辑': isEditable ? '🔓 是（可编辑）' : '🔒 否（只读）'
-        });
         
         return isReadonly;
         

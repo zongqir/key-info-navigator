@@ -140,18 +140,9 @@ export class FormattedTextUIRenderer {
                             <div class="formatted-text-dock__item-header">
                                 <div class="formatted-text-dock__item-main">
                                     ${(() => {
-                                        this.log('🎨 [UIRenderer] 正在处理项目类型:', item.type, '处理器:', processor.constructor.name);
-                                        this.log('🔍 [UIRenderer] 项目详细信息:', item);
-                                        this.log('🔍 [UIRenderer] 处理器配置:', processor.getConfig());
-                                        this.log('🔍 [UIRenderer] 是否有renderMainContent方法?', typeof processor.renderMainContent === 'function');
-                                        
                                         if (typeof processor.renderMainContent === 'function') {
-                                            this.log('✅ [UIRenderer] 调用自定义renderMainContent，item:', item);
-                                            const customContent = processor.renderMainContent(item);
-                                            this.log('🎯 [UIRenderer] 自定义内容结果:', customContent);
-                                            return customContent;
+                                            return processor.renderMainContent(item);
                                         } else {
-                                            this.log('⚠️ [UIRenderer] 没有自定义renderMainContent，使用默认文本渲染');
                                             return `<span class="formatted-text-dock__item-text">${this.escapeHtml(displayText)}</span>`;
                                         }
                                     })()}
@@ -311,7 +302,7 @@ export class FormattedTextUIRenderer {
      */
     private log(...args: any[]): void {
         if (this.logger) {
-            this.logger('[FormattedTextUIRenderer]', ...args);
+            this.logger(...args);
         }
     }
 }

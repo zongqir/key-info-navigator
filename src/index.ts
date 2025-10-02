@@ -34,13 +34,11 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
         const frontEnd = getFrontend();
         this.isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
 
-        // 强制调试信息（不受日志开关控制）
-        console.log(`[Key Info Navigator] 前端类型: ${frontEnd}`);
-        console.log(`[Key Info Navigator] 是否移动端: ${this.isMobile}`);
-        console.log(`[Key Info Navigator] User Agent: ${navigator.userAgent}`);
-
         // 加载设置
         await this.loadSettings();
+        
+        // 强制关闭调试日志（忽略保存的设置）
+        this.settings.enableDebugLog = false;
         
         // 配置日志器
         Logger.setDebugEnabled(this.settings.enableDebugLog);
@@ -55,11 +53,9 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
 
         // 根据设备类型初始化不同的UI组件
         if (this.isMobile) {
-            console.log('[Key Info Navigator] 🚀 检测到移动端环境，初始化底部抽屉面板');
             Logger.log('检测到移动端环境，初始化底部抽屉面板');
             await this.initMobileUI();
         } else {
-            console.log('[Key Info Navigator] 🖥️ 检测到桌面端环境，初始化侧边栏');
             Logger.log('检测到桌面端环境，初始化侧边栏');
             await this.initDesktopUI();
         }
@@ -194,12 +190,12 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
             
             // ========== 移动端UI测试工具 ==========
             forceMobileUI: () => {
-                console.log('[Key Info Navigator] 🚀 强制启用移动端UI');
+                Logger.log('强制启用移动端UI');
                 this.forceEnableMobileUI();
                 return '移动端UI已强制启用 📱';
             },
             forceDesktopUI: () => {
-                console.log('[Key Info Navigator] 🖥️ 强制启用桌面端UI');
+                Logger.log('强制启用桌面端UI');
                 this.forceEnableDesktopUI();
                 return '桌面端UI已强制启用 🖥️';
             },
@@ -440,26 +436,15 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
      */
     private async initMobileUI(): Promise<void> {
         try {
-            console.log('[Key Info Navigator] 🚀 开始初始化移动端UI');
+            Logger.log('开始初始化移动端UI');
             const moduleLogger = Logger.createModuleLogger('MobileBottomSheet');
-            console.log('[Key Info Navigator] 📱 创建MobileBottomSheet实例');
             
             this.mobileBottomSheet = new MobileBottomSheet(
                 this.i18n,
                 moduleLogger.log
             );
             
-            console.log('[Key Info Navigator] ✅ 移动端UI初始化完成');
-            console.log('[Key Info Navigator] 🔍 检查DOM中是否存在mobile-bottom-sheet元素');
-            
-            // 延迟检查DOM元素是否创建成功
-            setTimeout(() => {
-                const elements = document.querySelectorAll('.mobile-bottom-sheet');
-                console.log(`[Key Info Navigator] 📊 找到 ${elements.length} 个 mobile-bottom-sheet 元素`);
-                elements.forEach((el, index) => {
-                    console.log(`[Key Info Navigator] 📍 元素 ${index + 1}:`, el);
-                });
-            }, 1000);
+            Logger.log('移动端UI初始化完成');
             
         } catch (error) {
             console.error('[Key Info Navigator] ❌ 移动端UI初始化失败:', error);
@@ -479,7 +464,7 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
      * 强制启用移动端UI（调试用）
      */
     public forceEnableMobileUI(): void {
-        console.log('[Key Info Navigator] 🚀 强制启用移动端UI');
+        Logger.log('强制启用移动端UI');
         
         // 清理现有组件
         this.formattedTextDock?.destroy();
@@ -496,7 +481,7 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
      * 强制启用桌面端UI（调试用）
      */
     public forceEnableDesktopUI(): void {
-        console.log('[Key Info Navigator] 🖥️ 强制启用桌面端UI');
+        Logger.log('强制启用桌面端UI');
         
         // 清理现有组件
         this.formattedTextDock?.destroy();

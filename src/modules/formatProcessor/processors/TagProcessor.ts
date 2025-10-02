@@ -66,12 +66,9 @@ export class TagProcessor extends BaseFormatProcessor {
     extractFromBlock(block: any, blockIndex?: number): FormattedTextItem[] {
         const items: FormattedTextItem[] = [];
         
-        this.log('TagProcessor.extractFromBlock called with block:', block, 'blockIndex:', blockIndex);
-        
         if (block && block.tag) {
             // 保留原始标签文本（包含#号），用于匹配DOM
             const tags = block.tag.split(',').map((tag: string) => tag.trim()).filter(Boolean);
-            this.log('解析出的标签列表:', tags);
             
             tags.forEach((tag, tagIndex) => {
                 // 使用块在文档中的位置，而不是标签在块中的索引
@@ -79,10 +76,6 @@ export class TagProcessor extends BaseFormatProcessor {
                 
                 // 思源在DOM中存储标签时会去掉#号，只保留零宽空格
                 const cleanTag = tag.replace(/^#+|#+$/g, '');
-                
-                this.log('🏷️ 提取标签:', tag);
-                this.log('  ├─ 原始标签（包含#）:', tag);
-                this.log('  └─ 干净标签（去除#，用于匹配DOM）:', cleanTag);
                 
                 const item = {
                     id: `tag_${block.id}_${tag}`,
@@ -100,14 +93,8 @@ export class TagProcessor extends BaseFormatProcessor {
                     }
                 };
                 
-                this.log('  ✅ item.text（用于匹配DOM）:', item.text);
-                this.log('  ✅ item.metadata.displayName（用于显示）:', item.metadata.displayName);
-                
-                this.log('创建的标签项:', item);
                 items.push(item);
             });
-        } else {
-            this.log('块没有标签或块为空:', { block, hasTag: !!block?.tag });
         }
         
         return items;
@@ -183,31 +170,17 @@ export class TagProcessor extends BaseFormatProcessor {
      * 自定义渲染主要内容 - 替换默认的标签文本显示
      */
     renderMainContent(item: FormattedTextItem): string {
-        this.log('renderMainContent called with item:', item);
-        
-        this.log('🎨 渲染标签');
-        this.log('  ├─ item.text（原始）:', item.text);
-        this.log('  ├─ item.metadata:', item.metadata);
-        
         if (!item.metadata) {
-            this.log('No metadata found, returning default text:', item.text);
-            this.log('  ❌ 没有metadata，返回默认文本:', item.text);
             return item.text;
         }
         
         const { displayName, blockContent } = item.metadata;
         const tagColor = this.getTagColor(displayName);
         
-        this.log('  ├─ displayName（用于显示）:', displayName);
-        this.log('  ├─ tagColor:', tagColor);
-        this.log('  └─ blockContent:', blockContent?.substring(0, 30));
-        
-        this.log('Rendering tag:', displayName, 'with color:', tagColor);
-        
         // 截断块内容用于显示
         const truncatedContent = this.truncateText(blockContent, 80);
         
-        const result = `
+        return `
             <div class="formatted-text-dock__item-tag-inline">
                 <div class="formatted-text-dock__tag-shape" style="background-color: ${tagColor}">
                     <span class="formatted-text-dock__tag-text">${displayName}</span>
@@ -215,10 +188,6 @@ export class TagProcessor extends BaseFormatProcessor {
                 <span class="formatted-text-dock__tag-block-text">${this.escapeHtml(truncatedContent)}</span>
             </div>
         `;
-        
-        this.log('  ✅ 渲染完成，显示:', displayName);
-        this.log('Generated HTML:', result);
-        return result;
     }
 
     /**

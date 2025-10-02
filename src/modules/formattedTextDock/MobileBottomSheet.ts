@@ -64,36 +64,28 @@ export class MobileBottomSheet {
         private i18n: any,
         private logger?: (...args: any[]) => void
     ) {
-        console.log('[MobileBottomSheet] 🚀 构造函数开始初始化');
-        this.log('MobileBottomSheet 构造函数开始初始化');
+        this.log('MobileBottomSheet 初始化开始');
         this.parser = new TextFormatParser(logger);
         
         // 初始化状态变化处理器
         this.readonlyStateChangeHandler = (isReadonly: boolean) => {
-            this.log(`🔄 [MobileBottomSheet] 文档状态变化: ${isReadonly ? '🔒 锁定' : '✏️ 解锁'}`);
+            this.log(`文档状态变化: ${isReadonly ? '🔒 锁定' : '✏️ 解锁'}`);
             this.onReadonlyStateChange(isReadonly);
         };
         
         // 初始化功能模块
-        console.log('[MobileBottomSheet] 📦 初始化功能模块');
-        this.log('初始化功能模块');
         this.initModules();
         
         // 创建UI
-        console.log('[MobileBottomSheet] 🎨 创建移动端UI');
-        this.log('创建移动端UI');
         this.createUI();
         
         // 添加文档状态变化监听器
-        console.log('[MobileBottomSheet] 👂 添加文档状态变化监听器');
-        this.log('添加文档状态变化监听器');
         DocumentReadonlyChecker.addStateChangeListener(this.readonlyStateChangeHandler);
         
-        console.log('[MobileBottomSheet] 🔄 开始初始刷新');
-        this.log('开始初始刷新');
-        this.refresh(true); // 初始化时强制刷新
+        // 初始化时强制刷新
+        this.refresh(true);
         
-        console.log('[MobileBottomSheet] ✅ 构造函数初始化完成');
+        this.log('MobileBottomSheet 初始化完成');
     }
 
     /**
@@ -123,33 +115,26 @@ export class MobileBottomSheet {
      * 创建移动端UI
      */
     private createUI(): void {
-        console.log('[MobileBottomSheet] 🎨 开始创建移动端UI DOM结构');
-        
         // 创建主容器
         this.container = document.createElement('div');
         this.container.className = 'mobile-bottom-sheet';
-        console.log('[MobileBottomSheet] 📦 创建主容器:', this.container);
         
         // 创建背景遮罩
         this.backdrop = document.createElement('div');
         this.backdrop.className = 'bottom-sheet-backdrop';
-        console.log('[MobileBottomSheet] 🌫️ 创建背景遮罩:', this.backdrop);
         
         // 创建抽屉容器
         this.sheetContainer = document.createElement('div');
         this.sheetContainer.className = 'bottom-sheet-container';
-        console.log('[MobileBottomSheet] 📋 创建抽屉容器:', this.sheetContainer);
         
         // 创建拖拽手柄
         this.handle = document.createElement('div');
         this.handle.className = 'bottom-sheet-handle';
         this.handle.innerHTML = '<div class="handle-bar"></div>';
-        console.log('[MobileBottomSheet] ✋ 创建拖拽手柄:', this.handle);
         
         // 创建预览内容（PEEK状态显示）
         this.peekContent = document.createElement('div');
         this.peekContent.className = 'bottom-sheet-peek-content';
-        console.log('[MobileBottomSheet] 👀 创建预览内容容器:', this.peekContent);
         
         // 创建完整内容容器
         this.fullContent = document.createElement('div');
@@ -163,8 +148,6 @@ export class MobileBottomSheet {
             </div>
         `;
         
-        console.log('[MobileBottomSheet] 📄 创建完整内容容器:', this.fullContent);
-        
         // 组装DOM结构
         this.sheetContainer.appendChild(this.handle);
         this.sheetContainer.appendChild(this.peekContent);
@@ -173,32 +156,22 @@ export class MobileBottomSheet {
         this.container.appendChild(this.backdrop);
         this.container.appendChild(this.sheetContainer);
         
-        console.log('[MobileBottomSheet] 🌳 DOM结构组装完成');
-        console.log('[MobileBottomSheet] 📍 准备添加到document.body');
-        console.log('[MobileBottomSheet] 🔍 当前document.body存在吗?', !!document.body);
-        
         // 添加到body
         if (document.body) {
             document.body.appendChild(this.container);
-            console.log('[MobileBottomSheet] ✅ 成功添加到document.body');
-            console.log('[MobileBottomSheet] 📊 document.body子元素数量:', document.body.children.length);
+            this.log('移动端UI创建完成并添加到DOM');
         } else {
-            console.error('[MobileBottomSheet] ❌ document.body不存在，无法添加DOM元素');
+            this.log('错误: document.body不存在，无法添加DOM元素');
         }
         
         // 在DOM创建后初始化导航器和事件处理器
-        console.log('[MobileBottomSheet] 🔧 初始化导航器和事件处理器');
         this.initNavigatorAndEventHandler();
         
         // 绑定事件
-        console.log('[MobileBottomSheet] 🔗 绑定事件');
         this.bindEvents();
         
         // 初始状态设置
-        console.log('[MobileBottomSheet] 🎯 设置初始状态为PEEK');
         this.setState(BottomSheetState.PEEK);
-        
-        console.log('[MobileBottomSheet] ✅ UI创建完成');
     }
 
     /**
@@ -258,7 +231,6 @@ export class MobileBottomSheet {
         
         // 背景点击关闭
         this.backdrop.addEventListener('click', () => {
-            console.log(`[MobileBottomSheet] 🎯 背景点击，收回面板`);
             this.setState(BottomSheetState.PEEK);
         });
         
@@ -276,10 +248,7 @@ export class MobileBottomSheet {
         const currentTime = Date.now();
         const timeDiff = currentTime - this.lastTapTime;
         
-        console.log(`[MobileBottomSheet] 👆 Handle触摸，时间差: ${timeDiff}ms，当前状态: ${this.currentState}`);
-        
         if (timeDiff < 300) { // 双击检测
-            console.log(`[MobileBottomSheet] 👆👆 检测到双击Handle`);
             // 清除单击延时
             if (this.tapTimeout) {
                 clearTimeout(this.tapTimeout);
@@ -292,7 +261,6 @@ export class MobileBottomSheet {
                 clearTimeout(this.tapTimeout);
             }
             this.tapTimeout = window.setTimeout(() => {
-                console.log(`[MobileBottomSheet] 👆 单击Handle（延时确认），当前状态: ${this.currentState}`);
                 this.handleSingleClick();
             }, 300);
         }
@@ -310,12 +278,9 @@ export class MobileBottomSheet {
         e.preventDefault();
         e.stopPropagation();
         
-        console.log(`[MobileBottomSheet] 🎯 Handle区域单击展开，当前状态: ${this.currentState}`);
-        
         // 延时处理，避免与双击冲突
         setTimeout(() => {
             if (this.currentState === BottomSheetState.HALF) {
-                console.log(`[MobileBottomSheet] 📤 单击Handle展开到FULL状态`);
                 this.setState(BottomSheetState.FULL);
             }
         }, 350); // 稍微延时，确保双击检测完成
@@ -325,11 +290,8 @@ export class MobileBottomSheet {
      * 处理单击事件
      */
     private handleSingleClick(): void {
-        console.log(`[MobileBottomSheet] 👆 执行单击操作，当前状态: ${this.currentState}`);
-        
         if (this.currentState === BottomSheetState.HALF) {
             // 在HALF状态下单击 → 完全展开（FULL状态）
-            console.log(`[MobileBottomSheet] 📤 单击展开到FULL状态`);
             this.setState(BottomSheetState.FULL);
         }
         // 其他状态下单击不做任何操作
@@ -345,10 +307,7 @@ export class MobileBottomSheet {
         const currentTime = Date.now();
         const timeDiff = currentTime - this.lastTapTime;
         
-        console.log(`[MobileBottomSheet] 🖱️ Handle点击，时间差: ${timeDiff}ms`);
-        
         if (timeDiff < 300) { // 双击检测
-            console.log(`[MobileBottomSheet] 🖱️🖱️ 检测到双击Handle`);
             this.handleDoubleClick();
         }
         
@@ -359,15 +318,11 @@ export class MobileBottomSheet {
      * 处理双击事件
      */
     private handleDoubleClick(): void {
-        console.log(`[MobileBottomSheet] ✨ 执行双击操作，当前状态: ${this.currentState}`);
-        
         if (this.currentState === BottomSheetState.PEEK) {
             // 从PEEK状态双击 → 显示预览头部（HALF状态）
-            console.log(`[MobileBottomSheet] 📤 双击展开到预览状态`);
             this.setState(BottomSheetState.HALF);
         } else {
             // 从其他状态双击 → 收回到PEEK状态
-            console.log(`[MobileBottomSheet] 📥 双击收回到PEEK状态`);
             this.setState(BottomSheetState.PEEK);
         }
     }
@@ -411,23 +366,15 @@ export class MobileBottomSheet {
      * 设置滚动样式（确认工作状态）
      */
     private forceScrollStyles(): void {
-        console.log('[MobileBottomSheet] 🔧 确认滚动容器状态');
-        
         setTimeout(() => {
             const scrollDiv = this.container.querySelector('div[style*="overflow-y: scroll"]');
             if (scrollDiv) {
                 const formattedDock = scrollDiv.querySelector('.formatted-text-dock');
-                console.log('[MobileBottomSheet] ✅ 找到滚动容器，高度:', (scrollDiv as HTMLElement).offsetHeight);
-                console.log('[MobileBottomSheet] 📜 内容高度:', (scrollDiv as HTMLElement).scrollHeight);
-                console.log('[MobileBottomSheet] 🎯 formatted-text-dock存在:', !!formattedDock);
                 
                 // 确保事件绑定
                 if (formattedDock) {
                     this.eventHandler.bindEvents();
-                    console.log('[MobileBottomSheet] 🔗 重新绑定事件处理器');
                 }
-            } else {
-                console.error('[MobileBottomSheet] ❌ 没有找到滚动容器');
             }
         }, 200);
     }
@@ -453,8 +400,6 @@ export class MobileBottomSheet {
         this.isDragging = true;
         this.startY = e.touches[0].clientY;
         this.startTranslateY = this.currentTranslateY;
-        
-        console.log(`[MobileBottomSheet] 👆 开始拖拽收回: Y=${e.touches[0].clientY}`);
     }
 
     /**
@@ -474,8 +419,6 @@ export class MobileBottomSheet {
         // 只允许向下拖拽（deltaY > 0）
         if (deltaY <= 0) return;
         
-        console.log(`[MobileBottomSheet] 👆 向下拖拽: deltaY=${deltaY}`);
-        
         // 计算新的位置
         const newTranslateY = this.startTranslateY + deltaY;
         this.updatePosition(newTranslateY);
@@ -494,15 +437,11 @@ export class MobileBottomSheet {
         
         const deltaY = e.changedTouches[0].clientY - this.startY;
         
-        console.log(`[MobileBottomSheet] 👆 拖拽结束: deltaY=${deltaY}`);
-        
         // 如果向下拖拽超过50px，则收回到PEEK状态
         if (deltaY > 50) {
-            console.log(`[MobileBottomSheet] 📥 向下拖拽收回到PEEK状态`);
             this.setState(BottomSheetState.PEEK);
         } else {
             // 否则回弹到当前状态
-            console.log(`[MobileBottomSheet] 🔄 回弹到当前状态`);
             this.updatePositionForState(this.currentState);
         }
     }
@@ -513,7 +452,6 @@ export class MobileBottomSheet {
     private handleMouseDown(e: MouseEvent): void {
         this.isDragging = true;
         this.startY = e.clientY;
-        console.log(`[MobileBottomSheet] 🖱️ 鼠标按下: Y=${e.clientY}`);
         e.preventDefault();
     }
 
@@ -521,7 +459,7 @@ export class MobileBottomSheet {
         if (!this.isDragging) return;
         
         const deltaY = e.clientY - this.startY;
-        console.log(`[MobileBottomSheet] 🖱️ 鼠标移动: deltaY=${deltaY}px`);
+        // 鼠标移动处理
     }
 
     private handleMouseEnd(e: MouseEvent): void {
@@ -531,8 +469,6 @@ export class MobileBottomSheet {
         
         const deltaY = e.clientY - this.startY;
         const velocity = Math.abs(deltaY);
-        
-        console.log(`[MobileBottomSheet] 🖱️ 鼠标释放: deltaY=${deltaY}px, velocity=${velocity}`);
         
         this.determineTargetState(deltaY, velocity);
     }
@@ -607,9 +543,6 @@ export class MobileBottomSheet {
     private updatePositionForState(state: BottomSheetState): void {
         let translateY: string;
         
-        console.log(`[MobileBottomSheet] 🎯 更新位置状态: ${state}`);
-        console.log(`[MobileBottomSheet] 📏 当前屏幕高度: ${window.innerHeight}px`);
-        
         switch (state) {
             case BottomSheetState.CLOSED:
                 translateY = '100%'; // 完全隐藏
@@ -627,8 +560,6 @@ export class MobileBottomSheet {
                 translateY = 'calc(100% - 12px)'; // 默认PEEK状态，极致压缩
         }
         
-        console.log(`[MobileBottomSheet] 📐 计算得到的translateY: ${translateY}`);
-        
         this.updatePosition(translateY, true);
     }
 
@@ -638,8 +569,6 @@ export class MobileBottomSheet {
     private updatePosition(translateY: string | number, animated = false): void {
         const style = this.sheetContainer.style;
         
-        console.log(`[MobileBottomSheet] 🎨 更新位置: ${translateY}, 动画: ${animated}`);
-        
         if (animated) {
             style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         } else {
@@ -648,8 +577,6 @@ export class MobileBottomSheet {
         
         const transformValue = typeof translateY === 'string' ? translateY : `${translateY}px`;
         style.transform = `translateY(${transformValue})`;
-        
-        console.log(`[MobileBottomSheet] ✅ 应用transform: translateY(${transformValue})`);
         
         // 清除动画样式
         if (animated) {
@@ -684,8 +611,6 @@ export class MobileBottomSheet {
                 opacity = 0;
                 pointerEvents = 'none';
         }
-        
-        console.log(`[MobileBottomSheet] 🌫️ 更新遮罩: opacity=${opacity}, pointerEvents=${pointerEvents}`);
         
         this.backdrop.style.opacity = opacity.toString();
         this.backdrop.style.pointerEvents = pointerEvents;
@@ -726,9 +651,8 @@ export class MobileBottomSheet {
      * 处理文档只读状态变化
      */
     private onReadonlyStateChange(isReadonly: boolean): void {
-        this.log(`🔄 [MobileBottomSheet] 处理状态变化: ${isReadonly ? '🔒 锁定' : '✏️ 解锁'} - 开始刷新`);
+        this.log(`处理状态变化: ${isReadonly ? '🔒 锁定' : '✏️ 解锁'}`);
         this.renderList();
-        this.log('🔄 [MobileBottomSheet] 状态变化处理完成');
     }
 
     /**
@@ -800,8 +724,6 @@ export class MobileBottomSheet {
      * 渲染列表
      */
     private renderList(): void {
-        this.log('开始渲染移动端列表');
-        
         // 更新peek内容
         this.updatePeekContent();
         
@@ -816,7 +738,6 @@ export class MobileBottomSheet {
         const filteredItems = this.formattedTexts.filter(item => activeFormats.indexOf(item.type) !== -1);
         
         if (filteredItems.length === 0) {
-            this.log('没有匹配的格式化文本，显示空状态');
             this.showEmpty(this.i18n.noMatchingFormat);
             return;
         }
@@ -828,7 +749,7 @@ export class MobileBottomSheet {
         
         // 绑定点击事件
         this.eventHandler.bindItemEvents(content);
-        this.log('移动端列表渲染完成并绑定事件');
+        this.log('列表渲染完成');
     }
 
     /**
@@ -904,7 +825,7 @@ export class MobileBottomSheet {
      * 销毁组件
      */
     public destroy(): void {
-        this.log('🔄 [MobileBottomSheet] 开始销毁组件');
+        this.log('开始销毁组件');
         
         if (this.refreshTimer) {
             clearTimeout(this.refreshTimer);
@@ -913,7 +834,6 @@ export class MobileBottomSheet {
         
         // 移除文档状态变化监听器
         if (this.readonlyStateChangeHandler) {
-            this.log('🔄 [MobileBottomSheet] 移除状态变化监听器');
             DocumentReadonlyChecker.removeStateChangeListener(this.readonlyStateChangeHandler);
         }
         
@@ -926,7 +846,7 @@ export class MobileBottomSheet {
             this.container.parentNode.removeChild(this.container);
         }
         
-        this.log('🔄 [MobileBottomSheet] 组件销毁完成');
+        this.log('组件销毁完成');
     }
 
     /**
@@ -934,7 +854,7 @@ export class MobileBottomSheet {
      */
     private log(...args: any[]): void {
         if (this.logger) {
-            this.logger('[MobileBottomSheet]', ...args);
+            this.logger(...args);
         }
     }
 }

@@ -274,7 +274,7 @@ export class FormattedTextMemoManager {
      */
     private log(...args: any[]): void {
         if (this.logger) {
-            this.logger('[FormattedTextMemoManager]', ...args);
+            this.logger(...args);
         }
     }
 }

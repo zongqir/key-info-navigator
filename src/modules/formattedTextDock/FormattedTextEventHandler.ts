@@ -192,48 +192,30 @@ export class FormattedTextEventHandler {
      */
     private async removeFormattingFromText(blockId: string, text: string, type: TextFormatType, position: number): Promise<void> {
         try {
-            console.log('🗑️ [删除格式] 开始删除');
-            console.log('  ├─ 文本:', text);
-            console.log('  ├─ 类型:', type);
-            console.log('  ├─ 块ID:', blockId);
-            console.log('  └─ 位置:', position);
-            
             this.log(`开始删除格式化: "${text}", 类型: ${type}, 位置: ${position}`);
             
             // 获取对应的格式处理器
             const processor = this.parser.getFormatProcessor(type);
-            console.log('  ✅ 获取到处理器:', processor.formatType);
-            console.log('  ├─ 是否有removeFormatting方法:', typeof processor.removeFormatting === 'function');
             
             // 计算项目索引（同类型同文本的项目中的索引）
             const sameTypeItems = this.formattedTexts.filter(item => 
                 item.type === type && item.text === text
             );
             
-            console.log('  📋 相同项目列表:', sameTypeItems.map(i => ({text: i.text, position: i.position, blockId: i.blockId})));
-            
             // 按位置排序找到当前项目的索引
             sameTypeItems.sort((a, b) => a.position - b.position);
             const itemIndex = sameTypeItems.findIndex(item => item.position === position);
             
-            console.log('  ├─ 找到相同项目数量:', sameTypeItems.length);
-            console.log('  ├─ 当前项目索引:', itemIndex);
-            console.log('  └─ 使用的索引:', itemIndex >= 0 ? itemIndex : 0);
-            
             this.log(`找到 ${sameTypeItems.length} 个相同的项目，当前项目索引: ${itemIndex}`);
             
             // 调用处理器删除格式化
-            console.log('  🚀 调用 removeFormatting...');
             const success = await processor.removeFormatting!(text, blockId, itemIndex >= 0 ? itemIndex : 0);
-            console.log('  ✅ removeFormatting 返回结果:', success);
             
             if (success) {
-                console.log('  ✅ 删除成功，准备更新后端...');
                 showMessage(`✅ ${this.i18n.removeFormatSuccess || '格式删除成功'}: ${text}`, 2000, 'info');
                 
                 // 更新块内容到后端
                 await this.memoManager.updateBlockContent();
-                console.log('  ✅ 后端更新完成，准备刷新列表...');
                 
                 // 延迟刷新列表，让DOM更新完成
                 setTimeout(() => {
@@ -241,12 +223,10 @@ export class FormattedTextEventHandler {
                 }, 500);
                 
             } else {
-                console.log('  ❌ 删除失败！');
                 showMessage(`❌ ${this.i18n.removeFormatFailed || '格式删除失败'}: ${text}`, 3000, 'error');
             }
             
         } catch (error) {
-            console.error('  ❌ 删除格式化异常:', error);
             this.log('删除格式化失败:', error);
             showMessage(`❌ ${this.i18n.removeFormatFailed || '格式删除失败'}: ${text}`, 3000, 'error');
         }
@@ -355,7 +335,7 @@ export class FormattedTextEventHandler {
      */
     private log(...args: any[]): void {
         if (this.logger) {
-            this.logger('[FormattedTextEventHandler]', ...args);
+            this.logger(...args);
         }
     }
 }

@@ -586,7 +586,7 @@ export class FormattedTextNavigator {
      */
     private log(...args: any[]): void {
         if (this.logger) {
-            this.logger('[FormattedTextNavigator]', ...args);
+            this.logger(...args);
         }
     }
 }

@@ -503,7 +503,7 @@ export class TextFormatParser {
      */
     private log(...args: any[]): void {
         if (this.logger) {
-            this.logger('[TextFormatParser]', ...args);
+            this.logger(...args);
         }
     }
 }

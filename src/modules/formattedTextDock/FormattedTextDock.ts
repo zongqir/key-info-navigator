@@ -405,7 +405,7 @@ export class FormattedTextDock {
      */
     private log(...args: any[]): void {
         if (this.logger) {
-            this.logger('[FormattedTextDock]', ...args);
+            this.logger(...args);
         }
     }
 }

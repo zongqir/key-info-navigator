@@ -278,7 +278,7 @@ export class ThemeManager {
      */
     private log(...args: any[]): void {
         if (this.logger) {
-            this.logger('[ThemeManager]', ...args);
+            this.logger(...args);
         }
     }
 
