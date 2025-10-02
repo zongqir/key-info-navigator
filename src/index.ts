@@ -6,7 +6,15 @@ import {
 } from "siyuan";
 import "./index.scss";
 import { FormattedTextDock } from "./modules/formattedTextDock";
-import { Logger, ThemeManager, ThemeMode } from "./modules/utils";
+import { 
+    Logger, 
+    ThemeManager, 
+    ThemeMode,
+    getCurrentActiveReadonlyButton,
+    isCurrentDocumentReadonly,
+    isCurrentDocumentEditable,
+    getDocumentStatusDetail
+} from "./modules/utils";
 
 const FORMATTED_TEXT_DOCK_TYPE = "formatted_text_dock";
 
@@ -156,14 +164,23 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
     /**
      * 暴露全局控制接口
      * 在控制台中可以使用以下命令：
+     * 
+     * 【调试日志控制】
      * - KeyInfoNavigator.toggleDebug() - 切换调试日志
      * - KeyInfoNavigator.enableDebug() - 开启调试日志
      * - KeyInfoNavigator.disableDebug() - 关闭调试日志
      * - KeyInfoNavigator.getDebugStatus() - 查看当前状态
+     * 
+     * 【文档状态检查】
+     * - KeyInfoNavigator.checkDocStatus() - 检查当前文档只读状态
+     * - KeyInfoNavigator.isReadonly() - 当前文档是否只读
+     * - KeyInfoNavigator.isEditable() - 当前文档是否可编辑
+     * - KeyInfoNavigator.getReadonlyButton() - 获取当前文档的锁按钮
      */
     private exposeGlobalControls(): void {
         // 使用 window 对象暴露控制接口
         (window as any).KeyInfoNavigator = {
+            // ========== 调试日志控制 ==========
             toggleDebug: () => {
                 this.toggleDebugMode();
                 return `调试日志已${this.settings.enableDebugLog ? '开启' : '关闭'}`;
@@ -187,15 +204,51 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
                         '调试日志: 开启 ✅ (控制台会输出详细信息)' : 
                         '调试日志: 关闭 🔇 (仅输出错误信息)'
                 };
+            },
+            
+            // ========== 文档状态检查工具 ==========
+            checkDocStatus: () => {
+                const detail = getDocumentStatusDetail();
+                console.log('%c📄 当前文档状态详情', 'color: #2196F3; font-weight: bold;', detail);
+                return detail;
+            },
+            isReadonly: () => {
+                const readonly = isCurrentDocumentReadonly();
+                console.log(readonly ? '🔒 当前文档已锁定（只读模式）' : '✏️ 当前文档已解锁（可编辑）');
+                return readonly;
+            },
+            isEditable: () => {
+                const editable = isCurrentDocumentEditable();
+                console.log(editable ? '✏️ 当前文档可编辑（已解锁）' : '🔒 当前文档只读（已锁定）');
+                return editable;
+            },
+            getReadonlyButton: () => {
+                const btn = getCurrentActiveReadonlyButton();
+                if (btn) {
+                    console.log('✅ 找到锁按钮:', btn);
+                    console.log('按钮属性:', {
+                        ariaLabel: btn.getAttribute('aria-label'),
+                        dataSubtype: btn.getAttribute('data-subtype'),
+                        iconHref: btn.querySelector('use')?.getAttribute('xlink:href')
+                    });
+                } else {
+                    console.log('❌ 未找到锁按钮');
+                }
+                return btn;
             }
         };
 
         console.log('%c[Key Info Navigator] 控制台调试接口已就绪', 'color: #4CAF50; font-weight: bold;');
-        console.log('%c使用方法:', 'color: #2196F3; font-weight: bold;');
+        console.log('%c【调试日志控制】', 'color: #2196F3; font-weight: bold;');
         console.log('  KeyInfoNavigator.toggleDebug()    - 切换调试模式');
         console.log('  KeyInfoNavigator.enableDebug()    - 开启调试日志');
         console.log('  KeyInfoNavigator.disableDebug()   - 关闭调试日志');
         console.log('  KeyInfoNavigator.getDebugStatus() - 查看当前状态');
+        console.log('%c【文档状态检查】', 'color: #2196F3; font-weight: bold;');
+        console.log('  KeyInfoNavigator.checkDocStatus()    - 检查当前文档只读状态');
+        console.log('  KeyInfoNavigator.isReadonly()        - 当前文档是否只读');
+        console.log('  KeyInfoNavigator.isEditable()        - 当前文档是否可编辑');
+        console.log('  KeyInfoNavigator.getReadonlyButton() - 获取当前文档的锁按钮');
         console.log(`%c当前状态: ${this.settings.enableDebugLog ? '调试日志已开启 ✅' : '调试日志已关闭 🔇'}`, 
             this.settings.enableDebugLog ? 'color: #FF9800;' : 'color: #9E9E9E;');
     }

@@ -1,59 +1,39 @@
+import { isCurrentDocumentReadonly, getDocumentStatusText } from './ReadonlyButtonUtils';
+
 /**
- * 文档只读状态检查器
- * 检查当前文档是否处于只读状态（锁定编辑）
+ * 文档只读状态检查器（监听器版本）
+ * 提供文档只读状态的实时监听和变化通知功能
+ * 
+ * 核心功能：
+ * - 使用 ReadonlyButtonUtils 获取准确的状态
+ * - 监听 DOM 变化，实时检测状态变更
+ * - 支持订阅/取消订阅状态变化事件
+ * 
+ * 注意：本类主要用于需要监听状态变化的场景
+ * 如果只是一次性检查状态，请直接使用 ReadonlyButtonUtils
  */
 export class DocumentReadonlyChecker {
     private static observer: MutationObserver | null = null;
     private static currentState: boolean | null = null;
     private static changeCallbacks: Array<(isReadonly: boolean) => void> = [];
+    private static pollingTimer: number | null = null; // 定时检查的定时器ID
     
     /**
      * 检查文档是否处于只读状态（锁定编辑）
      * @returns true = 只读（锁定），false = 可编辑（解锁）
+     * @deprecated 建议直接使用 ReadonlyButtonUtils.isCurrentDocumentReadonly()
      */
     public static checkDocumentReadonly(): boolean {
-        // 查找面包屑锁按钮
-        const readonlyBtn = document.querySelector('.protyle-breadcrumb button[data-type="readonly"]');
-        
-        if (!readonlyBtn) {
-            console.warn('未找到面包屑锁按钮');
-            return false; // 找不到按钮，默认认为可编辑
-        }
-        
-        const ariaLabel = readonlyBtn.getAttribute('aria-label') || '';
-        const dataSubtype = readonlyBtn.getAttribute('data-subtype') || '';
-        const iconHref = readonlyBtn.querySelector('use')?.getAttribute('xlink:href') || '';
-        
-        // 判断是否解锁状态（可编辑）
-        // 解锁状态的特征：
-        // 1. data-subtype="unlock" → 已解锁（可编辑）
-        // 2. aria-label 包含 "取消" → 已解锁（"取消临时解锁"）
-        // 3. 图标是 #iconUnlock → 已解锁
-        const isUnlocked = 
-            dataSubtype === 'unlock' || 
-            ariaLabel.includes('取消') ||   // "取消临时解锁" → 当前已解锁
-            iconHref === '#iconUnlock';
-        
-        const isReadonly = !isUnlocked;  // 只读 = 非解锁状态
-        
-        console.log('文档状态检查:', {
-            '找到按钮': !!readonlyBtn,
-            'aria-label': ariaLabel,
-            'data-subtype': dataSubtype,
-            '图标href': iconHref,
-            '是否解锁': isUnlocked ? '✏️ 是（可编辑）' : '🔒 否（已锁定）',
-            '是否只读': isReadonly ? '🔒 是（锁定）' : '✏️ 否（解锁）'
-        });
-        
-        return isReadonly;
+        // 使用统一的工具类，确保多策略查找的准确性
+        return isCurrentDocumentReadonly();
     }
     
     /**
      * 获取用户友好的文档状态描述
+     * @deprecated 建议直接使用 ReadonlyButtonUtils.getDocumentStatusText()
      */
     public static getDocumentStatusText(): string {
-        const isReadonly = this.checkDocumentReadonly();
-        return isReadonly ? '文档已锁定，无法编辑' : '文档可编辑';
+        return getDocumentStatusText();
     }
     
     /**
@@ -83,14 +63,19 @@ export class DocumentReadonlyChecker {
     
     /**
      * 添加状态变化监听器
+     * @param callback 状态变化回调函数
+     * @param enablePolling 是否启用定时检查兜底（默认false，使用纯事件驱动）
      */
-    public static addStateChangeListener(callback: (isReadonly: boolean) => void): void {
+    public static addStateChangeListener(
+        callback: (isReadonly: boolean) => void, 
+        enablePolling: boolean = false
+    ): void {
         this.changeCallbacks.push(callback);
         console.log(`🔄 [DocumentReadonlyChecker] 添加状态变化监听器，当前监听器数量: ${this.changeCallbacks.length}`);
         
         // 如果是第一个监听器，开始监听DOM变化
         if (this.changeCallbacks.length === 1) {
-            this.startMonitoring();
+            this.startMonitoring(enablePolling);
         }
     }
     
@@ -112,20 +97,22 @@ export class DocumentReadonlyChecker {
     
     /**
      * 开始监听文档状态变化
+     * @param enablePolling 是否启用定时检查兜底（默认false）
      */
-    private static startMonitoring(): void {
+    private static startMonitoring(enablePolling: boolean = false): void {
         if (this.observer) {
             console.log('🔄 [DocumentReadonlyChecker] 监听器已经在运行');
             return;
         }
         
-        console.log('🔄 [DocumentReadonlyChecker] 开始监听文档状态变化');
+        console.log('🔄 [DocumentReadonlyChecker] 开始监听文档状态变化', 
+            enablePolling ? '(MutationObserver + 定时检查兜底)' : '(纯 MutationObserver)');
         
         // 初始化当前状态
         this.currentState = this.checkDocumentReadonly();
         console.log('🔄 [DocumentReadonlyChecker] 初始状态:', this.currentState ? '🔒 锁定' : '✏️ 解锁');
         
-        // 创建MutationObserver监听面包屑区域的变化
+        // 创建MutationObserver监听面包屑区域的变化（主要监听机制）
         this.observer = new MutationObserver((mutations) => {
             let shouldCheck = false;
             
@@ -160,7 +147,16 @@ export class DocumentReadonlyChecker {
             attributeFilter: ['aria-label', 'data-subtype', 'xlink:href']
         });
         
-        console.log('🔄 [DocumentReadonlyChecker] 监听器已启动，监听节点:', targetNode);
+        console.log('🔄 [DocumentReadonlyChecker] MutationObserver已启动，监听节点:', targetNode);
+        
+        // 可选：启动定时检查作为兜底（防止MutationObserver漏检）
+        if (enablePolling) {
+            this.pollingTimer = window.setInterval(() => {
+                this.checkStateChange();
+            }, 3000); // 每3秒检查一次作为兜底
+            
+            console.log('🔄 [DocumentReadonlyChecker] 定时检查兜底已启动（每3秒）');
+        }
     }
     
     /**
@@ -168,10 +164,18 @@ export class DocumentReadonlyChecker {
      */
     private static stopMonitoring(): void {
         if (this.observer) {
-            console.log('🔄 [DocumentReadonlyChecker] 停止监听文档状态变化');
+            console.log('🔄 [DocumentReadonlyChecker] 停止 MutationObserver 监听');
             this.observer.disconnect();
             this.observer = null;
         }
+        
+        // 停止定时检查
+        if (this.pollingTimer !== null) {
+            console.log('🔄 [DocumentReadonlyChecker] 停止定时检查兜底');
+            clearInterval(this.pollingTimer);
+            this.pollingTimer = null;
+        }
+        
         this.currentState = null;
     }
     
@@ -208,9 +212,15 @@ export class DocumentReadonlyChecker {
     /**
      * 获取当前监听器状态信息
      */
-    public static getMonitoringStatus(): { isMonitoring: boolean; listenerCount: number; currentState: boolean | null } {
+    public static getMonitoringStatus(): { 
+        isMonitoring: boolean; 
+        isPollingEnabled: boolean;
+        listenerCount: number; 
+        currentState: boolean | null;
+    } {
         return {
             isMonitoring: this.observer !== null,
+            isPollingEnabled: this.pollingTimer !== null,
             listenerCount: this.changeCallbacks.length,
             currentState: this.currentState
         };
