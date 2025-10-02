@@ -84,13 +84,11 @@
       transition: transform 0.1s ease;
     }
     
-    /* 类型颜色标识 - 纯色美化版本 */
+    /* 类型颜色标识 - 只保留边框颜色 */
     &[data-type="bold"] {
       border-left-color: #0969da;
-      background: rgba(9, 105, 218, 0.08);
       
       &:hover {
-        background: rgba(9, 105, 218, 0.15);
         border-left-color: #0969da;
         box-shadow: var(--kinfo-glass-shadow-hover), 
                     0 0 25px rgba(9, 105, 218, 0.3),
@@ -100,10 +98,8 @@
     
     &[data-type="italic"] {
       border-left-color: #FFD700;
-      background: rgba(255, 215, 0, 0.08);
       
       &:hover {
-        background: rgba(255, 215, 0, 0.15);
         border-left-color: #FFD700;
         box-shadow: var(--kinfo-glass-shadow-hover), 
                     0 0 25px rgba(255, 215, 0, 0.3),
@@ -113,10 +109,8 @@
     
     &[data-type="underline"] {
       border-left-color: #8B5CF6;
-      background: rgba(139, 92, 246, 0.08);
       
       &:hover {
-        background: rgba(139, 92, 246, 0.15);
         border-left-color: #8B5CF6;
         box-shadow: var(--kinfo-glass-shadow-hover), 
                     0 0 25px rgba(139, 92, 246, 0.3),
@@ -126,10 +120,8 @@
     
     &[data-type="highlight"] {
       border-left-color: #9a6700;
-      background: rgba(154, 103, 0, 0.08);
       
       &:hover {
-        background: rgba(154, 103, 0, 0.15);
         border-left-color: #9a6700;
         box-shadow: var(--kinfo-glass-shadow-hover), 
                     0 0 25px rgba(154, 103, 0, 0.3),
@@ -139,10 +131,8 @@
     
     &[data-type="memo"] {
       border-left-color: #8250df;
-      background: rgba(130, 80, 223, 0.08);
       
       &:hover {
-        background: rgba(130, 80, 223, 0.15);
         border-left-color: #8250df;
         box-shadow: var(--kinfo-glass-shadow-hover), 
                     0 0 25px rgba(130, 80, 223, 0.3),
@@ -152,10 +142,8 @@
     
     &[data-type="tag"] {
       border-left-color: #e85aad;
-      background: rgba(232, 90, 173, 0.08);
       
       &:hover {
-        background: rgba(232, 90, 173, 0.15);
         border-left-color: #e85aad;
         box-shadow: var(--kinfo-glass-shadow-hover), 
                     0 0 25px rgba(232, 90, 173, 0.3),
@@ -165,10 +153,8 @@
     
     &[data-type="todo"] {
       border-left-color: #d1242f;
-      background: rgba(209, 36, 47, 0.08);
       
       &:hover {
-        background: rgba(209, 36, 47, 0.15);
         border-left-color: #d1242f;
         box-shadow: var(--kinfo-glass-shadow-hover), 
                     0 0 25px rgba(209, 36, 47, 0.3),
