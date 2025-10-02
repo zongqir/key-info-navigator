@@ -82,6 +82,7 @@ export class FormattedTextDock {
         this.memoManager = new FormattedTextMemoManager(
             this.i18n,
             this.formattedTexts,
+            () => this.refresh(true), // 刷新回调
             this.logger
         );
 

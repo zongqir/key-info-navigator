@@ -239,11 +239,12 @@
 
 /* 分割线样式 */
 .filter-separator {
-  width: 1px;
-  height: 20px;
+  width: 2px;
+  height: 24px;
   background: var(--kinfo-border-normal);
-  margin: 0 8px;
-  opacity: 0.5;
+  margin: 0 10px;
+  opacity: 0.8;
+  border-radius: 1px;
 }
 
 /* 备注组件样式 */

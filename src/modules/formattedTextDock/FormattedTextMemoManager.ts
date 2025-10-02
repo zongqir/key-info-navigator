@@ -13,6 +13,7 @@ export class FormattedTextMemoManager {
     constructor(
         private i18n: any,
         private formattedTexts: FormattedTextItem[],
+        private onRefresh?: () => void,
         private logger?: (...args: any[]) => void
     ) {
         this.memoDialog = new MemoDialog(i18n, logger);
@@ -88,6 +89,11 @@ export class FormattedTextMemoManager {
             
             showMessage(`✅ ${this.i18n.editMemoSuccess || '备注编辑成功'}: ${text}`, 2000, 'info');
             
+            // 延迟刷新dock列表
+            setTimeout(() => {
+                this.onRefresh?.();
+            }, 500);
+            
         } catch (error) {
             this.log('更新备注失败:', error);
             showMessage(`❌ ${this.i18n.editMemoFailed || '编辑备注失败'}: ${text}`, 3000, 'error');
@@ -120,6 +126,11 @@ export class FormattedTextMemoManager {
             await this.wrapTextWithMemo(targetElement, text, memoContent);
             
             showMessage(`✅ ${this.i18n.addMemoSuccess || '备注添加成功'}: ${text}`, 2000, 'info');
+            
+            // 延迟刷新dock列表
+            setTimeout(() => {
+                this.onRefresh?.();
+            }, 500);
             
         } catch (error) {
             this.log('保存备注失败:', error);
