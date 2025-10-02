@@ -1,4 +1,5 @@
 import { isCurrentDocumentReadonly, getDocumentStatusText } from './ReadonlyButtonUtils';
+import { Logger } from './Logger';
 
 /**
  * 文档只读状态检查器（监听器版本）
@@ -51,7 +52,7 @@ export class DocumentReadonlyChecker {
         customMessage?: string
     ): void {
         const message = customMessage || this.getUnlockPromptMessage();
-        console.warn('🔒 文档只读状态提示:', message);
+        Logger.warn('🔒 文档只读状态提示:', message);
         
         if (showMessage) {
             showMessage(`🔒 ${message}`, 4000, 'warning');
@@ -71,7 +72,7 @@ export class DocumentReadonlyChecker {
         enablePolling: boolean = false
     ): void {
         this.changeCallbacks.push(callback);
-        console.log(`🔄 [DocumentReadonlyChecker] 添加状态变化监听器，当前监听器数量: ${this.changeCallbacks.length}`);
+        Logger.log(`🔄 [DocumentReadonlyChecker] 添加状态变化监听器，当前监听器数量: ${this.changeCallbacks.length}`);
         
         // 如果是第一个监听器，开始监听DOM变化
         if (this.changeCallbacks.length === 1) {
@@ -86,7 +87,7 @@ export class DocumentReadonlyChecker {
         const index = this.changeCallbacks.indexOf(callback);
         if (index > -1) {
             this.changeCallbacks.splice(index, 1);
-            console.log(`🔄 [DocumentReadonlyChecker] 移除状态变化监听器，剩余监听器数量: ${this.changeCallbacks.length}`);
+            Logger.log(`🔄 [DocumentReadonlyChecker] 移除状态变化监听器，剩余监听器数量: ${this.changeCallbacks.length}`);
         }
         
         // 如果没有监听器了，停止监听DOM变化
@@ -101,16 +102,16 @@ export class DocumentReadonlyChecker {
      */
     private static startMonitoring(enablePolling: boolean = false): void {
         if (this.observer) {
-            console.log('🔄 [DocumentReadonlyChecker] 监听器已经在运行');
+            Logger.log('🔄 [DocumentReadonlyChecker] 监听器已经在运行');
             return;
         }
         
-        console.log('🔄 [DocumentReadonlyChecker] 开始监听文档状态变化', 
+        Logger.log('🔄 [DocumentReadonlyChecker] 开始监听文档状态变化', 
             enablePolling ? '(MutationObserver + 定时检查兜底)' : '(纯 MutationObserver)');
         
         // 初始化当前状态
         this.currentState = this.checkDocumentReadonly();
-        console.log('🔄 [DocumentReadonlyChecker] 初始状态:', this.currentState ? '🔒 锁定' : '✏️ 解锁');
+        Logger.log('🔄 [DocumentReadonlyChecker] 初始状态:', this.currentState ? '🔒 锁定' : '✏️ 解锁');
         
         // 创建MutationObserver监听面包屑区域的变化（主要监听机制）
         this.observer = new MutationObserver((mutations) => {
@@ -147,7 +148,7 @@ export class DocumentReadonlyChecker {
             attributeFilter: ['aria-label', 'data-subtype', 'xlink:href']
         });
         
-        console.log('🔄 [DocumentReadonlyChecker] MutationObserver已启动，监听节点:', targetNode);
+        Logger.log('🔄 [DocumentReadonlyChecker] MutationObserver已启动，监听节点:', targetNode);
         
         // 可选：启动定时检查作为兜底（防止MutationObserver漏检）
         if (enablePolling) {
@@ -155,7 +156,7 @@ export class DocumentReadonlyChecker {
                 this.checkStateChange();
             }, 3000); // 每3秒检查一次作为兜底
             
-            console.log('🔄 [DocumentReadonlyChecker] 定时检查兜底已启动（每3秒）');
+            Logger.log('🔄 [DocumentReadonlyChecker] 定时检查兜底已启动（每3秒）');
         }
     }
     
@@ -164,14 +165,14 @@ export class DocumentReadonlyChecker {
      */
     private static stopMonitoring(): void {
         if (this.observer) {
-            console.log('🔄 [DocumentReadonlyChecker] 停止 MutationObserver 监听');
+            Logger.log('🔄 [DocumentReadonlyChecker] 停止 MutationObserver 监听');
             this.observer.disconnect();
             this.observer = null;
         }
         
         // 停止定时检查
         if (this.pollingTimer !== null) {
-            console.log('🔄 [DocumentReadonlyChecker] 停止定时检查兜底');
+            Logger.log('🔄 [DocumentReadonlyChecker] 停止定时检查兜底');
             clearInterval(this.pollingTimer);
             this.pollingTimer = null;
         }
@@ -186,7 +187,7 @@ export class DocumentReadonlyChecker {
         const newState = this.checkDocumentReadonly();
         
         if (this.currentState !== newState) {
-            console.log(`🔄 [DocumentReadonlyChecker] 状态发生变化: ${this.currentState ? '🔒' : '✏️'} → ${newState ? '🔒' : '✏️'}`);
+            Logger.log(`🔄 [DocumentReadonlyChecker] 状态发生变化: ${this.currentState ? '🔒' : '✏️'} → ${newState ? '🔒' : '✏️'}`);
             
             this.currentState = newState;
             
@@ -195,7 +196,7 @@ export class DocumentReadonlyChecker {
                 try {
                     callback(newState);
                 } catch (error) {
-                    console.error('🔄 [DocumentReadonlyChecker] 监听器回调执行失败:', error);
+                    Logger.error('🔄 [DocumentReadonlyChecker] 监听器回调执行失败:', error);
                 }
             });
         }
@@ -205,7 +206,7 @@ export class DocumentReadonlyChecker {
      * 手动触发状态检查（用于调试或强制检查）
      */
     public static forceCheckStateChange(): void {
-        console.log('🔄 [DocumentReadonlyChecker] 手动触发状态检查');
+        Logger.log('🔄 [DocumentReadonlyChecker] 手动触发状态检查');
         this.checkStateChange();
     }
     

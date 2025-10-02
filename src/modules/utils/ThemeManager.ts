@@ -1,5 +1,5 @@
 import { fetchPost } from "siyuan";
-
+import { Logger } from './Logger';
 /**
  * 主题模式枚举
  */

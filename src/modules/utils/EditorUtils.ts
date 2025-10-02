@@ -1,5 +1,5 @@
 import { getAllEditor } from "siyuan";
-
+import { Logger } from './Logger';
 /**
  * 编辑器工具类
  * 提供编辑器相关的通用方法

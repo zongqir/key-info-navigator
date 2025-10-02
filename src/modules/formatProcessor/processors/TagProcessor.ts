@@ -80,9 +80,9 @@ export class TagProcessor extends BaseFormatProcessor {
                 // 思源在DOM中存储标签时会去掉#号，只保留零宽空格
                 const cleanTag = tag.replace(/^#+|#+$/g, '');
                 
-                console.log('🏷️ [TagProcessor] 提取标签:', tag);
-                console.log('  ├─ 原始标签（包含#）:', tag);
-                console.log('  └─ 干净标签（去除#，用于匹配DOM）:', cleanTag);
+                this.log('🏷️ 提取标签:', tag);
+                this.log('  ├─ 原始标签（包含#）:', tag);
+                this.log('  └─ 干净标签（去除#，用于匹配DOM）:', cleanTag);
                 
                 const item = {
                     id: `tag_${block.id}_${tag}`,
@@ -100,8 +100,8 @@ export class TagProcessor extends BaseFormatProcessor {
                     }
                 };
                 
-                console.log('  ✅ item.text（用于匹配DOM）:', item.text);
-                console.log('  ✅ item.metadata.displayName（用于显示）:', item.metadata.displayName);
+                this.log('  ✅ item.text（用于匹配DOM）:', item.text);
+                this.log('  ✅ item.metadata.displayName（用于显示）:', item.metadata.displayName);
                 
                 this.log('创建的标签项:', item);
                 items.push(item);
@@ -185,22 +185,22 @@ export class TagProcessor extends BaseFormatProcessor {
     renderMainContent(item: FormattedTextItem): string {
         this.log('renderMainContent called with item:', item);
         
-        console.log('🎨 [TagProcessor] 渲染标签');
-        console.log('  ├─ item.text（原始）:', item.text);
-        console.log('  ├─ item.metadata:', item.metadata);
+        this.log('🎨 渲染标签');
+        this.log('  ├─ item.text（原始）:', item.text);
+        this.log('  ├─ item.metadata:', item.metadata);
         
         if (!item.metadata) {
             this.log('No metadata found, returning default text:', item.text);
-            console.log('  ❌ 没有metadata，返回默认文本:', item.text);
+            this.log('  ❌ 没有metadata，返回默认文本:', item.text);
             return item.text;
         }
         
         const { displayName, blockContent } = item.metadata;
         const tagColor = this.getTagColor(displayName);
         
-        console.log('  ├─ displayName（用于显示）:', displayName);
-        console.log('  ├─ tagColor:', tagColor);
-        console.log('  └─ blockContent:', blockContent?.substring(0, 30));
+        this.log('  ├─ displayName（用于显示）:', displayName);
+        this.log('  ├─ tagColor:', tagColor);
+        this.log('  └─ blockContent:', blockContent?.substring(0, 30));
         
         this.log('Rendering tag:', displayName, 'with color:', tagColor);
         
@@ -216,8 +216,7 @@ export class TagProcessor extends BaseFormatProcessor {
             </div>
         `;
         
-        console.log('  ✅ 渲染完成，显示:', displayName);
-        
+        this.log('  ✅ 渲染完成，显示:', displayName);
         this.log('Generated HTML:', result);
         return result;
     }

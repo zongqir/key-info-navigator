@@ -238,48 +238,48 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
      */
     public async removeFormatting(text: string, blockId: string, itemIndex?: number): Promise<boolean> {
         try {
-            console.log('🔧 [BaseFormatProcessor] removeFormatting 开始');
-            console.log('  ├─ 格式类型:', this.formatType);
-            console.log('  ├─ 文本:', text);
-            console.log('  ├─ 块ID:', blockId);
-            console.log('  ├─ 索引:', itemIndex);
-            console.log('  └─ HTML选择器:', this.config.htmlSelectors);
+            this.log('🔧 removeFormatting 开始');
+            this.log('  ├─ 格式类型:', this.formatType);
+            this.log('  ├─ 文本:', text);
+            this.log('  ├─ 块ID:', blockId);
+            this.log('  ├─ 索引:', itemIndex);
+            this.log('  └─ HTML选择器:', this.config.htmlSelectors);
             
             this.log(`开始删除格式化: "${text}", 块ID: ${blockId}, 索引: ${itemIndex}`);
             
             // 查找目标元素
             const targetElements = this.findFormattedElements(text, itemIndex);
-            console.log('  📋 找到的元素数量:', targetElements.length);
+            this.log('  📋 找到的元素数量:', targetElements.length);
             
             if (targetElements.length === 0) {
-                console.log('  ❌ 未找到任何目标格式化元素');
+                this.log('  ❌ 未找到任何目标格式化元素');
                 this.log('未找到目标格式化元素');
                 return false;
             }
             
             targetElements.forEach((el, index) => {
-                console.log(`    元素${index + 1}:`, el.outerHTML?.substring(0, 100));
+                this.log(`    元素${index + 1}:`, el.outerHTML?.substring(0, 100));
             });
             
             // 删除格式化
             let success = false;
             for (const element of targetElements) {
-                console.log('  🗑️ 尝试删除元素格式化:', element);
+                this.log('  🗑️ 尝试删除元素格式化:', element);
                 const removed = this.removeElementFormatting(element, text);
-                console.log('    └─ 删除结果:', removed);
+                this.log('    └─ 删除结果:', removed);
                 if (removed) {
                     success = true;
                 }
             }
             
             if (success) {
-                console.log('  ✅ 格式化删除成功，准备更新文档...');
+                this.log('  ✅ 格式化删除成功，准备更新文档...');
                 this.log('格式化删除成功');
                 // 触发文档更新
                 await this.updateDocumentContent();
-                console.log('  ✅ 文档更新完成');
+                this.log('  ✅ 文档更新完成');
             } else {
-                console.log('  ❌ 所有元素删除都失败了');
+                this.log('  ❌ 所有元素删除都失败了');
             }
             
             return success;
@@ -298,14 +298,14 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
         const selectors = this.config.htmlSelectors.join(',');
         const allElements = Array.from(document.querySelectorAll(selectors)) as HTMLElement[];
         
-        console.log('🔍 [findFormattedElements] 查找元素');
-        console.log('  ├─ 选择器:', selectors);
-        console.log('  ├─ 查找文本:', text);
-        console.log('  └─ 找到所有元素数量:', allElements.length);
+        this.log('🔍 查找格式化元素');
+        this.log('  ├─ 选择器:', selectors);
+        this.log('  ├─ 查找文本:', text);
+        this.log('  └─ 找到所有元素数量:', allElements.length);
         
         // 显示前几个元素的文本内容
         allElements.slice(0, 5).forEach((el, index) => {
-            console.log(`    元素${index + 1}: "${el.textContent?.trim()}" (长度: ${el.textContent?.trim().length})`);
+            this.log(`    元素${index + 1}: "${el.textContent?.trim()}" (长度: ${el.textContent?.trim().length})`);
         });
         
         // 过滤出文本匹配的元素
@@ -316,12 +316,12 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
             const cleanText = text.replace(/\u200B/g, '');
             const matches = cleanElementText === cleanText;
             if (allElements.length <= 10) { // 只在元素不太多时详细显示
-                console.log(`    比较: "${elementText}" (去零宽空格: "${cleanElementText}") === "${text}" ? ${matches}`);
+                this.log(`    比较: "${elementText}" (去零宽空格: "${cleanElementText}") === "${text}" ? ${matches}`);
             }
             return matches;
         });
         
-        console.log('  ✅ 匹配的元素数量:', matchingElements.length);
+        this.log('  ✅ 匹配的元素数量:', matchingElements.length);
         
         // 如果指定了索引，返回对应的元素
         if (itemIndex !== undefined && itemIndex < matchingElements.length) {

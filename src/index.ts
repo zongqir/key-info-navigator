@@ -238,7 +238,7 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
             }
         };
 
-        console.log('%c[Key Info Navigator] 控制台调试接口已就绪', 'color: #4CAF50; font-weight: bold;');
+        console.log('%c[Key Info Navigator] 控制台调试接口已就绪开关:  KeyInfoNavigator.toggleDebug()', 'color: #4CAF50; font-weight: bold;');
         console.log('%c【调试日志控制】', 'color: #2196F3; font-weight: bold;');
         console.log('  KeyInfoNavigator.toggleDebug()    - 切换调试模式');
         console.log('  KeyInfoNavigator.enableDebug()    - 开启调试日志');
