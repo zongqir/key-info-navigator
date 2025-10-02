@@ -1,0 +1,358 @@
+/* ==========================================================================
+   移动端底部抽屉面板样式
+   ========================================================================== */
+
+.mobile-bottom-sheet {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200; /* 降低z-index，避免覆盖思源笔记的关键UI */
+  pointer-events: none; /* 默认不阻止点击事件 */
+  
+  /* 确保不影响页面布局 */
+  &:not(.state-half):not(.state-full) {
+    pointer-events: none;
+    
+    .bottom-sheet-container {
+      pointer-events: auto; /* 只有面板容器可点击 */
+    }
+  }
+  
+  /* 只有在需要交互时才启用pointer-events */
+  &.state-peek {
+    pointer-events: none; /* PEEK状态下大部分区域不阻止点击 */
+    
+    .bottom-sheet-container {
+      pointer-events: auto; /* 只有面板容器可点击 */
+    }
+  }
+  
+  &.state-half,
+  &.state-full {
+    pointer-events: auto; /* 展开状态才全面启用交互 */
+  }
+}
+
+/* 背景遮罩 */
+.bottom-sheet-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3); /* 减少透明度 */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* 默认不阻止点击 */
+  
+  /* 只有在半屏或全屏状态才显示遮罩 */
+  .mobile-bottom-sheet.state-half &,
+  .mobile-bottom-sheet.state-full & {
+    pointer-events: auto;
+  }
+}
+
+/* 抽屉容器 */
+.bottom-sheet-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--kinfo-bg-primary); /* 恢复背景色 */
+  border-radius: 8px 8px 0 0; /* 恢复小圆角 */
+  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.08); /* 恢复轻微阴影 */
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  
+  /* 移除最小高度限制，让它可以更薄 */
+  max-height: calc(100vh - 100px); /* 留出更多空间给思源笔记界面 */
+  
+  /* 避免影响文档滚动 */
+  overscroll-behavior: contain;
+}
+
+/* 拖拽手柄 */
+.bottom-sheet-handle {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* 让手柄条靠近顶部 */
+  height: 4px; /* 进一步减少手柄区域高度 */
+  padding: 0; /* 移除所有内边距 */
+  cursor: grab;
+  
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.handle-bar {
+  width: 28px; /* 稍微减少宽度 */
+  height: 1px; /* 减少到1px高度，极细 */
+  background: var(--kinfo-text-tertiary);
+  border-radius: 0.5px;
+  opacity: 0.4; /* 降低透明度 */
+  transition: all 0.2s ease;
+}
+
+.bottom-sheet-handle:hover .handle-bar {
+  opacity: 1;
+  width: 48px;
+}
+
+/* 预览内容区域 (PEEK 状态) */
+.bottom-sheet-peek-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0; /* 移除底部padding */
+  min-height: 6px; /* 进一步减少最小高度 */
+  background: transparent; /* 保持透明背景 */
+}
+
+.peek-summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.peek-title {
+  display: block;
+  font-size: 10px; /* 恢复可读的字体大小 */
+  font-weight: 500; /* 恢复正常字重 */
+  color: var(--kinfo-text-primary);
+  margin-bottom: 0;
+  line-height: 1.1; /* 稍微增加行高 */
+  opacity: 1; /* 恢复完全不透明 */
+}
+
+.peek-subtitle {
+  display: block;
+  font-size: 8px; /* 恢复可读的字体大小 */
+  color: var(--kinfo-text-secondary);
+  opacity: 0.8; /* 恢复正常透明度 */
+  line-height: 1.1; /* 稍微增加行高 */
+}
+
+.peek-action {
+  display: flex;
+  align-items: center;
+  padding-left: 8px; /* 恢复合适的内边距 */
+}
+
+.peek-arrow {
+  font-size: 12px; /* 恢复正常箭头大小 */
+  color: var(--kinfo-text-tertiary);
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+  opacity: 0.7; /* 恢复正常透明度 */
+}
+
+/* 完整内容区域 */
+.bottom-sheet-full-content {
+  display: none;
+  flex: 1;
+  overflow: hidden;
+  padding: 0; /* 完全移除padding，让内容直接贴边 */
+  
+  .formatted-text-dock {
+    height: 100%;
+    background: transparent;
+    
+    &__header {
+      padding: 0 10px 2px; /* 完全移除顶部padding，让图标直接贴近面板顶部 */
+      border-bottom: 1px solid var(--kinfo-border-light);
+      position: sticky;
+      top: 0;
+      background: var(--kinfo-bg-primary);
+      z-index: 10;
+    }
+    
+    &__title {
+      font-size: 14px; /* 减小字体适应手机 */
+      font-weight: 600;
+      gap: 8px; /* 增加图标间距 */
+      margin: 0; /* 移除任何默认边距 */
+      line-height: 1.2; /* 减少行高 */
+    }
+    
+    &__controls {
+      gap: 6px; /* 增加控制按钮间距 */
+    }
+    
+    &__filters {
+      gap: 4px; /* 增加过滤器间距 */
+    }
+    
+    &__content {
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    &__list {
+      padding: 2px 2px; /* 进一步减少列表内边距，让内容更靠近顶部 */
+      height: 100%;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}
+
+/* 状态样式 */
+.mobile-bottom-sheet {
+  /* PEEK 状态 - 只显示预览内容 */
+  &.state-peek {
+    .bottom-sheet-peek-content {
+      display: flex;
+    }
+    
+    .bottom-sheet-full-content {
+      display: none;
+    }
+    
+    .peek-arrow {
+      transform: rotate(0deg);
+    }
+    
+    .bottom-sheet-container {
+      max-height: 12px; /* 进一步减少总高度 */
+    }
+  }
+  
+  /* HALF 状态 - 半屏显示，但不要太高 */
+  &.state-half {
+    .bottom-sheet-peek-content {
+      display: none;
+    }
+    
+    .bottom-sheet-full-content {
+      display: flex;
+      max-height: 40vh; /* 减少到40%视口高度 */
+    }
+    
+    .bottom-sheet-container {
+      max-height: 40vh;
+    }
+  }
+  
+  /* FULL 状态 - 全屏显示，减少顶部空间 */
+  &.state-full {
+    .bottom-sheet-peek-content {
+      display: none;
+    }
+    
+    .bottom-sheet-handle {
+      height: 2px; /* 在FULL状态下保留handle但做得极薄 */
+      padding: 0;
+      
+      .handle-bar {
+        width: 100px; /* 在FULL状态下让handle bar更小更薄 */
+        height: 10px;
+        opacity: 0.3;
+      }
+    }
+    
+    .bottom-sheet-full-content {
+      display: flex;
+      max-height: calc(100vh - 80px); /* 减少顶部空间，让面板更高 */
+    }
+    
+    .bottom-sheet-container {
+      max-height: calc(100vh - 80px); /* 减少顶部空间 */
+    }
+  }
+}
+
+/* 手机端优化 */
+@media (max-width: 768px) {
+  .bottom-sheet-container {
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .peek-title {
+    font-size: 13px;
+  }
+  
+  .peek-subtitle {
+    font-size: 11px;
+  }
+  
+  .bottom-sheet-full-content {
+    .formatted-text-dock {
+      &__header {
+        padding: 10px 8px 6px;
+      }
+      
+      &__title {
+        font-size: 14px;
+      }
+      
+      &__list {
+        padding: 6px 2px;
+      }
+    }
+  }
+}
+
+/* 触摸优化 */
+@media (hover: none) and (pointer: coarse) {
+  .bottom-sheet-handle {
+    height: 40px;
+    padding: 12px 0;
+  }
+  
+  .handle-bar {
+    height: 5px;
+  }
+  
+  .peek-summary {
+    padding: 4px 0;
+  }
+}
+
+/* 动画优化 */
+@media (prefers-reduced-motion: reduce) {
+  .bottom-sheet-container,
+  .bottom-sheet-backdrop,
+  .handle-bar,
+  .peek-arrow {
+    transition: none !important;
+  }
+}
+
+/* 安全区域适配 */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-sheet-container {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+  
+  .bottom-sheet-full-content {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+}
+
+/* 深色模式特殊处理 */
+@media (prefers-color-scheme: dark) {
+  .bottom-sheet-container {
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .bottom-sheet-backdrop {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* 辅助功能支持 */
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-bottom-sheet * {
+    scroll-behavior: smooth;
+  }
+}
+
+/* 高分辨率屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .handle-bar {
+    border: 0.5px solid var(--kinfo-border-light);
+  }
+}
