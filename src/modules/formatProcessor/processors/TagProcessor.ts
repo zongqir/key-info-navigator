@@ -62,6 +62,7 @@ export class TagProcessor extends BaseFormatProcessor {
         this.log('TagProcessor.extractFromBlock called with block:', block, 'blockIndex:', blockIndex);
         
         if (block && block.tag) {
+            // 保留原始标签文本（包含#号），用于匹配DOM
             const tags = block.tag.split(',').map((tag: string) => tag.trim()).filter(Boolean);
             this.log('解析出的标签列表:', tags);
             
@@ -69,18 +70,31 @@ export class TagProcessor extends BaseFormatProcessor {
                 // 使用块在文档中的位置，而不是标签在块中的索引
                 const position = blockIndex !== undefined ? blockIndex : 0;
                 
+                // 思源在DOM中存储标签时会去掉#号，只保留零宽空格
+                const cleanTag = tag.replace(/^#+|#+$/g, '');
+                
+                console.log('🏷️ [TagProcessor] 提取标签:', tag);
+                console.log('  ├─ 原始标签（包含#）:', tag);
+                console.log('  └─ 干净标签（去除#，用于匹配DOM）:', cleanTag);
+                
                 const item = {
                     id: `tag_${block.id}_${tag}`,
-                    text: `#${tag}`,
+                    text: cleanTag, // 存储不带#的文本，用于匹配DOM（DOM中也没有#）
                     type: this.formatType,
                     blockId: block.id,
                     position: position,
                     context: this.truncateText(block.content || "", 50),
                     icon: this.getConfig().icon,
-                    color: this.getTagColor(tag),
-                    // 保存原始标签名称（不含#）用于渲染
-                    metadata: { tagName: tag, blockContent: block.content || "" }
+                    color: this.getTagColor(cleanTag),
+                    // 保存标签名用于显示
+                    metadata: { 
+                        displayName: cleanTag, // 显示用标签（不带#）
+                        blockContent: block.content || "" 
+                    }
                 };
+                
+                console.log('  ✅ item.text（用于匹配DOM）:', item.text);
+                console.log('  ✅ item.metadata.displayName（用于显示）:', item.metadata.displayName);
                 
                 this.log('创建的标签项:', item);
                 items.push(item);
@@ -132,7 +146,7 @@ export class TagProcessor extends BaseFormatProcessor {
                 
                 const item = {
                     id: this.generateId('html', `${actualBlockId}_${index}`),
-                    text: text,
+                    text: text, // 保留原始文本（可能包含#）
                     type: this.formatType,
                     blockId: actualBlockId, // 使用真实的段落ID
                     position: index,
@@ -141,7 +155,8 @@ export class TagProcessor extends BaseFormatProcessor {
                     color: this.getTagColor(tagName),
                     // 设置metadata用于胶囊状渲染
                     metadata: { 
-                        tagName: tagName, 
+                        tagName: text, // 原始标签（可能带#）
+                        displayName: tagName, // 显示用标签（不带#）
                         blockContent: element.parentElement?.textContent || "" 
                     }
                 };
@@ -163,15 +178,24 @@ export class TagProcessor extends BaseFormatProcessor {
     renderMainContent(item: FormattedTextItem): string {
         this.log('renderMainContent called with item:', item);
         
+        console.log('🎨 [TagProcessor] 渲染标签');
+        console.log('  ├─ item.text（原始）:', item.text);
+        console.log('  ├─ item.metadata:', item.metadata);
+        
         if (!item.metadata) {
             this.log('No metadata found, returning default text:', item.text);
+            console.log('  ❌ 没有metadata，返回默认文本:', item.text);
             return item.text;
         }
         
-        const { tagName, blockContent } = item.metadata;
-        const tagColor = this.getTagColor(tagName);
+        const { displayName, blockContent } = item.metadata;
+        const tagColor = this.getTagColor(displayName);
         
-        this.log('Rendering tag:', tagName, 'with color:', tagColor);
+        console.log('  ├─ displayName（用于显示）:', displayName);
+        console.log('  ├─ tagColor:', tagColor);
+        console.log('  └─ blockContent:', blockContent?.substring(0, 30));
+        
+        this.log('Rendering tag:', displayName, 'with color:', tagColor);
         
         // 截断块内容用于显示
         const truncatedContent = this.truncateText(blockContent, 80);
@@ -179,11 +203,13 @@ export class TagProcessor extends BaseFormatProcessor {
         const result = `
             <div class="formatted-text-dock__item-tag-inline">
                 <div class="formatted-text-dock__tag-shape" style="background-color: ${tagColor}">
-                    <span class="formatted-text-dock__tag-text">#${tagName}</span>
+                    <span class="formatted-text-dock__tag-text">${displayName}</span>
                 </div>
                 <span class="formatted-text-dock__tag-block-text">${this.escapeHtml(truncatedContent)}</span>
             </div>
         `;
+        
+        console.log('  ✅ 渲染完成，显示:', displayName);
         
         this.log('Generated HTML:', result);
         return result;
