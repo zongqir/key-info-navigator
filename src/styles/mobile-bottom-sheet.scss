@@ -8,7 +8,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 200; /* 降低z-index，避免覆盖思源笔记的关键UI */
+  z-index: 10; /* 进一步降低z-index，避免遮挡闪卡等重要内容 */
   pointer-events: none; /* 默认不阻止点击事件 */
   
   /* 确保不影响页面布局 */
@@ -42,7 +42,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3); /* 减少透明度 */
+  background: rgba(0, 0, 0, 0.1); /* 进一步减少透明度，避免影响闪卡显示 */
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none; /* 默认不阻止点击 */
@@ -172,17 +172,50 @@
     &__title {
       font-size: 14px; /* 减小字体适应手机 */
       font-weight: 600;
-      gap: 8px; /* 增加图标间距 */
+      gap: 12px; /* 增加图标间距，改善手机端显示 */
       margin: 0; /* 移除任何默认边距 */
       line-height: 1.2; /* 减少行高 */
+      
+      /* 标题图标优化 */
+      .title-icon {
+        min-width: 20px; /* 确保图标有足够空间 */
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     }
     
     &__controls {
-      gap: 6px; /* 增加控制按钮间距 */
+      gap: 8px; /* 减少控制按钮间距，改善手机端显示 */
+      
+      /* 手机端控制按钮优化 */
+      .control-btn {
+        min-width: 32px; /* 确保按钮有足够宽度 */
+        height: 32px; /* 统一按钮高度 */
+        padding: 6px; /* 增加内边距 */
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     }
     
     &__filters {
-      gap: 4px; /* 增加过滤器间距 */
+      gap: 0px; /* 手机端图标间距为0，完全紧贴 */
+      
+      /* 手机端过滤器按钮优化 */
+      .filter-btn {
+        min-width: 48px; /* 大幅增加BIU按钮宽度，让字母有更多空间 */
+        height: 32px; /* 统一按钮高度 */
+        padding: 6px 12px; /* 增加左右内边距，让字母不拥挤 */
+        font-size: 14px; /* 适中的字体大小 */
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap; /* 防止文字换行 */
+      }
     }
     
     &__content {
@@ -255,11 +288,11 @@
     
     .bottom-sheet-full-content {
       display: flex;
-      max-height: calc(100vh - 80px); /* 减少顶部空间，让面板更高 */
+      max-height: calc(100vh - 120px); /* 增加顶部空间，确保不遮挡闪卡 */
     }
     
     .bottom-sheet-container {
-      max-height: calc(100vh - 80px); /* 减少顶部空间 */
+      max-height: calc(100vh - 120px); /* 增加顶部空间，确保不遮挡闪卡 */
     }
   }
 }
@@ -268,6 +301,60 @@
 @media (max-width: 768px) {
   .bottom-sheet-container {
     border-radius: 12px 12px 0 0;
+  }
+  
+  /* 进一步优化小屏幕设备的按钮显示 */
+  .mobile-bottom-sheet .formatted-text-dock {
+    &__filters {
+      gap: 0px; /* 小屏幕下图标间距为0，完全紧贴 */
+      flex-wrap: wrap; /* 允许换行 */
+      
+      .filter-btn {
+        min-width: 52px; /* 小屏幕下进一步增加按钮宽度，让BIU字母更宽松 */
+        height: 36px; /* 增加按钮高度 */
+        padding: 8px 14px; /* 大幅增加左右内边距 */
+        font-size: 15px; /* 稍大的字体 */
+        font-weight: 500; /* 增加字体粗细 */
+      }
+    }
+    
+    &__controls {
+      gap: 8px; /* 减少控制按钮间距，让手机端更紧凑 */
+      
+      .control-btn {
+        min-width: 36px; /* 小屏幕下增加按钮宽度 */
+        height: 36px; /* 增加按钮高度 */
+        padding: 8px; /* 增加内边距 */
+      }
+    }
+    
+    &__title {
+      gap: 10px; /* 减少标题图标间距，让手机端更紧凑 */
+      
+      .title-icon {
+        min-width: 24px; /* 增加图标空间 */
+        height: 24px;
+      }
+    }
+  }
+  
+  /* 手机端BIU按钮专门优化 */
+  .mobile-bottom-sheet .format-filter {
+    width: 44px !important; /* 手机端BIU按钮适中宽度，不要太宽 */
+    height: 32px !important; /* 手机端按钮高度适中 */
+    
+    .filter-icon {
+      width: 44px !important; /* 图标容器匹配按钮宽度 */
+      height: 32px !important; /* 图标容器匹配按钮高度 */
+      
+      /* 手机端BIU背景色区域调整 */
+      div[style*="background: #0969da"],
+      div[style*="background: #FF6B6B"], 
+      div[style*="background: #8B5CF6"] {
+        width: 24px !important; /* 手机端BIU背景色宽度进一步缩小 */
+        height: 24px !important; /* 保持合适高度 */
+      }
+    }
   }
   
   .peek-title {

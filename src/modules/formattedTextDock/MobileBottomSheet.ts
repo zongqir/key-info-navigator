@@ -404,7 +404,7 @@ export class MobileBottomSheet {
                 translateY = '50%'; // 半屏
                 break;
             case BottomSheetState.FULL:
-                translateY = '40px'; // 减少顶部空间，让面板更贴近工具栏
+                translateY = '80px'; // 增加顶部空间，确保不遮挡闪卡等重要内容
                 break;
             default:
                 translateY = 'calc(100% - 12px)'; // 默认PEEK状态，极致压缩
