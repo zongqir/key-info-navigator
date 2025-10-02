@@ -109,7 +109,7 @@
       color: var(--kinfo-warning);
       background: var(--kinfo-bg-primary);
       padding: 0 4px;
-      z-index: 1000;
+      z-index: 50;
     }
   }
 }
@@ -125,7 +125,7 @@
   padding: 8px;
   font-size: 10px;
   color: var(--kinfo-text-secondary);
-  z-index: 10000;
+  z-index: 100;
   
   &__item {
     margin: 2px 0;
