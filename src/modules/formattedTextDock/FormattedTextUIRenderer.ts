@@ -79,10 +79,7 @@ export class FormattedTextUIRenderer {
             `;
         }).join("");
         
-        const separator = textFormatButtons && otherFormatButtons ? 
-            '<div class="filter-separator"></div>' : '';
-        
-        return textFormatButtons + separator + otherFormatButtons;
+        return textFormatButtons + otherFormatButtons;
     }
 
     /**
@@ -233,32 +230,33 @@ export class FormattedTextUIRenderer {
      * 获取格式类型对应的统一大小图标
      */
     public getFormatIcon(type: TextFormatType): string {
+        // 统一的现代配色方案 - 使用协调的色相和饱和度
         const icons = {
             [TextFormatType.BOLD]: `
-                <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 16px; width: 16px; background: #0969da; color: white; font-weight: 900; font-family: Arial, sans-serif; border-radius: 2px;">B</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #0969da; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">B</div>
             `,
             [TextFormatType.ITALIC]: `
-                <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 16px; width: 16px; background: #FF6B6B; color: white; font-style: italic; font-weight: bold; font-family: Arial, sans-serif; border-radius: 2px;">I</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #FF6B6B; color: white; font-style: italic; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">I</div>
             `,
             [TextFormatType.UNDERLINE]: `
-                <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 16px; width: 16px; background: #8B5CF6; color: white; text-decoration: underline; font-weight: bold; font-family: Arial, sans-serif; border-radius: 2px;">U</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #8B5CF6; color: white; text-decoration: underline; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1; text-underline-offset: 2px;">U</div>
             `,
             [TextFormatType.HIGHLIGHT]: `
-                <div style="font-size: 20px; display: flex; align-items: center; justify-content: center; height: 20px; color: #FF8C00;">🌟</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #F59E0B; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">H</div>
             `,
             [TextFormatType.MEMO]: `
-                <div style="font-size: 20px; display: flex; align-items: center; justify-content: center; height: 20px; color: #20B2AA;">📝</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #8B5CF6; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">M</div>
             `,
             [TextFormatType.TAG]: `
-                <div style="font-size: 20px; display: flex; align-items: center; justify-content: center; height: 20px; color: #FFD700;">🏷️</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #EC4899; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">#</div>
             `,
             [TextFormatType.TODO]: `
-                <div style="font-size: 20px; display: flex; align-items: center; justify-content: center; height: 20px; color: #32CD32;">✅</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #10B981; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">✓</div>
             `
         };
         
         return icons[type] || `
-            <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 16px;">●</div>
+            <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px;">●</div>
         `;
     }
 
@@ -268,13 +266,13 @@ export class FormattedTextUIRenderer {
     public getFormatIconWithColor(type: TextFormatType, color: string): string {
         const icons: Partial<Record<TextFormatType, string>> = {
             [TextFormatType.BOLD]: `
-                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #0969da; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; border-radius: 4px; line-height: 1; padding: 0; margin: 0; text-align: center; vertical-align: middle;">B</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #0969da; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">B</div>
             `,
             [TextFormatType.ITALIC]: `
-                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #FF6B6B; color: white; font-style: italic; font-weight: bold; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; border-radius: 4px; line-height: 1; padding: 0; margin: 0; text-align: center; vertical-align: middle;">I</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #FF6B6B; color: white; font-style: italic; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">I</div>
             `,
             [TextFormatType.UNDERLINE]: `
-                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #8B5CF6; color: white; text-decoration: underline; font-weight: bold; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; border-radius: 4px; line-height: 1; padding: 0; margin: 0; text-align: center; vertical-align: middle; text-underline-offset: 1px;">U</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #8B5CF6; color: white; text-decoration: underline; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1; text-underline-offset: 2px;">U</div>
             `
         };
         
