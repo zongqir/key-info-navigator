@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.2.0 2025-10-03
+
+### ✨ New Features
+* 图标统一 - Unified icon design across the plugin
+* 默认按照文章出现的顺序排序 - Default sorting by document appearance order
+* 备注栏UI调整美化 - Enhanced and beautified memo panel UI
+
+### 🐛 Bug Fixes
+* 修复滚动条影响其他主题的BUG - Fixed scrollbar affecting other themes
+
 ## v2.0.0 2025-10-02
 
 ### 🐛 Bug Fixes

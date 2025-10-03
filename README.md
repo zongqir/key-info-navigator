@@ -2,11 +2,26 @@
 
 # Key Info Navigator
 
-> Current Version: v2.1.0 | Release Date: 2025-10-02
+> Current Version: v2.2.0 | Release Date: 2025-10-03
 
 A plugin that helps you quickly locate and navigate key information in SiYuan notes. Display important content in your documents through a sidebar to make your reading and editing more efficient.
 
-## ✨ What's New in v2.1.0
+## Features
+
+This plugin helps you:
+- 🔍 Quickly find important information in documents (bold, italic, highlight and other formatted text)
+- 📍 View all key content at a glance in the sidebar
+- ⚡ Jump to any position in the document with one click
+- 📝 Add notes and comments to important content
+
+## ✨ What's New in v2.2.0
+
+- 🎨 Unified icon design for better visual consistency
+- 🔄 Default sorting by document appearance order for natural reading flow
+- 💄 Enhanced and beautified memo panel UI
+- 🐛 Fixed scrollbar affecting other themes
+
+## What's New in v2.1.0
 
 - 📱 Added mobile support for better experience on phones and tablets
 
@@ -19,13 +34,12 @@ A plugin that helps you quickly locate and navigate key information in SiYuan no
 - 🏷️ Smart button display: Auto-hide memo buttons for tags and TODOs
 - ✅ Fixed tag deletion functionality for smoother operations
 
-## Features
+## 🎯 Future Plans
 
-This plugin helps you:
-- 🔍 Quickly find important information in documents (bold, italic, highlight and other formatted text)
-- 📍 View all key content at a glance in the sidebar
-- ⚡ Jump to any position in the document with one click
-- 📝 Add notes and comments to important content
+- ⚙️ Support customizable TODO list icons for personalization
+- 🎭 Support extraction and display of other style formats
+- 🔀 Configurable multi-dimensional sorting options
+- 📁 Support document-level persistence for sorting and filtering preferences instead of global storage
 
 ## How to Use
 
