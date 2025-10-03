@@ -230,7 +230,7 @@ export class FormattedTextUIRenderer {
      * 获取格式类型对应的统一大小图标
      */
     public getFormatIcon(type: TextFormatType): string {
-        // 统一的现代配色方案 - 使用协调的色相和饱和度
+        // 图标背景色与竖线指示器颜色保持一致（来自各Processor的color配置）
         const icons = {
             [TextFormatType.BOLD]: `
                 <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #0969da; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">B</div>
@@ -242,16 +242,16 @@ export class FormattedTextUIRenderer {
                 <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #8B5CF6; color: white; text-decoration: underline; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1; text-underline-offset: 2px;">U</div>
             `,
             [TextFormatType.HIGHLIGHT]: `
-                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #F59E0B; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">H</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #FF8C00; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">H</div>
             `,
             [TextFormatType.MEMO]: `
-                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #8B5CF6; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">M</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #20B2AA; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">M</div>
             `,
             [TextFormatType.TAG]: `
-                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #EC4899; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">#</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #FFD700; color: #333; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">#</div>
             `,
             [TextFormatType.TODO]: `
-                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #10B981; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">✓</div>
+                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #32CD32; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">✓</div>
             `
         };
         
