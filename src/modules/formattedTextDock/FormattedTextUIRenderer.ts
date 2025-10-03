@@ -246,7 +246,7 @@ export class FormattedTextUIRenderer {
                 <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #20B2AA; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">M</div>
             `,
             [TextFormatType.TAG]: `
-                <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #FFD700; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">#</div>
+                <div style="font-size: 16px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #FFD700; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">#</div>
             `,
             [TextFormatType.TODO]: `
                 <div style="font-size: 14px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; background: #32CD32; color: white; font-weight: 900; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; border-radius: 3px; line-height: 1;">✓</div>
