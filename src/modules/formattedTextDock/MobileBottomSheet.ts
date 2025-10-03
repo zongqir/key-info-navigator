@@ -178,6 +178,9 @@ export class MobileBottomSheet {
         // 绑定事件
         this.bindEvents();
         
+        // 确保DOM状态与enabledFormats数组一致
+        this.updateFilterButtonsState();
+        
         // 初始状态设置
         this.setState(BottomSheetState.PEEK);
     }
@@ -242,8 +245,59 @@ export class MobileBottomSheet {
             this.setState(BottomSheetState.PEEK);
         });
         
-        // 绑定内容区域的事件
+        // 绑定内容区域的事件（使用手机版专用的事件处理）
+        this.bindMobileEvents();
         this.eventHandler.bindEvents();
+    }
+
+    /**
+     * 绑定手机版专用事件 - 优化触摸响应
+     */
+    private bindMobileEvents(): void {
+        let lastToggleTime = 0;
+        
+        // 过滤器按钮 - 使用 touchend 实现单击切换
+        this.fullContent.querySelectorAll<HTMLButtonElement>(".format-filter")
+            .forEach(btn => {
+                const handleToggle = (e: Event) => {
+                    // 防止 touchend 和 click 同时触发
+                    const now = Date.now();
+                    if (now - lastToggleTime < 300) {
+                        this.log('忽略重复触发');
+                        return;
+                    }
+                    lastToggleTime = now;
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const format = btn.dataset.format as TextFormatType;
+                    this.log('手机版格式切换:', format, '事件类型:', e.type);
+                    this.toggleFormat(format);
+                };
+                
+                // 移动端使用 touchend，避免300ms延迟
+                btn.addEventListener("touchend", handleToggle, { passive: false });
+            });
+
+        // 刷新按钮
+        const refreshBtn = this.fullContent.querySelector<HTMLButtonElement>('[data-action="refresh"]');
+        if (refreshBtn) {
+            let lastRefreshTime = 0;
+            const handleRefresh = (e: Event) => {
+                const now = Date.now();
+                if (now - lastRefreshTime < 300) {
+                    return;
+                }
+                lastRefreshTime = now;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                this.log('手机版手动刷新');
+                this.refresh(true);
+            };
+            
+            refreshBtn.addEventListener("touchend", handleRefresh, { passive: false });
+        }
     }
 
     /**
@@ -757,6 +811,10 @@ export class MobileBottomSheet {
         
         // 绑定点击事件
         this.eventHandler.bindItemEvents(content);
+        
+        // 重新绑定手机版事件（因为DOM重新生成了）
+        this.bindMobileEvents();
+        
         this.log('列表渲染完成');
     }
 
@@ -804,6 +862,9 @@ export class MobileBottomSheet {
             this.log(`启用格式类型: ${type}`);
         }
         
+        // 同步更新DOM状态 - 添加视觉反馈
+        this.updateFilterButtonsState();
+        
         this.eventHandler.updateEnabledFormats(this.enabledFormats);
         this.log('当前启用的格式类型:', this.enabledFormats);
         
@@ -813,6 +874,22 @@ export class MobileBottomSheet {
         }
         
         this.renderList();
+    }
+
+    /**
+     * 更新过滤器按钮状态以同步DOM - 提供视觉反馈
+     */
+    private updateFilterButtonsState(): void {
+        const filterButtons = this.fullContent.querySelectorAll<HTMLButtonElement>('.format-filter');
+        filterButtons.forEach(btn => {
+            const format = btn.dataset.format as TextFormatType;
+            if (this.enabledFormats.includes(format)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        this.log('过滤器按钮状态已更新:', this.enabledFormats);
     }
 
     private getActiveFormats(): TextFormatType[] {

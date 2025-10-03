@@ -241,7 +241,8 @@
       gap: 0px; /* 手机端图标间距稍微增加，避免换行 */
       
       /* 手机端过滤器按钮优化 */
-      .filter-btn {
+      .filter-btn,
+      .format-filter {
         min-width: 40px; /* 减少按钮宽度，让更多按钮能放在一行 */
         height: 32px; /* 统一按钮高度 */
         padding: 6px 8px; /* 减少内边距，节省空间 */
@@ -251,6 +252,14 @@
         align-items: center;
         justify-content: center;
         white-space: nowrap; /* 防止文字换行 */
+        transition: all 0.15s ease; /* 添加平滑过渡效果 */
+        
+        /* 点击时的视觉反馈 - 按下去的效果 */
+        &:active {
+          transform: scale(0.92); /* 点击时缩小，模拟按下 */
+          opacity: 0.7; /* 点击时降低透明度 */
+          filter: brightness(0.95); /* 稍微变暗 */
+        }
       }
     }
     
@@ -414,12 +423,21 @@
       gap: 0px; /* 小屏幕下图标间距稍微增加，避免换行 */
       flex-wrap: nowrap; /* 不允许换行，保持单行显示 */
       
-      .filter-btn {
+      .filter-btn,
+      .format-filter {
         min-width: 38px; /* 小屏幕下减少按钮宽度，确保单行显示 */
         height: 32px; /* 统一高度 */
         padding: 6px 6px; /* 减少内边距，节省空间 */
         font-size: 12px; /* 小字体，节省空间 */
         font-weight: 500; /* 增加字体粗细 */
+        transition: all 0.15s ease; /* 添加平滑过渡效果 */
+        
+        /* 点击时的视觉反馈 - 移动端加强按下效果 */
+        &:active {
+          transform: scale(0.88); /* 移动端点击时明显的缩小，按下效果 */
+          opacity: 0.6; /* 移动端点击时明显的透明度变化 */
+          filter: brightness(0.9); /* 变暗效果 */
+        }
       }
     }
     
