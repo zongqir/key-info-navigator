@@ -1,6 +1,7 @@
 import { fetchPost } from 'siyuan';
 import { IFormatProcessor, TextFormatType, FormattedTextItem, ParseOptions } from './interfaces';
 import { FormatProcessorFactory } from './FormatProcessorFactory';
+import { SorterFactory } from '../sorter';
 
 /**
  * 文本格式解析器
@@ -11,6 +12,7 @@ export class TextFormatParser {
     constructor(private logger?: (...args: any[]) => void) {
         if (logger) {
             FormatProcessorFactory.setLogger(logger);
+            SorterFactory.setLogger(logger);
         }
     }
     
@@ -47,7 +49,11 @@ export class TextFormatParser {
                 allItems.push(...spanItems);
             }
             
-            return allItems;
+            // 使用排序器进行排序（默认为渲染顺序排序）
+            const sorter = SorterFactory.getDefaultSorter();
+            const sortedItems = await sorter.sort(allItems);
+            
+            return sortedItems;
             
         } catch (error) {
             this.log('解析格式化文本时出错:', error);
@@ -214,7 +220,8 @@ export class TextFormatParser {
     }
     
     /**
-     * 过滤和排序结果
+     * 过滤结果（去重和限制数量）
+     * 注意：排序已移至 parseFormattedTexts 方法中使用排序器完成
      */
     private filterAndSortResults(items: FormattedTextItem[], options: ParseOptions): FormattedTextItem[] {
         // 去重 - 包含位置信息，确保相同文本不同位置的项目都被保留
@@ -229,14 +236,6 @@ export class TextFormatParser {
         }
         
         let result = Array.from(uniqueItems.values());
-        
-        // 排序：按块ID和位置
-        result.sort((a, b) => {
-            if (a.blockId !== b.blockId) {
-                return a.blockId.localeCompare(b.blockId);
-            }
-            return a.position - b.position;
-        });
         
         // 应用最大结果限制
         if (options.maxResults && result.length > options.maxResults) {
