@@ -461,21 +461,20 @@
     }
   }
   
-  /* 手机端BIU按钮专门优化 */
+  /* 手机端所有过滤按钮专门优化 */
   .mobile-bottom-sheet .format-filter {
-    width: 44px !important; /* 手机端BIU按钮适中宽度，不要太宽 */
+    width: 44px !important; /* 手机端按钮适中宽度，不要太宽 */
     height: 32px !important; /* 手机端按钮高度适中 */
     
     .filter-icon {
       width: 44px !important; /* 图标容器匹配按钮宽度 */
       height: 32px !important; /* 图标容器匹配按钮高度 */
       
-      /* 手机端BIU背景色区域调整 */
-      div[style*="background: #0969da"],
-      div[style*="background: #FF6B6B"], 
-      div[style*="background: #8B5CF6"] {
-        width: 24px !important; /* 手机端BIU背景色宽度进一步缩小 */
-        height: 24px !important; /* 保持合适高度 */
+      /* 手机端所有背景色区域统一调整 - 通用规则，自动适配所有格式化类型 */
+      div[style*="background:"],
+      div[style*="background :"] {
+        width: 24px !important; /* 手机端统一背景色宽度 */
+        height: 24px !important; /* 手机端统一背景色高度 */
       }
     }
   }
