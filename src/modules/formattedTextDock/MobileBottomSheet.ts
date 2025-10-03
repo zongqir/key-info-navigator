@@ -245,8 +245,10 @@ export class MobileBottomSheet {
             this.setState(BottomSheetState.PEEK);
         });
         
-        // 绑定内容区域的事件（使用手机版专用的事件处理）
+        // 先绑定手机版专用的 touchend 事件
         this.bindMobileEvents();
+        
+        // 再绑定标准的事件处理器（会添加 click 事件，但 touchend 的 preventDefault 会阻止 click 触发）
         this.eventHandler.bindEvents();
     }
 
@@ -254,50 +256,86 @@ export class MobileBottomSheet {
      * 绑定手机版专用事件 - 优化触摸响应
      */
     private bindMobileEvents(): void {
-        let lastToggleTime = 0;
+        this.log('🔧 [bindMobileEvents] 开始绑定手机版专用事件');
         
-        // 过滤器按钮 - 使用 touchend 实现单击切换
-        this.fullContent.querySelectorAll<HTMLButtonElement>(".format-filter")
-            .forEach(btn => {
-                const handleToggle = (e: Event) => {
-                    // 防止 touchend 和 click 同时触发
+        // 确保等待DOM完全渲染
+        setTimeout(() => {
+            let lastToggleTime = 0;
+            
+            // 过滤器按钮 - 使用 touchstart 实现即时响应
+            const filterButtons = this.fullContent.querySelectorAll<HTMLButtonElement>(".format-filter");
+            this.log(`📱 [bindMobileEvents] 找到 ${filterButtons.length} 个过滤器按钮`);
+            this.log(`📱 [bindMobileEvents] fullContent:`, this.fullContent);
+            
+            filterButtons.forEach((btn, index) => {
+                const format = btn.dataset.format;
+                this.log(`📱 [bindMobileEvents] 绑定第 ${index + 1} 个按钮，格式: ${format}`);
+                
+                // 使用 touchstart 而不是 touchend，提供更即时的反馈
+                const handleTouchStart = (e: TouchEvent) => {
+                    this.log('👆 [touchstart] 触摸开始');
+                    // 不阻止默认行为，让 :active 样式生效
+                };
+                
+                const handleToggle = (e: TouchEvent) => {
+                    this.log('👆 [touchend] 触摸结束');
+                    
+                    // 防止重复触发
                     const now = Date.now();
                     if (now - lastToggleTime < 300) {
-                        this.log('忽略重复触发');
+                        this.log('⏱️ [touchend] 忽略重复触发，间隔:', now - lastToggleTime);
+                        e.preventDefault();
+                        e.stopPropagation();
                         return;
                     }
                     lastToggleTime = now;
                     
-                    e.preventDefault();
+                    e.preventDefault(); // 阻止后续的 click 事件
                     e.stopPropagation();
                     const format = btn.dataset.format as TextFormatType;
-                    this.log('手机版格式切换:', format, '事件类型:', e.type);
+                    this.log('✅ [touchend] 手机版格式切换触发:', format);
                     this.toggleFormat(format);
                 };
                 
-                // 移动端使用 touchend，避免300ms延迟
-                btn.addEventListener("touchend", handleToggle, { passive: false });
+                // 绑定 touchstart 用于视觉反馈
+                btn.addEventListener("touchstart", handleTouchStart as EventListener, { passive: true });
+                // 绑定 touchend 用于实际切换
+                btn.addEventListener("touchend", handleToggle as EventListener, { passive: false });
+                
+                this.log(`✅ [bindMobileEvents] 第 ${index + 1} 个按钮事件绑定完成`);
             });
 
-        // 刷新按钮
-        const refreshBtn = this.fullContent.querySelector<HTMLButtonElement>('[data-action="refresh"]');
-        if (refreshBtn) {
-            let lastRefreshTime = 0;
-            const handleRefresh = (e: Event) => {
-                const now = Date.now();
-                if (now - lastRefreshTime < 300) {
-                    return;
-                }
-                lastRefreshTime = now;
+            // 刷新按钮
+            const refreshBtn = this.fullContent.querySelector<HTMLButtonElement>('[data-action="refresh"]');
+            if (refreshBtn) {
+                this.log('🔄 [bindMobileEvents] 找到刷新按钮，开始绑定');
+                let lastRefreshTime = 0;
+                const handleRefresh = (e: TouchEvent) => {
+                    this.log('🔄 [touchend] 刷新按钮触摸');
+                    
+                    // 防止重复触发
+                    const now = Date.now();
+                    if (now - lastRefreshTime < 300) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
+                    lastRefreshTime = now;
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.log('🔄 [touchend] 手机版手动刷新触发');
+                    this.refresh(true);
+                };
                 
-                e.preventDefault();
-                e.stopPropagation();
-                this.log('手机版手动刷新');
-                this.refresh(true);
-            };
+                refreshBtn.addEventListener("touchend", handleRefresh as EventListener, { passive: false });
+                this.log('✅ [bindMobileEvents] 刷新按钮绑定完成');
+            } else {
+                this.log('⚠️ [bindMobileEvents] 未找到刷新按钮');
+            }
             
-            refreshBtn.addEventListener("touchend", handleRefresh, { passive: false });
-        }
+            this.log('✅ [bindMobileEvents] 所有手机版事件绑定完成');
+        }, 100); // 延迟100ms确保DOM完全渲染
     }
 
     /**
@@ -809,11 +847,10 @@ export class MobileBottomSheet {
 
         content.innerHTML = `<div class="formatted-text-dock__list">${listHTML}</div>`;
         
-        // 绑定点击事件
+        // 绑定列表项的点击事件（导航、备注等）
         this.eventHandler.bindItemEvents(content);
         
-        // 重新绑定手机版事件（因为DOM重新生成了）
-        this.bindMobileEvents();
+        // 注意：过滤器按钮在header中，不需要重新绑定
         
         this.log('列表渲染完成');
     }
