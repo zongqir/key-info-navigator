@@ -6,6 +6,17 @@ import { TextFormatParser } from "../formatProcessor/TextFormatParser";
  * 负责生成和渲染侧边栏的UI元素
  */
 export class FormattedTextUIRenderer {
+    // 所有可用的格式类型（固定不变）
+    private readonly allFormats: TextFormatType[] = [
+        TextFormatType.BOLD,
+        TextFormatType.ITALIC,
+        TextFormatType.UNDERLINE,
+        TextFormatType.HIGHLIGHT,
+        TextFormatType.MEMO,
+        TextFormatType.TAG,
+        TextFormatType.TODO,
+    ];
+
     constructor(
         private parser: TextFormatParser,
         private enabledFormats: TextFormatType[],
@@ -45,16 +56,16 @@ export class FormattedTextUIRenderer {
      */
     public createFiltersHTML(): string {
         const textFormats = [TextFormatType.BOLD, TextFormatType.ITALIC, TextFormatType.UNDERLINE];
-        const otherFormats = this.enabledFormats.filter(type => !textFormats.includes(type));
+        const otherFormats = this.allFormats.filter(type => !textFormats.includes(type));
         
         const textFormatButtons = textFormats
-            .filter(type => this.enabledFormats.includes(type))
             .map(type => {
                 const processor = this.parser.getFormatProcessor(type);
                 const config = processor.getConfig();
+                const isActive = this.enabledFormats.includes(type);
                 
                 return `
-                    <button class="format-filter active" 
+                    <button class="format-filter ${isActive ? 'active' : ''}" 
                             data-format="${type}"
                             title="${this.getFormatDisplayName(type)}">
                         <div class="filter-icon">
@@ -67,9 +78,10 @@ export class FormattedTextUIRenderer {
         const otherFormatButtons = otherFormats.map(type => {
             const processor = this.parser.getFormatProcessor(type);
             const config = processor.getConfig();
+            const isActive = this.enabledFormats.includes(type);
             
             return `
-                <button class="format-filter active" 
+                <button class="format-filter ${isActive ? 'active' : ''}" 
                         data-format="${type}"
                         title="${this.getFormatDisplayName(type)}">
                     <div class="filter-icon" style="color:${config.color}">

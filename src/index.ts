@@ -27,7 +27,16 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
     
     // 默认设置
     private settings = {
-        enableDebugLog: false  // 默认关闭调试日志
+        enableDebugLog: false,  // 默认关闭调试日志
+        enabledFormats: [
+            'bold',
+            'italic', 
+            'underline',
+            'highlight',
+            'memo',
+            'tag',
+            'todo'
+        ] as string[]  // 默认启用所有格式
     };
 
     async onload() {
@@ -141,6 +150,30 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
         } catch (error) {
             Logger.error('保存设置失败:', error);
         }
+    }
+
+    /**
+     * 保存筛选状态
+     */
+    public async saveFilterSettings(enabledFormats: string[]) {
+        this.settings.enabledFormats = enabledFormats;
+        await this.saveSettings();
+        Logger.log('筛选状态已保存:', enabledFormats);
+    }
+
+    /**
+     * 获取筛选状态
+     */
+    public getFilterSettings(): string[] {
+        return this.settings.enabledFormats || [
+            'bold',
+            'italic', 
+            'underline',
+            'highlight',
+            'memo',
+            'tag',
+            'todo'
+        ];
     }
 
     /**
@@ -421,7 +454,9 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
                 this.formattedTextDock = new FormattedTextDock(
                     dock.element as HTMLElement,
                     this.i18n,
-                    moduleLogger.log
+                    moduleLogger.log,
+                    this.getFilterSettings(),
+                    (formats) => this.saveFilterSettings(formats)
                 );
             },
             destroy: () => {
@@ -441,7 +476,9 @@ export default class KeyInfoNavigatorPlugin extends Plugin {
             
             this.mobileBottomSheet = new MobileBottomSheet(
                 this.i18n,
-                moduleLogger.log
+                moduleLogger.log,
+                this.getFilterSettings(),
+                (formats) => this.saveFilterSettings(formats)
             );
             
             Logger.log('移动端UI初始化完成');

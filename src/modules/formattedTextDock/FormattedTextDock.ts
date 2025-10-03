@@ -39,10 +39,18 @@ export class FormattedTextDock {
     constructor(
         private element: HTMLElement,
         private i18n: any,
-        private logger?: (...args: any[]) => void
+        private logger?: (...args: any[]) => void,
+        initialEnabledFormats?: string[],
+        private onFilterChange?: (formats: string[]) => void
     ) {
         this.log('构造函数开始初始化');
         this.parser = new TextFormatParser(logger);
+        
+        // 从保存的设置中恢复筛选状态
+        if (initialEnabledFormats && initialEnabledFormats.length > 0) {
+            this.enabledFormats = initialEnabledFormats as TextFormatType[];
+            this.log('从设置中恢复筛选状态:', this.enabledFormats);
+        }
         
         // 初始化状态变化处理器
         this.readonlyStateChangeHandler = (isReadonly: boolean) => {
@@ -354,6 +362,12 @@ export class FormattedTextDock {
         this.eventHandler.updateEnabledFormats(this.enabledFormats);
         
         this.log('当前启用的格式类型:', this.enabledFormats);
+        
+        // 保存筛选状态
+        if (this.onFilterChange) {
+            this.onFilterChange(this.enabledFormats);
+        }
+        
         this.renderList();
     }
 
