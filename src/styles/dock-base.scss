@@ -57,30 +57,39 @@
 
   /* 刷新按钮 */
   &__refresh {
+    flex-shrink: 0;
+    padding: 0;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    background: transparent;
-    border: none;
-    transition: all 0.15s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    color: var(--b3-theme-on-surface);
+    
+    svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      transition: all 0.2s ease;
+    }
 
     &:hover {
-      background: var(--kinfo-bg-surface-hover);
+      background: var(--b3-theme-surface-hover);
+      
+      svg {
+        transform: rotate(180deg);
+      }
     }
 
     &:active {
-      background: var(--kinfo-bg-surface-active);
-      transform: scale(0.95);
-    }
-
-    svg {
-      width: 14px;
-      height: 14px;
-      color: var(--kinfo-text-tertiary);
+      transform: scale(0.92);
+      background: var(--b3-theme-surface-active);
     }
   }
 
