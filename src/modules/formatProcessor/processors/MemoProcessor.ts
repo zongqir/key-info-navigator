@@ -33,10 +33,19 @@ export class MemoProcessor extends BaseFormatProcessor {
         // 从 markdown 中提取被标记的文本（括号外的部分）
         let markedText = '';
         if (span.markdown) {
-            // 格式：fwefwefwe<sup>(fwefewfwe)</sup>
-            // 移除 <sup>...</sup> 部分，保留前面的文本
-            const match = span.markdown.match(/^(.+?)<sup>/);
-            markedText = match ? this.cleanText(match[1]) : this.cleanText(span.content || '');
+            // 尝试多种格式提取被标记文本
+            let match = span.markdown.match(/^(.+?)<sup>/);  // 格式1：xxx<sup>
+            if (match) {
+                markedText = this.cleanText(match[1]);
+            } else {
+                // 格式2：xxx（yyy） 或 xxx(yyy) - 提取括号前的内容
+                match = span.markdown.match(/^(.+?)[（(]/);
+                if (match) {
+                    markedText = this.cleanText(match[1]);
+                } else {
+                    markedText = this.cleanText(span.content || '');
+                }
+            }
         } else {
             markedText = this.cleanText(span.content || '');
         }
@@ -155,45 +164,66 @@ export class MemoProcessor extends BaseFormatProcessor {
 
     /**
      * 从Markdown文本中提取备注内容
-     * 格式：划线文本(备注内容)
+     * 支持多种格式：
+     * 1. 标准格式：划线文本<sup>(备注内容)</sup>
+     * 2. 中文括号：划线文本（备注内容）
+     * 3. 英文括号：划线文本(备注内容)
      */
     private extractMemoFromMarkdown(markdown: string): string {
-        // 格式：fwefwefwe<sup>(fwefewfwe)</sup>
-        // 提取 <sup>(...)</sup> 中的括号内容
-        const match = markdown.match(/<sup>\((.+?)\)<\/sup>/);
-        return match ? match[1] : '';
+        // 格式1：fwefwefwe<sup>(fwefewfwe)</sup> - 标准格式
+        let match = markdown.match(/<sup>\((.+?)\)<\/sup>/);
+        if (match) return match[1];
+        
+        // 格式2：fwefwefwe<sup>（fwefewfwe）</sup> - 中文括号带sup标签
+        match = markdown.match(/<sup>（(.+?)）<\/sup>/);
+        if (match) return match[1];
+        
+        // 格式3：fwefwefwe（fwefewfwe） - 纯中文括号
+        match = markdown.match(/(.+?)（(.+?)）$/);
+        if (match) return match[2];
+        
+        // 格式4：fwefwefwe(fwefewfwe) - 纯英文括号
+        match = markdown.match(/(.+?)\((.+?)\)$/);
+        if (match) return match[2];
+        
+        return '';
     }
 
     /**
      * 从文本中提取备注内容（如果格式包含括号）
+     * 支持中文括号（）和英文括号()
      */
     private extractMemoFromText(text: string): string {
-        // 如果文本包含括号，提取括号内容作为备注
-        const match = text.match(/(.+?)\((.+?)\)$/);
+        // 优先匹配中文括号
+        let match = text.match(/(.+?)（(.+?)）$/);
+        if (match) return match[2];
+        
+        // 匹配英文括号
+        match = text.match(/(.+?)\((.+?)\)$/);
         return match ? match[2] : '';
     }
 
     /**
-     * 自定义渲染主要内容 - 只显示划线文本
+     * 自定义渲染主要内容 - 第一行：只显示被标记的文本
      */
     public renderMainContent(item: FormattedTextItem): string {
         const markedText = item.text;
         
-        // 只显示被标记的文本，备注内容在详细信息中显示
+        // 第一行只显示被标记的文本（带下划线样式）
         return `<span class="formatted-text-dock__memo-marked-text">${this.escapeHtml(markedText)}</span>`;
     }
 
     /**
-     * 自定义渲染详细内容 - 显示备注卡片（无缩进版本）
+     * 自定义渲染详细内容 - 第二行：显示备注卡片
      */
     public renderItemDetails(item: FormattedTextItem, displayText: string): string {
         const memoContent = item.memoContent || '';
         
         if (!memoContent) {
-            return ''; // 没有备注内容就不显示卡片
+            return ''; // 没有备注内容就不显示第二行
         }
         
-        // 渲染备注卡片
+        // 第二行显示备注内容卡片
         return `
             <div class="formatted-text-dock__item-memo">
                 <div class="formatted-text-dock__item-memo-content">${this.escapeHtml(memoContent)}</div>
