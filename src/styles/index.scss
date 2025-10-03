@@ -185,35 +185,9 @@
 }
 
 /* ==========================================================================
-   自定义滚动条全局样式
+   自定义滚动条样式（已移除全局样式，各组件使用自己的滚动条样式）
+   - 桌面版 Dock：参见 dock-base.scss
+   - 移动版组件：参见 mobile-bottom-sheet.scss
    ========================================================================== */
 
-/* WebKit 浏览器滚动条 */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--kinfo-scroll-track);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--kinfo-scroll-thumb);
-  border-radius: 4px;
-  
-  &:hover {
-    background: var(--kinfo-scroll-thumb-hover);
-  }
-  
-  &:active {
-    background: var(--kinfo-border-strong);
-  }
-}
-
-/* Firefox 滚动条 */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--kinfo-scroll-thumb) var(--kinfo-scroll-track);
-}
+/* 注意：全局滚动条样式已移除，避免影响思源笔记的其他部分 */
