@@ -231,13 +231,15 @@ export class TextFormatParser {
             }
             
             // 按优先级排序，选择优先级最高的处理器
+            // 注意：这里只对单个span中的多格式冲突进行优先级选择
+            // 不同的span应该都被处理，在侧边栏中显示多个条目
             matchingProcessors.sort((a, b) => a.priority - b.priority);
             const selectedProcessor = matchingProcessors[0].processor;
             
             // 如果有多个匹配的处理器，记录优先级选择日志
             if (matchingProcessors.length > 1) {
                 const formatTypes = matchingProcessors.map(mp => mp.processor.formatType).join(', ');
-                this.log(`检测到多格式冲突，优先级选择: ${selectedProcessor.formatType} (span类型: ${span.type}, 可选格式: ${formatTypes})`);
+                this.log(`单个span多格式冲突，优先级选择: ${selectedProcessor.formatType} (span类型: ${span.type}, 可选格式: ${formatTypes})`);
             }
             
             // 使用选中的处理器提取内容
