@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.3.0 2025-10-04
+
+### ✨ New Features
+* 支持多种高亮样式展示 - Support for multiple highlight styles display
+* UI筛选逻辑优化 - Optimized UI filtering logic
+
+### 🐛 Bug Fixes
+* 修复复合场景识别逻辑 - Fixed compound scenario recognition logic
+
+### 🎨 UI/UX Improvements
+* 夜间模式深度美化 - Enhanced dark mode visual experience
+* 界面布局更加紧凑 - More compact interface layout
+* 卡片UI全面优化 - Comprehensive card UI optimization
+* 整体视觉体验提升 - Overall visual experience enhancement
+
 ## v2.2.0 2025-10-03
 
 ### ✨ New Features
