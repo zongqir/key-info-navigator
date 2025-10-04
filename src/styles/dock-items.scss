@@ -9,9 +9,9 @@
     align-items: center; /* 默认垂直居中 */
     padding: 10px 18px; /* 稍微增加舒适感 */
     margin: 2px 6px; /* 增加卡片间距 */
-    background: linear-gradient(135deg, var(--kinfo-bg-primary) 0%, rgba(255, 255, 255, 0.05) 100%);
+    background: var(--kinfo-bg-primary);
     border-radius: 12px; /* 更圆润的圆角 */
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--kinfo-border-light);
     border-left: 3px solid transparent;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
@@ -31,22 +31,9 @@
       padding: 12px 18px; /* 多行内容时稍微增加上下内边距 */
     }
     
-    /* 微妙的内部高光效果 */
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 3px;
-      right: 3px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
-      border-radius: 12px 12px 0 0;
-      pointer-events: none;
-    }
-
     &:hover {
-      background: linear-gradient(135deg, var(--kinfo-bg-surface-hover) 0%, rgba(255, 255, 255, 0.08) 100%);
-      border-color: rgba(255, 255, 255, 0.2);
+      background: var(--kinfo-bg-surface-hover);
+      border-color: var(--kinfo-border-normal);
       /* 更柔和的hover阴影 */
       box-shadow: 
         0 4px 8px rgba(0, 0, 0, 0.04),
@@ -56,10 +43,6 @@
       
       .formatted-text-dock__item-actions {
         opacity: 1;
-      }
-      
-      &::before {
-        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
       }
     }
 
@@ -286,11 +269,12 @@
     &-content {
       font-size: 11px;
       color: var(--kinfo-text-secondary);
-      background: linear-gradient(135deg, rgba(32, 178, 170, 0.08) 0%, rgba(32, 178, 170, 0.05) 100%);
+      background: var(--kinfo-memo-bg);
       padding: 4px 18px; /* 配合新的内边距调整：从 16px 改为 18px */
       line-height: 1.3;
       word-break: break-word;
       border-radius: 0 0 8px 8px; /* 添加底部圆角，与卡片呼应 */
+      border-top: 1px solid var(--kinfo-border-light);
       
       /* 限制最多显示2行 */
       display: -webkit-box;
@@ -309,17 +293,15 @@
     width: 30px;
     height: 30px;
     border: none;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--kinfo-bg-tertiary);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--kinfo-border-light);
     
     &:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.2);
+      background: var(--kinfo-bg-surface-hover);
+      border-color: var(--kinfo-border-normal);
       transform: translateY(-1px) scale(1.05);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
@@ -344,18 +326,18 @@
   &__action-icon {
     width: 14px;
     height: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--kinfo-text-secondary);
     transition: color 0.2s ease;
   }
 
   /* 添加备注按钮 */
   &__add-memo-btn {
     &:hover {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.3);
+      background: var(--kinfo-primary-lighter);
+      border-color: var(--kinfo-primary);
       
       .formatted-text-dock__action-icon {
-        color: rgba(59, 130, 246, 0.9);
+        color: var(--kinfo-primary);
       }
     }
   }
@@ -363,11 +345,11 @@
   /* 删除格式按钮 */
   &__remove-format-btn {
     &:hover {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: rgba(239, 68, 68, 0.3);
+      background: var(--kinfo-error-light);
+      border-color: var(--kinfo-error);
       
       .formatted-text-dock__action-icon {
-        color: rgba(239, 68, 68, 0.9);
+        color: var(--kinfo-error);
       }
     }
   }

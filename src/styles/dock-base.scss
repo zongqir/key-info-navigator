@@ -200,9 +200,9 @@
       gap: 8px;
       padding: 8px;
       margin: 4px 8px;
-      background: rgba(var(--b3-theme-primary-rgb), 0.03);
-      border: 1px solid rgba(var(--b3-theme-primary-rgb), 0.08);
-      border-radius: 4px;
+      background: var(--kinfo-bg-secondary);
+      border: 1px solid var(--kinfo-border-light);
+      border-radius: 6px;
       
       .filter-hint-icons {
         display: flex;
@@ -226,10 +226,6 @@
             opacity: 1;
             transform: translateY(-1px);
           }
-          
-          div {
-            /* 不需要transform缩放，让图标自然填充容器 */
-          }
         }
       }
       
@@ -237,20 +233,27 @@
         display: flex;
         align-items: center;
         gap: 3px;
-        padding: 3px 8px;
-        background: var(--kinfo-text-tertiary);
+        padding: 4px 10px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c44569 100%);
         color: white;
         border: none;
-        border-radius: 3px;
+        border-radius: 4px;
         font-size: 11px;
         font-weight: 500;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         line-height: 1.2;
+        box-shadow: 0 2px 6px rgba(238, 90, 111, 0.25);
         
         &:hover {
-          background: var(--kinfo-text-secondary);
+          background: linear-gradient(135deg, #ff7979 0%, #f56a7d 50%, #d45577 100%);
           transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(238, 90, 111, 0.35);
+        }
+        
+        &:active {
+          transform: translateY(0);
+          box-shadow: 0 1px 3px rgba(238, 90, 111, 0.2);
         }
         
         .show-all-icon {
