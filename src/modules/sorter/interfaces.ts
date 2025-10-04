@@ -1,5 +1,3 @@
-import { FormattedTextItem } from "../formatProcessor";
-
 /**
  * 排序策略枚举
  */
@@ -24,7 +22,7 @@ export interface ISorter {
      * @param items 待排序的项目列表
      * @returns 排序后的项目列表
      */
-    sort(items: FormattedTextItem[]): Promise<FormattedTextItem[]>;
+    sort(items: any[]): Promise<any[]>;
 }
 
 /**
