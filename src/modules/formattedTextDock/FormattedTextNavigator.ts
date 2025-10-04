@@ -231,19 +231,18 @@ export class FormattedTextNavigator {
         }
         
         // 如果有多个格式化元素，优先选择距离点击位置最近的
-        const clickedPosition = this.getElementPosition(target);
-        let closestElement = formattedElements[0];
-        let minDistance = Math.abs(this.getElementPosition(closestElement.element) - clickedPosition);
+        // 注：现在统一使用块ID匹配，所以距离计算主要用于确定处理顺序
+        let selectedElement = formattedElements[0];
         
+        // 如果点击的就是格式化元素本身，优先选择它
         for (const formatInfo of formattedElements) {
-            const distance = Math.abs(this.getElementPosition(formatInfo.element) - clickedPosition);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestElement = formatInfo;
+            if (formatInfo.element === target || formatInfo.element.contains(target)) {
+                selectedElement = formatInfo;
+                break;
             }
         }
         
-        this.locateInDock(closestElement.text, closestElement.type, closestElement.element);
+        this.locateInDock(selectedElement.text, selectedElement.type, selectedElement.element);
     }
     
     /**
@@ -399,57 +398,49 @@ export class FormattedTextNavigator {
     }
     
     /**
-     * 在侧边栏中定位对应条目
+     * 在侧边栏中定位对应条目 - 统一使用块ID匹配
      */
     private locateInDock(text: string, type: TextFormatType, clickedElement: HTMLElement): void {
         this.log(`在侧边栏中定位: "${text}", 类型: ${type}`);
         
-        // 查找侧边栏中匹配的条目
+        // 找到点击元素所在的块ID
+        const clickedBlockId = this.findBlockId(clickedElement);
+        if (!clickedBlockId) {
+            this.log('未找到点击元素的块ID');
+            return;
+        }
+        
+        this.log(`点击元素的块ID: ${clickedBlockId}`);
+        
+        // 查找侧边栏中匹配的条目 - 统一使用块ID匹配
         const dockItems = this.element.querySelectorAll('.formatted-text-dock__item');
         
         let targetItem: HTMLElement | null = null;
         
-        // 对于标签和TODO，通过块ID进行精确匹配
-        if (type === TextFormatType.TAG || type === TextFormatType.TODO) {
-            // 找到点击元素所在的块ID
-            const clickedBlockId = this.findBlockId(clickedElement);
+        dockItems.forEach((item) => {
+            const itemElement = item as HTMLElement;
+            const itemType = itemElement.dataset.type;
+            const itemBlockId = itemElement.dataset.blockId;
             
-            dockItems.forEach((item) => {
-                const itemElement = item as HTMLElement;
-                const itemType = itemElement.dataset.type;
-                const itemBlockId = itemElement.dataset.blockId;
-                
-                // 只需要匹配：类型和块ID（不需要文本匹配，因为标签/待办的文本格式可能不同）
-                if (itemType === type && itemBlockId === clickedBlockId) {
+            // 统一匹配逻辑：类型匹配 + 块ID匹配
+            if (itemType === type && itemBlockId === clickedBlockId) {
+                // 如果有多个匹配项，优先选择文本也匹配的
+                if (!targetItem) {
                     targetItem = itemElement;
-                    return;
-                }
-            });
-        } else {
-            // 其他格式使用位置匹配
-            let bestMatch = -1;
-            
-            dockItems.forEach((item) => {
-                const itemElement = item as HTMLElement;
-                const itemText = itemElement.dataset.text;
-                const itemType = itemElement.dataset.type;
-                
-                if (itemText === text && itemType === type) {
-                    const itemPosition = Number(itemElement.dataset.position || 0);
-                    const clickedPosition = this.getElementPosition(clickedElement);
-                    
-                    if (bestMatch === -1 || Math.abs(clickedPosition - itemPosition) < bestMatch) {
-                        bestMatch = Math.abs(clickedPosition - itemPosition);
+                } else {
+                    // 如果当前项的文本也匹配，则优先选择
+                    const itemText = itemElement.dataset.text;
+                    if (itemText === text) {
                         targetItem = itemElement;
                     }
                 }
-            });
-        }
+            }
+        });
         
         if (targetItem) {
             this.highlightDockItem(targetItem);
         } else {
-            this.log(`未在侧边栏中找到匹配的条目: "${text}", 类型: ${type}`);
+            this.log(`未在侧边栏中找到匹配的条目: blockId=${clickedBlockId}, 类型=${type}`);
         }
     }
     
@@ -470,20 +461,6 @@ export class FormattedTextNavigator {
         return null;
     }
 
-    /**
-     * 获取元素在文档中的大致位置
-     */
-    private getElementPosition(element: HTMLElement): number {
-        try {
-            const rect = element.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            return rect.top + scrollTop;
-        } catch (error) {
-            this.log('获取元素位置失败:', error);
-            return 0;
-        }
-    }
-    
     /**
      * 高亮侧边栏条目
      */
