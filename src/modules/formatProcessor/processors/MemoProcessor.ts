@@ -37,49 +37,92 @@ export class MemoProcessor extends BaseFormatProcessor {
         this.log('基础数据 - content:', content, 'markdown:', markdown);
         
         // 自定义备注提取逻辑
-        let extractedText = '';
+        let markedText = '';
         let memoContent = '';
         
+        this.log('🔍 开始备注提取逻辑...');
+        
         if (content && markdown) {
+            this.log('✅ 同时具备content和markdown，开始自定义提取');
+            
             // 从markdown中提取从content第一个字符开始，到")"结束的完整部分
             const firstChar = content.charAt(0);
+            this.log('📍 content第一个字符:', JSON.stringify(firstChar));
+            
             if (firstChar) {
                 // 在markdown中找到content开始的位置
                 const contentStartIndex = markdown.indexOf(firstChar);
+                this.log('🔎 在markdown中查找第一个字符的位置:', contentStartIndex);
+                this.log('📝 markdown完整内容:', JSON.stringify(markdown));
+                
                 if (contentStartIndex !== -1) {
-                    // 从该位置开始，找到第一个")"的位置
-                    const parenIndex = markdown.indexOf(')', contentStartIndex);
+                    // 从该位置开始，查找第一个括号（优先英文，后备中文）
+                    let parenIndex = markdown.indexOf(')', contentStartIndex);
+                    
+                    // 如果没找到英文括号，尝试中文括号
+                    if (parenIndex === -1) {
+                        parenIndex = markdown.indexOf('）', contentStartIndex);
+                    }
+                    
+                    this.log('🔍 从位置', contentStartIndex, '开始查找")"的位置:', parenIndex);
+                    
                     if (parenIndex !== -1) {
-                        // 提取从第一个字符到")"的完整部分
-                        extractedText = markdown.substring(contentStartIndex, parenIndex + 1);
-                        this.log('从markdown提取的完整文本:', extractedText);
+                        // 提取从第一个字符到括号的完整部分
+                        let extractedText = markdown.substring(contentStartIndex, parenIndex + 1);
+                        this.log('✂️ 从markdown提取的完整文本:', JSON.stringify(extractedText));
+                        
+                        // 如果是中文括号，转换为英文括号进行处理
+                        if (extractedText.includes('）')) {
+                            extractedText = extractedText.replace(/（/g, '(').replace(/）/g, ')');
+                            this.log('🔄 转换中文括号为英文括号:', JSON.stringify(extractedText));
+                        }
                         
                         // 解析被标记文本和备注内容
                         const parsedResult = this.parseExtractedText(extractedText);
+                        this.log('🔧 parseExtractedText解析结果:', parsedResult);
+                        
                         if (parsedResult) {
-                            extractedText = parsedResult.markedText;
+                            // 从content第一个字符开始，不包含前面的markdown格式符号，只去掉HTML标签
+                            const cleanedMarkedText = this.removeHtmlTags(parsedResult.markedText);
+                            markedText = cleanedMarkedText;
                             memoContent = parsedResult.memoContent;
+                            
+                            this.log('🎯 最终提取结果:');
+                            this.log('  - 被标记文本(从content第一个字符开始,去HTML):', JSON.stringify(markedText));
+                            this.log('  - 备注内容:', JSON.stringify(memoContent));
+                        } else {
+                            // 解析失败，使用整个markdown作为被标记文本
+                            this.log('❌ parseExtractedText解析失败，使用整个markdown');
+                            markedText = this.removeHtmlTags(markdown);
                         }
                     } else {
-                        // 如果没有找到")"，使用content作为被标记文本
-                        extractedText = content;
+                        // 如果没有找到任何括号，使用整个markdown作为被标记文本
+                        this.log('❌ 未找到任何括号，使用整个markdown作为被标记文本');
+                        markedText = this.removeHtmlTags(markdown);
                     }
                 } else {
-                    // 如果在markdown中找不到content的开始，直接使用content
-                    extractedText = content;
+                    // 如果在markdown中找不到content的开始，直接使用markdown
+                    this.log('❌ 在markdown中找不到content的第一个字符，使用整个markdown');
+                    markedText = markdown;
                 }
             } else {
-                extractedText = content;
+                this.log('❌ content第一个字符为空，使用markdown或content');
+                markedText = markdown || content;
             }
         } else {
-            // 如果缺少基础数据，使用content
-            extractedText = content;
+            // 如果缺少基础数据，优先使用markdown
+            this.log('❌ 缺少content或markdown，使用后备方案');
+            this.log('  - content存在:', !!content);
+            this.log('  - markdown存在:', !!markdown);
+            markedText = markdown || content;
         }
         
-        // 清理文本
-        const markedText = this.cleanText(extractedText);
+        this.log('🏁 备注提取逻辑完成，最终markedText:', JSON.stringify(markedText), 'memoContent:', JSON.stringify(memoContent));
         
-        if (!markedText) {
+        // 清理文本
+        const cleanedMarkedText = this.cleanText(markedText);
+        
+        if (!cleanedMarkedText) {
             this.log('跳过空的标记文本');
             return [];
         }
@@ -87,7 +130,7 @@ export class MemoProcessor extends BaseFormatProcessor {
         const id = this.generateId('span', span.id || span.block_id);
         const item: FormattedTextItem = {
             id,
-            text: markedText, // 显示被标记的文本
+            text: cleanedMarkedText, // 显示从markdown提取的被标记文本（保留格式）
             type: this.formatType,
             blockId: blockId || span.block_id || span.root_id,
             position: this.parsePosition(span.start_offset),
@@ -97,9 +140,9 @@ export class MemoProcessor extends BaseFormatProcessor {
             memoContent: memoContent, // 备注内容
             metadata: {
                 originalSpan: span,
-                markedText: markedText,
+                markedText: cleanedMarkedText,
                 memoText: memoContent,
-                extractedText: extractedText
+                originalMarkdown: markdown
             }
         };
         
@@ -112,21 +155,47 @@ export class MemoProcessor extends BaseFormatProcessor {
      * 例如："a123(456)" -> { markedText: "a123", memoContent: "456" }
      */
     private parseExtractedText(extractedText: string): { markedText: string, memoContent: string } | null {
-        this.log('解析提取的文本:', extractedText);
+        this.log('🔧 parseExtractedText开始解析:', JSON.stringify(extractedText));
         
-        // 匹配格式：被标记文本(备注内容)
-        const match = extractedText.match(/^(.+?)\((.+?)\)$/);
+        // 只处理英文括号格式：被标记文本(备注内容)
+        // 支持HTML标签格式：被标记文本<sup>(备注内容)</sup>
+        
+        // 格式1：HTML sup标签格式（英文括号）
+        let match = extractedText.match(/^(.+?)<sup>\((.+?)\)<\/sup>$/);
         if (match) {
             const markedText = match[1].trim();
             const memoContent = match[2].trim();
-            
-            this.log('解析结果 - 被标记文本:', markedText, '备注内容:', memoContent);
+            this.log('✅ 匹配HTML sup英文括号格式成功:');
+            this.log('  - 被标记文本:', JSON.stringify(markedText));
+            this.log('  - 备注内容:', JSON.stringify(memoContent));
             return { markedText, memoContent };
         }
         
-        // 如果不匹配括号格式，整个文本作为被标记文本
-        this.log('未匹配括号格式，使用整个文本作为被标记文本');
+        // 格式2：纯英文括号
+        match = extractedText.match(/^(.+?)\((.+?)\)$/);
+        if (match) {
+            const markedText = match[1].trim();
+            const memoContent = match[2].trim();
+            this.log('✅ 匹配英文括号格式成功:');
+            this.log('  - 被标记文本:', JSON.stringify(markedText));
+            this.log('  - 备注内容:', JSON.stringify(memoContent));
+            return { markedText, memoContent };
+        }
+        
+        // 如果不匹配任何括号格式，整个文本作为被标记文本
+        this.log('❌ 未匹配到任何括号格式，使用整个文本作为被标记文本');
+        this.log('  - 尝试的正则表达式:');
+        this.log('    1. /^(.+?)<sup>\\((.+?)\\)<\\/sup>$/ (HTML sup英文括号)');
+        this.log('    2. /^(.+?)\\((.+?)\\)$/ (纯英文括号)');
         return { markedText: extractedText, memoContent: '' };
+    }
+
+    /**
+     * 去掉HTML标签，只保留文本内容
+     */
+    private removeHtmlTags(text: string): string {
+        // 去掉HTML标签，但保留markdown格式符号如**
+        return text.replace(/<[^>]*>/g, '');
     }
 
     /**
