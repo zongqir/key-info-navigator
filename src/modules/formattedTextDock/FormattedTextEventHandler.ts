@@ -46,6 +46,63 @@ export class FormattedTextEventHandler {
                 this.onRefresh();
             });
         }
+
+        // 筛选提示区域的事件处理
+        this.bindFilterHintEvents();
+    }
+
+    /**
+     * 绑定筛选提示区域的事件
+     */
+    private bindFilterHintEvents(): void {
+        // 使用事件委托处理动态生成的筛选提示按钮
+        this.element.addEventListener('click', (e) => {
+            const target = e.target as HTMLElement;
+            const button = target.closest('button');
+            
+            if (!button) return;
+            
+            // 显示全部按钮
+            if (button.hasAttribute('data-action') && button.dataset.action === 'show-all') {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showAllFormats();
+                return;
+            }
+            
+            // 格式切换按钮
+            if (button.classList.contains('format-toggle') && button.hasAttribute('data-format')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const format = button.dataset.format as TextFormatType;
+                this.onFormatToggle(format);
+                return;
+            }
+        });
+    }
+
+    /**
+     * 显示所有格式类型
+     */
+    private showAllFormats(): void {
+        this.log('显示全部格式类型');
+        // 启用所有格式
+        const allFormats: TextFormatType[] = [
+            TextFormatType.BOLD,
+            TextFormatType.ITALIC,
+            TextFormatType.UNDERLINE,
+            TextFormatType.HIGHLIGHT,
+            TextFormatType.MEMO,
+            TextFormatType.TAG,
+            TextFormatType.TODO,
+        ];
+        
+        // 通过切换器逐个启用
+        allFormats.forEach(format => {
+            if (!this.enabledFormats.includes(format)) {
+                this.onFormatToggle(format);
+            }
+        });
     }
 
     /**

@@ -26,28 +26,29 @@ export class TextFormatParser {
         try {
             const allItems: FormattedTextItem[] = [];
             
-            // 直接查询标签块
-            if (options.enabledFormats.includes(TextFormatType.TAG)) {
-                const tagItems = await this.queryTagBlocks(rootBlockId, options.maxResults);
-                allItems.push(...tagItems);
-            }
+            // 始终查询所有格式类型的数据，筛选在调用方处理
+            // 这确保了即使当前筛选器关闭了某些格式，数据仍然可用于智能提示
             
-            // 直接查询Todo块
-            if (options.enabledFormats.includes(TextFormatType.TODO)) {
-                const todoItems = await this.queryTodoBlocks(rootBlockId, options.maxResults);
-                allItems.push(...todoItems);
-            }
+            // 直接查询标签块 - 始终查询
+            const tagItems = await this.queryTagBlocks(rootBlockId, options.maxResults);
+            allItems.push(...tagItems);
             
-            // 查询spans（原有的格式化文本）
-            const spanFormats = options.enabledFormats.filter(f => 
-                f !== TextFormatType.TAG && f !== TextFormatType.TODO
-            );
+            // 直接查询Todo块 - 始终查询
+            const todoItems = await this.queryTodoBlocks(rootBlockId, options.maxResults);
+            allItems.push(...todoItems);
             
-            if (spanFormats.length > 0) {
-                const processors = FormatProcessorFactory.getProcessors(spanFormats);
-                const spanItems = await this.querySpans(rootBlockId, processors, options);
-                allItems.push(...spanItems);
-            }
+            // 查询spans（其他格式化文本）- 始终查询所有类型
+            const allSpanFormats = [
+                TextFormatType.BOLD,
+                TextFormatType.ITALIC,
+                TextFormatType.UNDERLINE,
+                TextFormatType.HIGHLIGHT,
+                TextFormatType.MEMO
+            ];
+            
+            const processors = FormatProcessorFactory.getProcessors(allSpanFormats);
+            const spanItems = await this.querySpans(rootBlockId, processors, options);
+            allItems.push(...spanItems);
             
             // 使用排序器进行排序（默认为渲染顺序排序）
             const sorter = SorterFactory.getDefaultSorter();

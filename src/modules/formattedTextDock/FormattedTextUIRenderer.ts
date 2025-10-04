@@ -212,6 +212,41 @@ export class FormattedTextUIRenderer {
     }
 
     /**
+     * 显示带筛选提示的空状态
+     */
+    public createEmptyWithHintHTML(message: string, filteredOutTypes: TextFormatType[]): string {
+        let typeHints = '';
+        if (filteredOutTypes.length > 0) {
+            typeHints = `
+                <div class="formatted-text-dock__filter-hint-section empty-state">
+                    <div class="filter-hint-container">
+                        <div class="filter-hint-icons">
+                            ${filteredOutTypes.map(type => `
+                                <button class="filter-hint-icon format-toggle" data-format="${type}" title="显示${this.getFormatDisplayName(type)}">
+                                    ${this.getFormatIcon(type)}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <button class="filter-hint-show-all" data-action="show-all" title="显示全部">
+                            <svg class="show-all-icon" viewBox="0 0 16 16" width="12" height="12">
+                                <path d="M8 1L10.5 6H15L11.5 9L13 14L8 11L3 14L4.5 9L1 6H5.5L8 1Z" fill="currentColor"/>
+                            </svg>
+                            <span>显示全部</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="formatted-text-dock__empty">
+                <div class="empty-message">${this.escapeHtml(message)}</div>
+                ${typeHints}
+            </div>
+        `;
+    }
+
+    /**
      * 显示空状态
      */
     public createEmptyHTML(message: string): string {

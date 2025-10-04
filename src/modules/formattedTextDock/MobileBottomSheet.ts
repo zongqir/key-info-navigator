@@ -784,7 +784,7 @@ export class MobileBottomSheet {
             this.log(`开始${force ? '强制' : '自动'}刷新，文档ID: ${blockId}`);
             
             const options: ParseOptions = {
-                enabledFormats: this.enabledFormats,
+                enabledFormats: this.enabledFormats, // 现在这个参数不影响查询，只用于兼容性
                 maxResults: 200,
                 includeContext: true
             };
@@ -837,13 +837,28 @@ export class MobileBottomSheet {
         const activeFormats = this.getActiveFormats();
         const filteredItems = this.formattedTexts.filter(item => activeFormats.indexOf(item.type) !== -1);
         
+        // 检查是否有被筛选掉的内容
+        const filteredOutTypes = this.getFilteredOutTypes();
+        const hasFilteredOutContent = filteredOutTypes.length > 0;
+        
         if (filteredItems.length === 0) {
-            this.showEmpty(this.i18n.noMatchingFormat);
+            if (hasFilteredOutContent) {
+                this.showEmptyWithFilterHint();
+            } else {
+                this.showEmpty(this.i18n.noMatchingFormat);
+            }
             return;
         }
 
+        // 有显示内容，但也可能有被筛选的内容
         const groupedItems = FormattedTextUtils.groupItems(filteredItems);
-        const listHTML = this.uiRenderer.createListHTML(groupedItems);
+        let listHTML = this.uiRenderer.createListHTML(groupedItems);
+        
+        // 如果有被筛选的内容，在列表底部添加筛选提示
+        if (hasFilteredOutContent) {
+            const hintHTML = this.createFilterHintSection(filteredOutTypes);
+            listHTML += hintHTML;
+        }
 
         content.innerHTML = `<div class="formatted-text-dock__list">${listHTML}</div>`;
         
@@ -933,12 +948,64 @@ export class MobileBottomSheet {
         return [...this.enabledFormats];
     }
 
+    /**
+     * 创建筛选提示区域
+     */
+    private createFilterHintSection(filteredOutTypes: TextFormatType[]): string {
+        if (filteredOutTypes.length === 0) return '';
+            
+        return `
+            <div class="formatted-text-dock__filter-hint-section">
+                <div class="filter-hint-container">
+                    <div class="filter-hint-icons">
+                        ${filteredOutTypes.map(type => `
+                            <button class="filter-hint-icon format-toggle" data-format="${type}" title="显示${this.uiRenderer.getFormatDisplayName(type)}">
+                                ${this.uiRenderer.getFormatIcon(type)}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button class="filter-hint-show-all" data-action="show-all" title="显示全部">
+                        <svg class="show-all-icon" viewBox="0 0 16 16" width="12" height="12">
+                            <path d="M8 1L10.5 6H15L11.5 9L13 14L8 11L3 14L4.5 9L1 6H5.5L8 1Z" fill="currentColor"/>
+                        </svg>
+                        <span>显示全部</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
     private showLoading(): void {
         this.updatePeekContent();
         const content = this.fullContent.querySelector<HTMLElement>(".formatted-text-dock__content");
         if (content) {
             content.innerHTML = this.uiRenderer.createLoadingHTML();
         }
+    }
+
+    /**
+     * 显示带筛选提示的空状态
+     */
+    private showEmptyWithFilterHint(): void {
+        this.updatePeekContent();
+        const content = this.fullContent.querySelector<HTMLElement>(".formatted-text-dock__content");
+        if (content) {
+            // 分析被筛选掉的内容类型
+            const filteredOutTypes = this.getFilteredOutTypes();
+            const hintMessage = this.i18n.noMatchingFormatWithHint || 
+                `没有匹配当前筛选条件的格式化文字。当前文档中包含其他类型的格式化文字，请调整筛选器设置查看。`;
+            
+            content.innerHTML = this.uiRenderer.createEmptyWithHintHTML(hintMessage, filteredOutTypes);
+        }
+    }
+
+    /**
+     * 获取被筛选掉的格式类型
+     */
+    private getFilteredOutTypes(): TextFormatType[] {
+        const allTypes = this.formattedTexts.map(item => item.type);
+        const uniqueTypes = Array.from(new Set(allTypes));
+        return uniqueTypes.filter(type => !this.enabledFormats.includes(type));
     }
 
     private showEmpty(message: string): void {

@@ -22,6 +22,7 @@
   "openDocumentFirst": "Please open a document first",
   "noFormattedText": "No formatted text found in current document",
   "noMatchingFormat": "No matching formatted text",
+  "noMatchingFormatWithHint": "No formatted text matches the current filter criteria. The current document contains other types of formatted text. Please adjust the filter settings to view them.",
   "loading": "Loading...",
   "loadFailed": "Load failed, please try again",
   "textNotFound": "Text not found",
