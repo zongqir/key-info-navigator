@@ -398,7 +398,7 @@ export class FormattedTextNavigator {
     }
     
     /**
-     * 在侧边栏中定位对应条目 - 统一使用块ID匹配
+     * 在侧边栏中定位对应条目 - 纯基于块ID匹配，简单有效
      */
     private locateInDock(text: string, type: TextFormatType, clickedElement: HTMLElement): void {
         this.log(`在侧边栏中定位: "${text}", 类型: ${type}`);
@@ -412,35 +412,29 @@ export class FormattedTextNavigator {
         
         this.log(`点击元素的块ID: ${clickedBlockId}`);
         
-        // 查找侧边栏中匹配的条目 - 统一使用块ID匹配
+        // 查找侧边栏中匹配的条目 - 纯基于块ID匹配
         const dockItems = this.element.querySelectorAll('.formatted-text-dock__item');
         
         let targetItem: HTMLElement | null = null;
         
+        // 简单匹配：只看块ID，找到第一个就用
         dockItems.forEach((item) => {
             const itemElement = item as HTMLElement;
-            const itemType = itemElement.dataset.type;
             const itemBlockId = itemElement.dataset.blockId;
             
-            // 统一匹配逻辑：类型匹配 + 块ID匹配
-            if (itemType === type && itemBlockId === clickedBlockId) {
-                // 如果有多个匹配项，优先选择文本也匹配的
-                if (!targetItem) {
-                    targetItem = itemElement;
-                } else {
-                    // 如果当前项的文本也匹配，则优先选择
-                    const itemText = itemElement.dataset.text;
-                    if (itemText === text) {
-                        targetItem = itemElement;
-                    }
-                }
+            // 如果还没找到匹配项，且块ID匹配，就用这个
+            if (!targetItem && itemBlockId === clickedBlockId) {
+                targetItem = itemElement;
             }
         });
         
         if (targetItem) {
+            const matchedType = targetItem.dataset.type;
+            const matchedText = targetItem.dataset.text;
+            this.log(`块ID匹配成功: ${clickedBlockId}, 匹配到类型=${matchedType}, 文本="${matchedText}"`);
             this.highlightDockItem(targetItem);
         } else {
-            this.log(`未在侧边栏中找到匹配的条目: blockId=${clickedBlockId}, 类型=${type}`);
+            this.log(`未在侧边栏中找到匹配的条目: blockId=${clickedBlockId}`);
         }
     }
     
