@@ -20,7 +20,7 @@
   "todo": "待办",
   "refresh": "刷新",
   "openDocumentFirst": "请先打开文档",
-  "noFormattedText": "当前文档中没有找到格式化文字",
+  "noFormattedText": "无关键信息",
   "noMatchingFormat": "没有匹配的格式化文字",
   "noMatchingFormatWithHint": "暂无匹配的关键信息。文档还包含其他类型的重要内容，调整筛选条件即可查看。",
   "loading": "正在加载...",
