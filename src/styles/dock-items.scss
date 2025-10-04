@@ -3,49 +3,55 @@
    ========================================================================== */
 
 .formatted-text-dock {
-  /* 现代化卡片设计 - 极简立体风格（紧凑版本） */
+  /* 现代化卡片设计 - 柔和舒适风格 */
   &__item {
     display: flex;
     align-items: center; /* 默认垂直居中 */
-    padding: 8px 16px;
-    margin: 1px 4px;
-    background: var(--kinfo-bg-primary);
-    border-radius: 8px;
-    border: 1px solid var(--kinfo-border-light);
+    padding: 10px 18px; /* 稍微增加舒适感 */
+    margin: 2px 6px; /* 增加卡片间距 */
+    background: linear-gradient(135deg, var(--kinfo-bg-primary) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 12px; /* 更圆润的圆角 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-left: 3px solid transparent;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     cursor: pointer;
+    /* 柔和的多层阴影系统 */
     box-shadow: 
-      0 1px 4px rgba(0, 0, 0, 0.04),
-      0 1px 2px rgba(0, 0, 0, 0.06);
+      0 2px 4px rgba(0, 0, 0, 0.02),
+      0 4px 8px rgba(0, 0, 0, 0.03),
+      0 8px 16px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     
     /* 多行内容时的样式（通过JS动态添加类名） */
     &.has-context,
     &.has-memo {
       align-items: flex-start;
-      padding: 10px 16px; /* 多行内容时稍微增加上下内边距 */
+      padding: 12px 18px; /* 多行内容时稍微增加上下内边距 */
     }
     
-    /* 简洁的顶部高光 */
+    /* 微妙的内部高光效果 */
     &::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 3px; /* 调整为 3px 配合新的边框宽度 */
-      right: 4px;
+      left: 3px;
+      right: 3px;
       height: 1px;
-      background: rgba(255, 255, 255, 0.8);
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
       border-radius: 12px 12px 0 0;
       pointer-events: none;
     }
 
     &:hover {
-      background: var(--kinfo-bg-surface-hover);
-      border-color: var(--kinfo-border-normal);
+      background: linear-gradient(135deg, var(--kinfo-bg-surface-hover) 0%, rgba(255, 255, 255, 0.08) 100%);
+      border-color: rgba(255, 255, 255, 0.2);
+      /* 更柔和的hover阴影 */
       box-shadow: 
-        0 8px 25px rgba(0, 0, 0, 0.1),
-        0 3px 10px rgba(0, 0, 0, 0.08);
+        0 4px 8px rgba(0, 0, 0, 0.04),
+        0 8px 16px rgba(0, 0, 0, 0.06),
+        0 16px 32px rgba(0, 0, 0, 0.08);
       transform: translateY(-2px);
       
       .formatted-text-dock__item-actions {
@@ -53,21 +59,18 @@
       }
       
       &::before {
-        background: rgba(255, 255, 255, 0.9);
+        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
       }
     }
 
     &:active {
       transform: translateY(-1px);
-      box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.08),
-        0 2px 6px rgba(0, 0, 0, 0.06);
-      transition: all 0.1s ease;
+      transition: all 0.15s ease;
     }
     
-    /* 类型颜色标识 - 现代极简风格 */
+    /* 类型颜色标识 - 保持鲜明颜色 */
     &[data-type="bold"] {
-      border-left-color: #0969da;
+      border-left: 3px solid #0969da; /* 恢复原来的鲜明颜色 */
       
       /* 加粗类型的文本显示为粗体 */
       .formatted-text-dock__item-text {
@@ -76,15 +79,17 @@
       
       &:hover {
         border-left-color: #0969da;
+        /* 柔和的彩色阴影但保持鲜明颜色 */
         box-shadow: 
-          0 8px 25px rgba(0, 0, 0, 0.1),
-          0 3px 10px rgba(0, 0, 0, 0.08),
-          -2px 0 8px rgba(9, 105, 218, 0.15);
+          0 4px 8px rgba(0, 0, 0, 0.04),
+          0 8px 16px rgba(0, 0, 0, 0.06),
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          -4px 0 16px rgba(9, 105, 218, 0.15);
       }
     }
     
     &[data-type="italic"] {
-      border-left-color: #FF6B6B;
+      border-left: 3px solid #FF6B6B; /* 恢复原来的鲜明颜色 */
       
       /* 斜体类型的文本显示为斜体 */
       .formatted-text-dock__item-text {
@@ -94,19 +99,20 @@
       &:hover {
         border-left-color: #FF6B6B;
         box-shadow: 
-          0 8px 25px rgba(0, 0, 0, 0.1),
-          0 3px 10px rgba(0, 0, 0, 0.08),
-          -2px 0 8px rgba(255, 107, 107, 0.15);
+          0 4px 8px rgba(0, 0, 0, 0.04),
+          0 8px 16px rgba(0, 0, 0, 0.06),
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          -4px 0 16px rgba(255, 107, 107, 0.15);
       }
     }
     
     &[data-type="underline"] {
-      border-left-color: #8B5CF6;
+      border-left: 3px solid #8B5CF6; /* 恢复原来的鲜明颜色 */
       
       /* 下划线类型的文本显示下划线 */
       .formatted-text-dock__item-text {
         text-decoration: underline;
-        text-decoration-color: #8B5CF6;
+        text-decoration-color: #8B5CF6; /* 恢复原来的鲜明颜色 */
         text-underline-offset: 2px;
         text-decoration-thickness: 1px;
       }
@@ -114,57 +120,62 @@
       &:hover {
         border-left-color: #8B5CF6;
         box-shadow: 
-          0 8px 25px rgba(0, 0, 0, 0.1),
-          0 3px 10px rgba(0, 0, 0, 0.08),
-          -2px 0 8px rgba(139, 92, 246, 0.15);
+          0 4px 8px rgba(0, 0, 0, 0.04),
+          0 8px 16px rgba(0, 0, 0, 0.06),
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          -4px 0 16px rgba(139, 92, 246, 0.15);
       }
     }
     
     &[data-type="highlight"] {
-      border-left-color: #FF8C00;
+      border-left: 3px solid #FF8C00; /* 恢复原来的鲜明颜色 */
       
       &:hover {
         border-left-color: #FF8C00;
         box-shadow: 
-          0 8px 25px rgba(0, 0, 0, 0.1),
-          0 3px 10px rgba(0, 0, 0, 0.08),
-          -2px 0 8px rgba(255, 140, 0, 0.15);
+          0 4px 8px rgba(0, 0, 0, 0.04),
+          0 8px 16px rgba(0, 0, 0, 0.06),
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          -4px 0 16px rgba(255, 140, 0, 0.15);
       }
     }
     
     &[data-type="memo"] {
-      border-left-color: #20B2AA;
+      border-left: 3px solid #20B2AA; /* 恢复原来的鲜明颜色 */
       
       &:hover {
         border-left-color: #20B2AA;
         box-shadow: 
-          0 8px 25px rgba(0, 0, 0, 0.1),
-          0 3px 10px rgba(0, 0, 0, 0.08),
-          -2px 0 8px rgba(32, 178, 170, 0.15);
+          0 4px 8px rgba(0, 0, 0, 0.04),
+          0 8px 16px rgba(0, 0, 0, 0.06),
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          -4px 0 16px rgba(32, 178, 170, 0.15);
       }
     }
     
     &[data-type="tag"] {
-      border-left-color: #FFD700;
+      border-left: 3px solid #FFD700; /* 恢复原来的鲜明颜色 */
       
       &:hover {
         border-left-color: #FFD700;
         box-shadow: 
-          0 8px 25px rgba(0, 0, 0, 0.1),
-          0 3px 10px rgba(0, 0, 0, 0.08),
-          -2px 0 8px rgba(255, 215, 0, 0.15);
+          0 4px 8px rgba(0, 0, 0, 0.04),
+          0 8px 16px rgba(0, 0, 0, 0.06),
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          -4px 0 16px rgba(255, 215, 0, 0.15);
       }
     }
     
     &[data-type="todo"] {
-      border-left-color: #32CD32;
+      border-left: 3px solid #32CD32; /* 恢复原来的鲜明颜色 */
       
       &:hover {
         border-left-color: #32CD32;
         box-shadow: 
-          0 8px 25px rgba(0, 0, 0, 0.1),
-          0 3px 10px rgba(0, 0, 0, 0.08),
-          -2px 0 8px rgba(50, 205, 50, 0.15);
+          0 4px 8px rgba(0, 0, 0, 0.04),
+          0 8px 16px rgba(0, 0, 0, 0.06),
+          0 16px 32px rgba(0, 0, 0, 0.08),
+          -4px 0 16px rgba(50, 205, 50, 0.15);
       }
     }
     
@@ -266,19 +277,20 @@
     overflow: hidden;
   }
 
-  /* 备注区域 - 简洁版本（2行限制）- 紧凑版 */
+  /* 备注区域 - 简洁版本（2行限制）- 柔和版 */
   &__item-memo {
-    margin-top: 2px; /* 减少间距：从 4px 改为 2px */
-    margin-left: -16px; /* 配合新的内边距调整：从 -20px 改为 -16px */
-    margin-right: -16px; /* 配合新的内边距调整：从 -20px 改为 -16px */
+    margin-top: 3px; /* 稍微增加间距：从 2px 改为 3px */
+    margin-left: -18px; /* 配合新的内边距调整：从 -16px 改为 -18px */
+    margin-right: -18px; /* 配合新的内边距调整：从 -16px 改为 -18px */
     
     &-content {
-      font-size: 11px; /* 减少字体：从 12px 改为 11px */
+      font-size: 11px;
       color: var(--kinfo-text-secondary);
-      background: rgba(32, 178, 170, 0.08);
-      padding: 3px 16px; /* 减少上下内边距：从 4px 改为 3px */
-      line-height: 1.3; /* 减少行高：从 1.4 改为 1.3 */
+      background: linear-gradient(135deg, rgba(32, 178, 170, 0.08) 0%, rgba(32, 178, 170, 0.05) 100%);
+      padding: 4px 18px; /* 配合新的内边距调整：从 16px 改为 18px */
+      line-height: 1.3;
       word-break: break-word;
+      border-radius: 0 0 8px 8px; /* 添加底部圆角，与卡片呼应 */
       
       /* 限制最多显示2行 */
       display: -webkit-box;
@@ -289,35 +301,37 @@
     }
   }
 
-  /* 操作按钮样式 - 现代化版本 */
+  /* 操作按钮样式 - 柔和现代版本 */
   &__action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border: none;
-    background: var(--kinfo-bg-surface);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    border: 1px solid var(--kinfo-border-light);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     
     &:hover {
-      background: var(--kinfo-bg-surface-hover);
-      border-color: var(--kinfo-border-normal);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     
     &:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+      transform: translateY(0) scale(1.02);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
     
     /* 禁用状态样式 */
     &--disabled {
-      opacity: 0.4;
+      opacity: 0.3;
       cursor: not-allowed;
       pointer-events: none;
       
@@ -330,18 +344,18 @@
   &__action-icon {
     width: 14px;
     height: 14px;
-    color: var(--kinfo-text-secondary);
+    color: rgba(255, 255, 255, 0.8);
     transition: color 0.2s ease;
   }
 
   /* 添加备注按钮 */
   &__add-memo-btn {
     &:hover {
-      background: var(--kinfo-primary-light);
-      border-color: var(--kinfo-primary);
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
       
       .formatted-text-dock__action-icon {
-        color: var(--kinfo-primary);
+        color: rgba(59, 130, 246, 0.9);
       }
     }
   }
@@ -349,11 +363,11 @@
   /* 删除格式按钮 */
   &__remove-format-btn {
     &:hover {
-      background: var(--kinfo-error-light);
-      border-color: var(--kinfo-error);
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
       
       .formatted-text-dock__action-icon {
-        color: var(--kinfo-error);
+        color: rgba(239, 68, 68, 0.9);
       }
     }
   }
@@ -400,11 +414,18 @@
   }
 }
 
-/* 响应式设计 */
+/* 响应式设计 - 柔和版本 */
 @media (max-width: 768px) {
   .formatted-text-dock {
     &__item {
-      padding: 6px 12px; /* 移动端进一步紧凑：从 10px 12px 改为 6px 12px */
+      padding: 8px 14px; /* 移动端合适的内边距 */
+      margin: 1px 3px; /* 移动端更紧凑的外边距 */
+      border-radius: 10px; /* 移动端稍小的圆角 */
+      
+      &.has-context,
+      &.has-memo {
+        padding: 10px 14px;
+      }
     }
     
     &__item-indicator {
@@ -423,11 +444,18 @@
     }
 
     &__item-text {
-      font-size: 12px; /* 移动端文字稍小：从原来的默认改为 12px */
+      font-size: 12px; /* 移动端文字稍小 */
+      line-height: 1.4; /* 移动端行高稍大，便于触摸 */
     }
 
     &__item-context {
-      font-size: 10px; /* 移动端上下文文字更小：从原来的默认改为 10px */
+      font-size: 10px; /* 移动端上下文文字更小 */
+    }
+    
+    &__action-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
     }
   }
 }
