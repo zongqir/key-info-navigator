@@ -9,7 +9,7 @@ export class HighlightProcessor extends BaseFormatProcessor {
     
     protected readonly config: FormatConfig = {
         sqlType: ["mark", "text"],  // 支持mark和text两种类型
-        htmlSelectors: ["mark", '[data-type="mark"]', '[data-type="textmark"]'],
+        htmlSelectors: ["mark", '[data-type="mark"]', '[data-type="textmark"]', '[data-type="text"]'],
         kramdownRegex: /==(.+?)==/g,
         icon: "iconHighlight",
         color: "#9a6700", // 现代简约琥珀色

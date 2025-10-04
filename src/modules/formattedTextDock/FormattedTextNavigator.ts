@@ -200,7 +200,7 @@ export class FormattedTextNavigator {
     }
     
     /**
-     * 处理页面点击事件
+     * 处理页面点击事件 - 简化版本，优先尝试精确匹配，失败则退回到块ID匹配
      */
     private handlePageClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
@@ -217,32 +217,42 @@ export class FormattedTextNavigator {
             return;
         }
         
-        // 查找该块中的所有格式化文本
-        const formattedElements = this.findAllFormattedElementsInBlock(blockElement);
-        if (formattedElements.length === 0) {
+        // 获取块ID
+        const blockId = blockElement.getAttribute('data-node-id');
+        if (!blockId) {
             return;
         }
         
-        // 如果只有一个格式化元素，直接定位
-        if (formattedElements.length === 1) {
-            const formatInfo = formattedElements[0];
-            this.locateInDock(formatInfo.text, formatInfo.type, formatInfo.element);
-            return;
+        // 尝试智能匹配：如果点击的元素本身就是格式化元素，优先匹配它
+        const clickedText = target.textContent?.trim();
+        if (clickedText && this.tryExactMatch(blockId, clickedText)) {
+            return; // 精确匹配成功
         }
         
-        // 如果有多个格式化元素，优先选择距离点击位置最近的
-        // 注：现在统一使用块ID匹配，所以距离计算主要用于确定处理顺序
-        let selectedElement = formattedElements[0];
+        // 退回到简单的块ID匹配
+        this.locateInDockByBlockId(blockId);
+    }
+    
+    /**
+     * 尝试精确匹配：优先匹配点击元素的文本内容
+     */
+    private tryExactMatch(blockId: string, clickedText: string): boolean {
+        const dockItems = this.element.querySelectorAll('.formatted-text-dock__item');
         
-        // 如果点击的就是格式化元素本身，优先选择它
-        for (const formatInfo of formattedElements) {
-            if (formatInfo.element === target || formatInfo.element.contains(target)) {
-                selectedElement = formatInfo;
-                break;
+        for (let i = 0; i < dockItems.length; i++) {
+            const itemElement = dockItems[i] as HTMLElement;
+            const itemBlockId = itemElement.dataset.blockId;
+            const itemText = itemElement.dataset.text;
+            
+            // 精确匹配：block ID + 文本内容都匹配
+            if (itemBlockId === blockId && itemText === clickedText) {
+                this.log(`🎯 精确匹配成功: blockId=${blockId}, text="${clickedText}"`);
+                this.highlightDockItem(itemElement);
+                return true;
             }
         }
         
-        this.locateInDock(selectedElement.text, selectedElement.type, selectedElement.element);
+        return false; // 精确匹配失败
     }
     
     /**
@@ -397,6 +407,32 @@ export class FormattedTextNavigator {
         return null;
     }
     
+    /**
+     * 纯基于块ID的侧边栏定位 - 极简版本
+     */
+    private locateInDockByBlockId(blockId: string): void {
+        this.log(`纯块ID定位: ${blockId}`);
+        
+        // 查找侧边栏中匹配的条目
+        const dockItems = this.element.querySelectorAll('.formatted-text-dock__item');
+        
+        // 找到第一个匹配的block ID就用
+        for (let i = 0; i < dockItems.length; i++) {
+            const itemElement = dockItems[i] as HTMLElement;
+            const itemBlockId = itemElement.dataset.blockId;
+            
+            if (itemBlockId === blockId) {
+                const matchedType = itemElement.dataset.type;
+                const matchedText = itemElement.dataset.text;
+                this.log(`✅ 块ID匹配成功: ${blockId}, 类型=${matchedType}, 文本="${matchedText}"`);
+                this.highlightDockItem(itemElement);
+                return;
+            }
+        }
+        
+        this.log(`❌ 未在侧边栏中找到块ID: ${blockId}`);
+    }
+
     /**
      * 在侧边栏中定位对应条目 - 纯基于块ID匹配，简单有效
      */
