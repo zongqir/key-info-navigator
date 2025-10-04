@@ -44,39 +44,8 @@ export class FormattedTextNavigator {
                 return;
             }
             
-            // 标签和待办事项通过块ID导航
-            if (type === TextFormatType.TAG || type === TextFormatType.TODO) {
-                this.navigateToBlock(savedItem);
-                return;
-            }
-            
-            // 其他格式使用传统的选择器查找
-            const processor = this.parser.getFormatProcessor(type);
-            const config = processor.getConfig();
-            const selectors = config.htmlSelectors.join(',');
-            
-            const allTypeElements = Array.from(document.querySelectorAll(selectors));
-            const matchingElements = allTypeElements.filter(el => el.textContent?.trim() === text);
-
-            if (matchingElements.length === 0) {
-                showMessage(`❌ ${this.i18n.textNotFound}: ${text}`, 3000, 'error');
-                return;
-            }
-
-            const targetIndex = Math.min(itemIndex, matchingElements.length - 1);
-            const target = matchingElements[targetIndex] as HTMLElement;
-            
-            // 找到包含该元素的块（用于弹动效果）
-            const blockElement = this.findBlockElement(target);
-            
-            this.scrollToElement(target);
-            // 对块元素应用高亮和弹动效果（inline元素无法弹动）
-            if (blockElement) {
-                this.highlightElement(blockElement);
-            } else {
-                this.highlightElement(target);
-            }
-            // showMessage(`✅ ${this.i18n.navigationSuccess}: ${text}`, 2000, 'info');
+            // 统一使用块ID导航 - 这是最可靠的方式，避免文本匹配的不确定性
+            this.navigateToBlock(savedItem);
 
         } catch (error) {
             this.log('导航失败:', error);
