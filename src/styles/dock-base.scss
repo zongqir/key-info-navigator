@@ -104,7 +104,7 @@
   &__list {
     flex: 1;
     overflow-y: auto;
-    padding: 8px 12px;
+    padding: 6px 8px; /* 减少内边距：从 8px 12px 改为 6px 8px */
   }
 
   /* 状态样式 */

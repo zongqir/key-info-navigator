@@ -3,29 +3,36 @@
    ========================================================================== */
 
 .formatted-text-dock {
-  /* 现代化卡片设计 - 极简立体风格 */
+  /* 现代化卡片设计 - 极简立体风格（紧凑版本） */
   &__item {
     display: flex;
-    align-items: flex-start;
-    padding: 16px 20px;
-    margin: 3px 8px;
+    align-items: center; /* 默认垂直居中 */
+    padding: 8px 16px;
+    margin: 1px 4px;
     background: var(--kinfo-bg-primary);
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid var(--kinfo-border-light);
-    border-left: 4px solid transparent;
+    border-left: 3px solid transparent;
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     cursor: pointer;
     box-shadow: 
-      0 2px 8px rgba(0, 0, 0, 0.04),
-      0 1px 3px rgba(0, 0, 0, 0.06);
+      0 1px 4px rgba(0, 0, 0, 0.04),
+      0 1px 2px rgba(0, 0, 0, 0.06);
+    
+    /* 多行内容时的样式（通过JS动态添加类名） */
+    &.has-context,
+    &.has-memo {
+      align-items: flex-start;
+      padding: 10px 16px; /* 多行内容时稍微增加上下内边距 */
+    }
     
     /* 简洁的顶部高光 */
     &::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 4px;
+      left: 3px; /* 调整为 3px 配合新的边框宽度 */
       right: 4px;
       height: 1px;
       background: rgba(255, 255, 255, 0.8);
@@ -185,10 +192,11 @@
 
   &__item-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center; /* 垂直居中对齐主要内容 */
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 4px;
+    margin-bottom: 0; /* 减少间距：从 4px 改为 0 */
+    width: 100%; /* 确保占满宽度 */
   }
 
   &__item-main {
@@ -220,13 +228,13 @@
     transition: opacity 0.2s ease;
   }
 
-  /* 项目文本 - 现代化优化版本（2行限制） */
+  /* 项目文本 - 现代化优化版本（2行限制）- 紧凑版 */
   &__item-text {
     font-weight: 500;
     color: var(--kinfo-text-primary);
     word-break: break-word;
-    line-height: 1.5;
-    font-size: 14px;
+    line-height: 1.3; /* 减少行高：从 1.5 改为 1.3 */
+    font-size: 13px; /* 稍微减少字体：从 14px 改为 13px */
     letter-spacing: 0.01em;
     margin: 0;
     padding: 0;
@@ -239,12 +247,12 @@
     overflow: hidden;
   }
   
-  /* 项目上下文信息 - 现代化版本（2行限制） */
+  /* 项目上下文信息 - 现代化版本（2行限制）- 紧凑版 */
   &__item-context {
-    font-size: 12px;
+    font-size: 11px; /* 减少字体：从 12px 改为 11px */
     color: var(--kinfo-text-tertiary);
-    line-height: 1.4;
-    margin-top: 4px;
+    line-height: 1.3; /* 减少行高：从 1.4 改为 1.3 */
+    margin-top: 2px; /* 减少间距：从 4px 改为 2px */
     opacity: 0.85;
     word-break: break-word;
     font-weight: 400;
@@ -258,18 +266,18 @@
     overflow: hidden;
   }
 
-  /* 备注区域 - 简洁版本（2行限制） */
+  /* 备注区域 - 简洁版本（2行限制）- 紧凑版 */
   &__item-memo {
-    margin-top: 4px;
-    margin-left: -20px; /* 负边距让备注与卡片左边对齐 */
-    margin-right: -20px; /* 负边距让备注与卡片右边对齐 */
+    margin-top: 2px; /* 减少间距：从 4px 改为 2px */
+    margin-left: -16px; /* 配合新的内边距调整：从 -20px 改为 -16px */
+    margin-right: -16px; /* 配合新的内边距调整：从 -20px 改为 -16px */
     
     &-content {
-      font-size: 12px;
+      font-size: 11px; /* 减少字体：从 12px 改为 11px */
       color: var(--kinfo-text-secondary);
       background: rgba(32, 178, 170, 0.08);
-      padding: 4px 20px; /* 恢复内边距以保持内容不贴边 */
-      line-height: 1.4;
+      padding: 3px 16px; /* 减少上下内边距：从 4px 改为 3px */
+      line-height: 1.3; /* 减少行高：从 1.4 改为 1.3 */
       word-break: break-word;
       
       /* 限制最多显示2行 */
@@ -396,7 +404,7 @@
 @media (max-width: 768px) {
   .formatted-text-dock {
     &__item {
-      padding: 8px 12px;
+      padding: 6px 12px; /* 移动端进一步紧凑：从 10px 12px 改为 6px 12px */
     }
     
     &__item-indicator {
@@ -415,11 +423,11 @@
     }
 
     &__item-text {
-      font-size: 12px;
+      font-size: 12px; /* 移动端文字稍小：从原来的默认改为 12px */
     }
 
     &__item-context {
-      font-size: 10px;
+      font-size: 10px; /* 移动端上下文文字更小：从原来的默认改为 10px */
     }
   }
 }

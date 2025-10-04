@@ -124,8 +124,18 @@ export class FormattedTextUIRenderer {
                 
                 const actionButtons = processor.renderActionButtons ? processor.renderActionButtons(item, this.i18n) : '';
                 
+                // 检测是否有多行内容，决定垂直对齐方式
+                const itemDetails = this.renderItemDetails(item, displayText);
+                const hasMultilineContent = itemDetails.trim() !== '';
+                
+                // 检测是否是备注类型且有备注内容
+                const isMemoWithContent = item.type === 'memo' && item.memoContent && item.memoContent.trim() !== '';
+                
+                // 确定对齐样式类
+                const alignmentClass = (hasMultilineContent || isMemoWithContent) ? 'has-context' : '';
+                
                 html.push(`
-                    <div class="formatted-text-dock__item" 
+                    <div class="formatted-text-dock__item ${alignmentClass}" 
                          data-type="${item.type}"
                          data-text="${item.text}"
                          data-block-id="${item.blockId}"
@@ -146,7 +156,7 @@ export class FormattedTextUIRenderer {
                                     ${actionButtons}
                                 </div>
                             </div>
-                            ${this.renderItemDetails(item, displayText)}
+                            ${itemDetails}
                         </div>
                     </div>
                 `);
