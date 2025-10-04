@@ -112,7 +112,7 @@
   &__loading {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;  /* 改为 stretch，让子元素占满宽度 */
     justify-content: center;
     height: 100px;
     color: var(--kinfo-text-tertiary);
@@ -123,6 +123,7 @@
 
     .empty-message {
       margin-bottom: 8px;
+      align-self: center;  /* 只让文字居中 */
     }
   }
 
@@ -134,7 +135,6 @@
     padding: 16px;
     margin-top: 12px;
     width: 100%;
-    max-width: 280px;
 
     .filter-hint-message {
       font-size: 12px;
@@ -185,10 +185,12 @@
 
   /* 筛选提示区域分割线和容器 */
   &__filter-hint-section {
-    padding: 4px 8px 2px 8px;
+    padding: 0;
+    margin: 0;
     
     &.empty-state {
-      padding: 8px 8px 4px 8px;
+      padding: 0;
+      margin: 0;
     }
     
     .filter-hint-container {
@@ -196,7 +198,8 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 4px 8px;
+      padding: 8px;
+      margin: 4px 8px;
       background: rgba(var(--b3-theme-primary-rgb), 0.03);
       border: 1px solid rgba(var(--b3-theme-primary-rgb), 0.08);
       border-radius: 4px;

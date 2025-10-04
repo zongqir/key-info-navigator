@@ -22,7 +22,7 @@
   "openDocumentFirst": "请先打开文档",
   "noFormattedText": "当前文档中没有找到格式化文字",
   "noMatchingFormat": "没有匹配的格式化文字",
-  "noMatchingFormatWithHint": "没有匹配当前筛选条件的格式化文字。当前文档中包含其他类型的格式化文字，请调整筛选器设置查看。",
+  "noMatchingFormatWithHint": "暂无匹配的关键信息。文档还包含其他类型的重要内容，调整筛选条件即可查看。",
   "loading": "正在加载...",
   "loadFailed": "加载失败，请重试",
   "textNotFound": "未找到文本",

@@ -430,7 +430,7 @@ export class FormattedTextDock {
             // 分析被筛选掉的内容类型
             const filteredOutTypes = this.getFilteredOutTypes();
             const hintMessage = this.i18n.noMatchingFormatWithHint || 
-                `没有匹配当前筛选条件的格式化文字。当前文档中包含其他类型的格式化文字，请调整筛选器设置查看。`;
+                `暂无匹配的关键信息。文档还包含其他类型的重要内容，调整筛选条件即可查看。`;
             
             content.innerHTML = this.uiRenderer.createEmptyWithHintHTML(hintMessage, filteredOutTypes);
         }
