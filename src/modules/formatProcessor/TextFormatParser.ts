@@ -152,14 +152,15 @@ export class TextFormatParser {
             return `textmark ${t}`;
         });
         
-        const typeConditions = actualTypes.map(t => `'${t}'`).join(",");
+        // 使用 LIKE 匹配，支持多格式合并的情况（如 "textmark strong inline-memo"）
+        const typeConditions = actualTypes.map(t => `type LIKE '%${t}%'`).join(" OR ");
         const limit = maxResults ? `LIMIT ${maxResults}` : 'LIMIT 200';
         
         const stmt = `
             SELECT *
             FROM spans
             WHERE root_id = "${rootBlockId}"
-              AND type IN (${typeConditions})
+              AND (${typeConditions})
             ORDER BY block_id, start_offset
             ${limit}
         `.trim();
@@ -183,12 +184,24 @@ export class TextFormatParser {
             return [];
         }
         
+        // 定义格式优先级（数字越小优先级越高）
+        const formatPriority = new Map([
+            [TextFormatType.MEMO, 1],      // 备注最高优先级
+            [TextFormatType.HIGHLIGHT, 2], // 高亮第二
+            [TextFormatType.BOLD, 3],      // 加粗第三
+            [TextFormatType.ITALIC, 4],    // 斜体第四
+            [TextFormatType.UNDERLINE, 5], // 下划线第五
+        ]);
+        
         for (const span of spans) {
             // 检查span是否为有效对象
             if (!span || typeof span !== 'object') {
                 this.log('跳过无效的span对象:', span);
                 continue;
             }
+            
+            // 收集所有匹配的处理器及其优先级
+            const matchingProcessors: { processor: IFormatProcessor, priority: number }[] = [];
             
             for (const processor of processors) {
                 try {
@@ -204,15 +217,38 @@ export class TextFormatParser {
                     });
                     
                     if (isMatch) {
-                        const items = processor.extractFromSpan(span);
-                        if (items.length > 0) {
-                            allItems.push(...items);
-                            break; // 找到匹配的处理器并成功提取后才 break
-                        }
+                        const priority = formatPriority.get(processor.formatType) || 999; // 未定义优先级的格式排在最后
+                        matchingProcessors.push({ processor, priority });
                     }
                 } catch (error) {
-                    this.log(`${processor.formatType}处理器Span提取失败:`, error);
+                    this.log(`${processor.formatType}处理器匹配检查失败:`, error);
                 }
+            }
+            
+            if (matchingProcessors.length === 0) {
+                this.log('没有找到匹配的处理器，span类型:', span.type);
+                continue;
+            }
+            
+            // 按优先级排序，选择优先级最高的处理器
+            matchingProcessors.sort((a, b) => a.priority - b.priority);
+            const selectedProcessor = matchingProcessors[0].processor;
+            
+            // 如果有多个匹配的处理器，记录优先级选择日志
+            if (matchingProcessors.length > 1) {
+                const formatTypes = matchingProcessors.map(mp => mp.processor.formatType).join(', ');
+                this.log(`检测到多格式冲突，优先级选择: ${selectedProcessor.formatType} (span类型: ${span.type}, 可选格式: ${formatTypes})`);
+            }
+            
+            // 使用选中的处理器提取内容
+            try {
+                const items = selectedProcessor.extractFromSpan(span);
+                if (items.length > 0) {
+                    allItems.push(...items);
+                    this.log(`使用 ${selectedProcessor.formatType} 处理器成功提取:`, items.length, '个项目');
+                }
+            } catch (error) {
+                this.log(`${selectedProcessor.formatType}处理器提取失败:`, error);
             }
         }
         
@@ -262,6 +298,8 @@ export class TextFormatParser {
         
         const stmt = this.buildSqlQuery(rootBlockId, sqlTypes, options.maxResults);
         this.log('执行Span SQL查询:', stmt);
+        this.log('启用的格式:', options.enabledFormats);
+        this.log('处理器数量:', processors.length);
         
         try {
             // 使用原生 fetch（fetchPost 有问题）
@@ -275,24 +313,32 @@ export class TextFormatParser {
             const response = await fetchResponse.json();
             
             if (!response) {
-                this.log('Span SQL查询无响应');
+                this.log('❌ Span SQL查询无响应');
                 return [];
             }
             
             if (response.code !== 0) {
-                this.log('Span SQL查询失败:', response);
+                this.log('❌ Span SQL查询失败:', response);
                 return [];
             }
             
             // 确保response.data是有效数组
             if (!response.data || !Array.isArray(response.data)) {
-                this.log('Span SQL查询返回无效数据:', response.data);
+                this.log('❌ Span SQL查询返回无效数据:', response.data);
                 return [];
             }
             
+            this.log('✅ 查询到', response.data.length, '个span');
+            // 添加详细的span类型日志
+            response.data.forEach((span: any, index: number) => {
+                if (span && span.type) {
+                    this.log(`Span ${index + 1}: type="${span.type}", content="${(span.content || '').substring(0, 50)}..."`);
+                }
+            });
+            
             return this.processQueryResults(response.data, processors, options);
         } catch (error) {
-            this.log('Span SQL查询异常:', error);
+            this.log('❌ Span SQL查询异常:', error);
             return [];
         }
     }
@@ -431,9 +477,11 @@ export class TextFormatParser {
             
             if (block.tag) {
                 // 使用TagProcessor的extractFromBlock方法，传递块索引
-                const tagItems = tagProcessor.extractFromBlock(block, index);
-                this.log('TagProcessor提取的标签项:', tagItems);
-                items.push(...tagItems);
+                if ('extractFromBlock' in tagProcessor) {
+                    const tagItems = (tagProcessor as any).extractFromBlock(block, index);
+                    this.log('TagProcessor提取的标签项:', tagItems);
+                    items.push(...tagItems);
+                }
             }
         });
         
@@ -474,9 +522,11 @@ export class TextFormatParser {
             if (block.subtype === 't' && typeof block.subtype === 'string') {
                 this.log('✅ [TextFormatParser] 确认是Todo块，调用TodoProcessor');
                 // 使用TodoProcessor的extractFromBlock方法，传递块索引
-                const todoItems = todoProcessor.extractFromBlock(block, index);
-                this.log('🎯 [TextFormatParser] TodoProcessor返回的项目:', todoItems);
-                items.push(...todoItems);
+                if ('extractFromBlock' in todoProcessor) {
+                    const todoItems = (todoProcessor as any).extractFromBlock(block, index);
+                    this.log('🎯 [TextFormatParser] TodoProcessor返回的项目:', todoItems);
+                    items.push(...todoItems);
+                }
             } else {
                 this.log('⚠️ [TextFormatParser] 不是Todo块或subtype无效，subtype:', block.subtype, 'type:', typeof block.subtype);
             }
