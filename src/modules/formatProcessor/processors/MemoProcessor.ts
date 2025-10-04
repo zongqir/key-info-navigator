@@ -21,7 +21,7 @@ export class MemoProcessor extends BaseFormatProcessor {
     };
 
     /**
-     * 从Span数据中提取备注文本
+     * 从Span数据中提取备注文本 - 自定义模式
      */
     public extractFromSpan(span: any, blockId?: string): FormattedTextItem[] {
         if (!this.isValidSpan(span)) {
@@ -30,28 +30,54 @@ export class MemoProcessor extends BaseFormatProcessor {
         
         this.log('提取备注span数据:', span);
         
-        // 从 markdown 中提取被标记的文本（括号外的部分）
-        let markedText = '';
-        if (span.markdown) {
-            // 尝试多种格式提取被标记文本
-            let match = span.markdown.match(/^(.+?)<sup>/);  // 格式1：xxx<sup>
-            if (match) {
-                markedText = this.cleanText(match[1]);
-            } else {
-                // 格式2：xxx（yyy） 或 xxx(yyy) - 提取括号前的内容
-                match = span.markdown.match(/^(.+?)[（(]/);
-                if (match) {
-                    markedText = this.cleanText(match[1]);
+        // 获取基础数据
+        const content = span.content || '';
+        const markdown = span.markdown || '';
+        
+        this.log('基础数据 - content:', content, 'markdown:', markdown);
+        
+        // 自定义备注提取逻辑
+        let extractedText = '';
+        let memoContent = '';
+        
+        if (content && markdown) {
+            // 从markdown中提取从content第一个字符开始，到")"结束的完整部分
+            const firstChar = content.charAt(0);
+            if (firstChar) {
+                // 在markdown中找到content开始的位置
+                const contentStartIndex = markdown.indexOf(firstChar);
+                if (contentStartIndex !== -1) {
+                    // 从该位置开始，找到第一个")"的位置
+                    const parenIndex = markdown.indexOf(')', contentStartIndex);
+                    if (parenIndex !== -1) {
+                        // 提取从第一个字符到")"的完整部分
+                        extractedText = markdown.substring(contentStartIndex, parenIndex + 1);
+                        this.log('从markdown提取的完整文本:', extractedText);
+                        
+                        // 解析被标记文本和备注内容
+                        const parsedResult = this.parseExtractedText(extractedText);
+                        if (parsedResult) {
+                            extractedText = parsedResult.markedText;
+                            memoContent = parsedResult.memoContent;
+                        }
+                    } else {
+                        // 如果没有找到")"，使用content作为被标记文本
+                        extractedText = content;
+                    }
                 } else {
-                    markedText = this.cleanText(span.content || '');
+                    // 如果在markdown中找不到content的开始，直接使用content
+                    extractedText = content;
                 }
+            } else {
+                extractedText = content;
             }
         } else {
-            markedText = this.cleanText(span.content || '');
+            // 如果缺少基础数据，使用content
+            extractedText = content;
         }
         
-        // 备注内容可能在不同的字段中
-        const memoContent = this.extractMemoContent(span);
+        // 清理文本
+        const markedText = this.cleanText(extractedText);
         
         if (!markedText) {
             this.log('跳过空的标记文本');
@@ -72,12 +98,35 @@ export class MemoProcessor extends BaseFormatProcessor {
             metadata: {
                 originalSpan: span,
                 markedText: markedText,
-                memoText: memoContent
+                memoText: memoContent,
+                extractedText: extractedText
             }
         };
         
         this.log('创建备注项:', item);
         return [item];
+    }
+
+    /**
+     * 解析提取的文本，分离被标记文本和备注内容
+     * 例如："a123(456)" -> { markedText: "a123", memoContent: "456" }
+     */
+    private parseExtractedText(extractedText: string): { markedText: string, memoContent: string } | null {
+        this.log('解析提取的文本:', extractedText);
+        
+        // 匹配格式：被标记文本(备注内容)
+        const match = extractedText.match(/^(.+?)\((.+?)\)$/);
+        if (match) {
+            const markedText = match[1].trim();
+            const memoContent = match[2].trim();
+            
+            this.log('解析结果 - 被标记文本:', markedText, '备注内容:', memoContent);
+            return { markedText, memoContent };
+        }
+        
+        // 如果不匹配括号格式，整个文本作为被标记文本
+        this.log('未匹配括号格式，使用整个文本作为被标记文本');
+        return { markedText: extractedText, memoContent: '' };
     }
 
     /**
@@ -126,30 +175,6 @@ export class MemoProcessor extends BaseFormatProcessor {
     }
 
     /**
-     * 从span数据中提取备注内容
-     */
-    private extractMemoContent(span: any): string {
-        // 优先从 markdown 字段提取（格式：划线文本(备注内容)）
-        if (span.markdown) {
-            const extracted = this.extractMemoFromMarkdown(span.markdown);
-            if (extracted) {
-                return extracted;
-            }
-        }
-        
-        // 备用方案：尝试其他字段
-        const memoContent = span.memo_content || 
-               span.memo || 
-               span['inline-memo-content'] || 
-               span.attrs?.memo || 
-               span.attrs?.['memo-content'] ||
-               this.extractMemoFromMarkdown(span.content || '') ||
-               '';
-        
-        return memoContent;
-    }
-
-    /**
      * 从DOM元素中提取备注内容
      */
     private extractMemoContentFromElement(element: Element): string {
@@ -160,33 +185,6 @@ export class MemoProcessor extends BaseFormatProcessor {
                element.getAttribute('title') ||
                this.extractMemoFromText(element.textContent || '') ||
                '';
-    }
-
-    /**
-     * 从Markdown文本中提取备注内容
-     * 支持多种格式：
-     * 1. 标准格式：划线文本<sup>(备注内容)</sup>
-     * 2. 中文括号：划线文本（备注内容）
-     * 3. 英文括号：划线文本(备注内容)
-     */
-    private extractMemoFromMarkdown(markdown: string): string {
-        // 格式1：fwefwefwe<sup>(fwefewfwe)</sup> - 标准格式
-        let match = markdown.match(/<sup>\((.+?)\)<\/sup>/);
-        if (match) return match[1];
-        
-        // 格式2：fwefwefwe<sup>（fwefewfwe）</sup> - 中文括号带sup标签
-        match = markdown.match(/<sup>（(.+?)）<\/sup>/);
-        if (match) return match[1];
-        
-        // 格式3：fwefwefwe（fwefewfwe） - 纯中文括号
-        match = markdown.match(/(.+?)（(.+?)）$/);
-        if (match) return match[2];
-        
-        // 格式4：fwefwefwe(fwefewfwe) - 纯英文括号
-        match = markdown.match(/(.+?)\((.+?)\)$/);
-        if (match) return match[2];
-        
-        return '';
     }
 
     /**
