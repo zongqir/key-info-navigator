@@ -269,7 +269,7 @@ export class FormattedTextEventHandler {
             const success = await processor.removeFormatting!(text, blockId, itemIndex >= 0 ? itemIndex : 0);
             
             if (success) {
-                showMessage(`✅ ${this.i18n.removeFormatSuccess || '格式删除成功'}: ${text}`, 2000, 'info');
+                showMessage(`✅ ${this.i18n.removeFormatSuccess || '格式删除成功'}`, 2000, 'info');
                 
                 // 更新块内容到后端
                 await this.memoManager.updateBlockContent();
@@ -280,12 +280,12 @@ export class FormattedTextEventHandler {
                 }, 500);
                 
             } else {
-                showMessage(`❌ ${this.i18n.removeFormatFailed || '格式删除失败'}: ${text}`, 3000, 'error');
+                showMessage(` ${this.i18n.removeFormatFailed || '格式删除失败，手动删除多重关键词'}`, 4000, 'error');
             }
             
         } catch (error) {
             this.log('删除格式化失败:', error);
-            showMessage(`❌ ${this.i18n.removeFormatFailed || '格式删除失败'}: ${text}`, 3000, 'error');
+            showMessage(` ${this.i18n.removeFormatFailed || '格式删除失败，手动删除多重关键词'}`, 4000, 'error');
         }
     }
     

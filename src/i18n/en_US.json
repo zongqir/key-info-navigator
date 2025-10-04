@@ -37,7 +37,7 @@
   "memoTargetLabel": "Add memo to the following content:",
   "removeFormat": "Remove Format",
   "removeFormatSuccess": "Format removed successfully",
-  "removeFormatFailed": "Failed to remove format",
+  "removeFormatFailed": "Failed to remove format. Please try refreshing the page. If it's a nested format structure, please remove it manually",
   "reverseNavigationSuccess": "Located to sidebar item",
   "settings": "Settings",
   "general": "General",

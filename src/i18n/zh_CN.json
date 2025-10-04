@@ -37,7 +37,7 @@
   "memoTargetLabel": "为以下内容添加备注：",
   "removeFormat": "删除格式",
   "removeFormatSuccess": "格式删除成功",
-  "removeFormatFailed": "格式删除失败",
+  "removeFormatFailed": "格式删除失败，如果是复合关键信息，请手动删除",
   "reverseNavigationSuccess": "已定位到侧边栏条目",
   "settings": "设置",
   "general": "常规设置",
