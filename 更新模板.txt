@@ -1,0 +1,2 @@
+更新版本信息
+1. 你可能需要修改两个readme plugin和package两个json以及更新日志.

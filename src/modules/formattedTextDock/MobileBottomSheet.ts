@@ -854,10 +854,10 @@ export class MobileBottomSheet {
         const groupedItems = FormattedTextUtils.groupItems(filteredItems);
         let listHTML = this.uiRenderer.createListHTML(groupedItems);
         
-        // 如果有被筛选的内容，在列表底部添加筛选提示
+        // 如果有被筛选的内容，在列表顶部添加筛选提示
         if (hasFilteredOutContent) {
             const hintHTML = this.createFilterHintSection(filteredOutTypes);
-            listHTML += hintHTML;
+            listHTML = hintHTML + listHTML;  // 放在列表前面
         }
 
         content.innerHTML = `<div class="formatted-text-dock__list">${listHTML}</div>`;

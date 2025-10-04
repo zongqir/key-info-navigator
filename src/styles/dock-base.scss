@@ -213,10 +213,10 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 26px;
-          height: 26px;
-          background: var(--kinfo-bg-primary);
-          border: 1px solid var(--kinfo-border-medium);
+          width: auto;  /* 让宽度自适应图标 */
+          height: auto; /* 让高度自适应图标 */
+          background: none; /* 去掉灰色背景 */
+          border: none;     /* 去掉边框 */
           border-radius: 3px;
           cursor: pointer;
           transition: all 0.15s ease;
@@ -224,13 +224,11 @@
           
           &:hover {
             opacity: 1;
-            background: var(--kinfo-bg-hover);
-            border-color: var(--kinfo-accent-primary);
             transform: translateY(-1px);
           }
           
           div {
-            transform: scale(0.85);
+            /* 不需要transform缩放，让图标自然填充容器 */
           }
         }
       }

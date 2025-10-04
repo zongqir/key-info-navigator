@@ -314,16 +314,16 @@ export class FormattedTextDock {
             return;
         }
 
-        // 有显示内容，但也可能有被筛选的内容
+        // 有显示内容，但也可能有被筛选的内容  
         const groupedItems = FormattedTextUtils.groupItems(filteredItems);
         this.log(`分组后的项目数量: ${groupedItems.size}`);
         
         let listHTML = this.uiRenderer.createListHTML(groupedItems);
         
-        // 如果有被筛选的内容，在列表底部添加筛选提示
+        // 如果有被筛选的内容，在列表顶部添加筛选提示
         if (hasFilteredOutContent) {
             const hintHTML = this.createFilterHintSection(filteredOutTypes);
-            listHTML += hintHTML;
+            listHTML = hintHTML + listHTML;  // 放在列表前面
         }
 
         content.innerHTML = `<div class="formatted-text-dock__list">${listHTML}</div>`;
