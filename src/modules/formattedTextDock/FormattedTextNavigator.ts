@@ -1,6 +1,7 @@
 import { showMessage } from "siyuan";
 import { TextFormatType, FormattedTextItem } from "../formatProcessor";
 import { TextFormatParser } from "../formatProcessor/TextFormatParser";
+import { DocumentReadonlyChecker } from "../utils/DocumentReadonlyChecker";
 
 /**
  * 格式化文本导航器
@@ -201,10 +202,17 @@ export class FormattedTextNavigator {
     
     /**
      * 处理页面点击事件 - 简化版本，优先尝试精确匹配，失败则退回到块ID匹配
+     * 只有在文档处于只读模式下才触发反向导航功能
      */
     private handlePageClick(event: MouseEvent): void {
         const target = event.target as HTMLElement;
         if (!target) return;
+        
+        // 检查文档是否处于只读状态，只有在只读模式下才启用反向导航
+        if (!DocumentReadonlyChecker.checkDocumentReadonly()) {
+            this.log('文档处于可编辑状态，跳过反向导航功能');
+            return;
+        }
         
         // 检查是否点击了侧边栏本身，如果是则不处理
         if (this.element.contains(target)) {
