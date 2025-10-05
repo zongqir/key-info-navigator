@@ -9,6 +9,7 @@ export class FormattedTextMultiSelectManager {
     private selectedItemIds = new Set<string>();
     private lastSelectedIndex = -1;
     private isMultiSelectMode = false;
+    private isMobileDevice = false;
 
     constructor(
         private element: HTMLElement,
@@ -18,7 +19,32 @@ export class FormattedTextMultiSelectManager {
         private i18n: any,
         private logger?: (...args: any[]) => void
     ) {
+        // 检测是否为移动设备
+        this.isMobileDevice = this.detectMobileDevice();
+        
+        if (this.isMobileDevice) {
+            this.log('检测到移动设备，禁用多选功能');
+            return; // 移动端不启用多选功能
+        }
+        
         this.bindEvents();
+    }
+
+    /**
+     * 检测是否为移动设备
+     */
+    private detectMobileDevice(): boolean {
+        // 检测用户代理
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+        
+        // 检测触摸屏
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        // 检测屏幕宽度
+        const isSmallScreen = window.innerWidth <= 768;
+        
+        return isMobileUA || (isTouchDevice && isSmallScreen);
     }
 
     /**

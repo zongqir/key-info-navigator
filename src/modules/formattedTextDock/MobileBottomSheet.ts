@@ -852,7 +852,7 @@ export class MobileBottomSheet {
 
         // 有显示内容，但也可能有被筛选的内容
         const groupedItems = FormattedTextUtils.groupItems(filteredItems);
-        let listHTML = this.uiRenderer.createListHTML(groupedItems);
+        let listHTML = this.uiRenderer.createListHTML(groupedItems, new Set()); // 移动端不支持多选，传入空选择集合
         
         // 如果有被筛选的内容，在列表顶部添加筛选提示
         if (hasFilteredOutContent) {

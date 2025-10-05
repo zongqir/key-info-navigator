@@ -175,42 +175,43 @@
 
 /* 响应式布局 */
 @media (max-width: 768px) {
+    /* 在移动端隐藏批量操作控制栏，因为移动端不支持多选 */
     .formatted-text-dock__batch-controls {
-        padding: 6px 8px;
-        font-size: 11px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        min-height: auto;
-    }
-    
-    .formatted-text-dock__batch-info {
-        justify-content: center;
-    }
-    
-    .formatted-text-dock__batch-actions {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .formatted-text-dock__batch-actions button {
-        font-size: 10px;
-        padding: 3px 6px;
+        display: none !important;
     }
     
     .formatted-text-dock__item {
         padding: 8px 10px;
         margin-bottom: 1px;
+        cursor: default; /* 移动端不需要指针样式 */
     }
     
+    /* 移动端不显示选中状态，因为不支持多选 */
     .formatted-text-dock__item.selected {
-        margin-left: -3px;
-        border-left-width: 3px;
+        background: transparent !important;
+        border-left: none !important;
+        margin-left: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+    
+    .formatted-text-dock__item.selected::before {
+        display: none !important;
     }
     
     .formatted-text-dock__multi-select-hint {
-        bottom: 80px;
-        font-size: 10px;
-        padding: 6px 10px;
+        display: none !important; /* 移动端不显示多选提示 */
+    }
+}
+
+/* 专门针对触摸设备的样式 */
+@media (pointer: coarse) {
+    .formatted-text-dock__batch-controls {
+        display: none !important; /* 触摸设备不显示批量操作 */
+    }
+    
+    .formatted-text-dock__item {
+        cursor: default;
+        user-select: text; /* 触摸设备允许文本选择 */
     }
 }

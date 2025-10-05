@@ -123,7 +123,7 @@ export class FormattedTextDock {
             this.logger
         );
 
-        // 多选管理器
+        // 多选管理器（会自动检测移动设备并决定是否启用）
         this.multiSelectManager = new FormattedTextMultiSelectManager(
             this.element,
             this.formattedTexts,
@@ -199,6 +199,11 @@ export class FormattedTextDock {
         // 销毁各个模块
         this.memoManager?.destroy();
         this.navigator?.destroy();
+        
+        // 清理多选管理器
+        if (this.multiSelectManager) {
+            this.multiSelectManager.destroy();
+        }
         
         this.log('🔄 [FormattedTextDock] 组件销毁完成');
     }
@@ -583,7 +588,7 @@ export class FormattedTextDock {
         if (successCount > 0 && failCount === 0) {
             showMessage(`✅ 成功删除 ${successCount} 个项目的格式`, 3000, 'info');
         } else if (successCount > 0 && failCount > 0) {
-            showMessage(`⚠️ 成功删除 ${successCount} 个，失败 ${failCount} 个项目的格式`, 4000, 'warning');
+            showMessage(`⚠️ 成功删除 ${successCount} 个，失败 ${failCount} 个项目的格式`, 4000, 'info');
         } else {
             showMessage(`❌ 删除格式失败，请手动处理`, 4000, 'error');
         }
@@ -592,31 +597,6 @@ export class FormattedTextDock {
         setTimeout(() => {
             this.refresh(true);
         }, 500);
-    }
-
-    /**
-     * 销毁组件时清理多选管理器
-     */
-    public destroy(): void {
-        // 清理状态变化监听器
-        DocumentReadonlyChecker.removeStateChangeListener(this.readonlyStateChangeHandler);
-        
-        // 清理导航器
-        if (this.navigator) {
-            this.navigator.destroy();
-        }
-        
-        // 清理多选管理器
-        if (this.multiSelectManager) {
-            this.multiSelectManager.destroy();
-        }
-        
-        // 清理定时器
-        if (this.refreshTimer) {
-            clearTimeout(this.refreshTimer);
-        }
-        
-        this.log('FormattedTextDock 组件已销毁');
     }
 
     /**
