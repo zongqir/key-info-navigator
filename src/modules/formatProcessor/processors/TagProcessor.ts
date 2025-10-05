@@ -33,8 +33,70 @@ export class TagProcessor extends BaseFormatProcessor {
     // 缓存blocks content，避免重复查询
     private blockContentCache = new Map<string, string>();
     
+    // 正在查询中的block_id，避免重复查询
+    private fetchingBlocks = new Set<string>();
+    
     constructor(logger?: (...args: any[]) => void) {
         super(logger);
+    }
+    
+    /**
+     * 清理缓存（在组件刷新时调用）
+     */
+    public clearCache(): void {
+        this.blockContentCache.clear();
+        this.fetchingBlocks.clear();
+    }
+    
+    /**
+     * 批量预检查和恢复内容（在组件渲染完成后调用）
+     */
+    public batchRestoreContent(): void {
+        // 查找所有显示"加载中..."的tag元素
+        const loadingElements = document.querySelectorAll('[data-tag-block-id]');
+        
+        loadingElements.forEach(element => {
+            const blockId = element.getAttribute('data-tag-block-id');
+            const itemId = element.getAttribute('data-tag-item-id');
+            
+            if (blockId && itemId && (element.textContent === '加载中...' || element.textContent === '')) {
+                // 如果缓存中有内容，立即更新
+                if (this.blockContentCache.has(blockId)) {
+                    const cachedContent = this.blockContentCache.get(blockId)!;
+                    const truncatedContent = this.truncateText(cachedContent, 80);
+                    element.textContent = truncatedContent;
+                } else if (!this.fetchingBlocks.has(blockId)) {
+                    // 如果缓存中没有且没有在查询中，触发异步加载
+                    this.fetchBlockContent(blockId, itemId);
+                }
+            }
+        });
+        
+        // 间隔检查，确保在DOM稳定后能够恢复
+        setTimeout(() => {
+            this.batchRestoreContentOnce();
+        }, 500);
+        
+        setTimeout(() => {
+            this.batchRestoreContentOnce();
+        }, 1500);
+    }
+    
+    /**
+     * 单次批量恢复检查
+     */
+    private batchRestoreContentOnce(): void {
+        const loadingElements = document.querySelectorAll('[data-tag-block-id]');
+        
+        loadingElements.forEach(element => {
+            const blockId = element.getAttribute('data-tag-block-id');
+            
+            if (blockId && element.textContent === '加载中...' && this.blockContentCache.has(blockId)) {
+                const cachedContent = this.blockContentCache.get(blockId)!;
+                const truncatedContent = this.truncateText(cachedContent, 80);
+                element.textContent = truncatedContent;
+            }
+        });
     }
     
     /**
@@ -217,10 +279,38 @@ export class TagProcessor extends BaseFormatProcessor {
         const { displayName, blockContent, needsBlockContent } = item.metadata;
         const tagColor = this.getTagColor(displayName);
         
-        // 如果需要获取block内容且当前blockContent为空，异步获取并显示加载状态
+        // 如果需要获取block内容且当前blockContent为空，先检查缓存
         if (needsBlockContent && !blockContent) {
-            // 异步获取block内容
+            // 优先检查缓存
+            if (this.blockContentCache.has(item.blockId)) {
+                const cachedContent = this.blockContentCache.get(item.blockId)!;
+                const truncatedContent = this.truncateText(cachedContent, 80);
+                
+                return `
+                    <div class="formatted-text-dock__item-tag-inline">
+                        <div class="formatted-text-dock__tag-shape" style="background-color: ${tagColor}">
+                            <span class="formatted-text-dock__tag-text">${displayName}</span>
+                        </div>
+                        <span class="formatted-text-dock__tag-block-text" data-tag-item-id="${item.id}" data-tag-block-id="${item.blockId}">${this.escapeHtml(truncatedContent)}</span>
+                    </div>
+                `;
+            }
+            
+            // 缓存中没有，异步获取block内容
             this.fetchBlockContent(item.blockId, item.id);
+            
+            // 多次延迟检查，防止DOM重新渲染导致的竞态条件
+            setTimeout(() => {
+                this.recheckAndUpdateContent(item.blockId, item.id);
+            }, 100);
+            
+            setTimeout(() => {
+                this.recheckAndUpdateContent(item.blockId, item.id);
+            }, 300);
+            
+            setTimeout(() => {
+                this.recheckAndUpdateContent(item.blockId, item.id);
+            }, 1000);
             
             // 先显示加载状态
             return `
@@ -228,7 +318,7 @@ export class TagProcessor extends BaseFormatProcessor {
                     <div class="formatted-text-dock__tag-shape" style="background-color: ${tagColor}">
                         <span class="formatted-text-dock__tag-text">${displayName}</span>
                     </div>
-                    <span class="formatted-text-dock__tag-block-text" data-tag-item-id="${item.id}">加载中...</span>
+                    <span class="formatted-text-dock__tag-block-text" data-tag-item-id="${item.id}" data-tag-block-id="${item.blockId}">加载中...</span>
                 </div>
             `;
         }
@@ -241,7 +331,7 @@ export class TagProcessor extends BaseFormatProcessor {
                 <div class="formatted-text-dock__tag-shape" style="background-color: ${tagColor}">
                     <span class="formatted-text-dock__tag-text">${displayName}</span>
                 </div>
-                <span class="formatted-text-dock__tag-block-text" data-tag-item-id="${item.id}">${this.escapeHtml(truncatedContent)}</span>
+                <span class="formatted-text-dock__tag-block-text" data-tag-item-id="${item.id}" data-tag-block-id="${item.blockId}">${this.escapeHtml(truncatedContent)}</span>
             </div>
         `;
     }
@@ -264,6 +354,16 @@ export class TagProcessor extends BaseFormatProcessor {
             return;
         }
         
+        // 检查是否已经在查询中，避免重复查询
+        if (this.fetchingBlocks.has(blockId)) {
+            // 等待查询完成，然后更新当前item
+            this.waitForBlockContent(blockId, itemId);
+            return;
+        }
+        
+        // 标记为正在查询
+        this.fetchingBlocks.add(blockId);
+        
         try {
             // 查询blocks表获取content
             const stmt = `SELECT content FROM blocks WHERE id = "${blockId}"`;
@@ -280,16 +380,77 @@ export class TagProcessor extends BaseFormatProcessor {
                 const blockContent = response.data[0].content || '';
                 // 缓存结果
                 this.blockContentCache.set(blockId, blockContent);
-                // 更新DOM显示
-                this.updateTagBlockText(itemId, blockContent);
+                // 更新所有等待这个block内容的DOM元素
+                this.updateAllTagBlockTexts(blockId, blockContent);
             } else {
                 // 查询失败或无内容，显示默认文本
-                this.updateTagBlockText(itemId, '无内容');
+                this.blockContentCache.set(blockId, '无内容');
+                this.updateAllTagBlockTexts(blockId, '无内容');
             }
         } catch (error) {
             // 查询异常，显示错误信息
             console.error('获取block内容失败:', error);
-            this.updateTagBlockText(itemId, '加载失败');
+            this.blockContentCache.set(blockId, '加载失败');
+            this.updateAllTagBlockTexts(blockId, '加载失败');
+        } finally {
+            // 移除查询中标记
+            this.fetchingBlocks.delete(blockId);
+        }
+    }
+    
+    /**
+     * 等待block内容查询完成
+     */
+    private waitForBlockContent(blockId: string, itemId: string): void {
+        // 使用轮询方式检查缓存是否已更新
+        const checkInterval = 50; // 50ms检查一次
+        const maxWaitTime = 5000; // 最多等待5秒
+        let waitedTime = 0;
+        
+        const pollCache = () => {
+            if (this.blockContentCache.has(blockId)) {
+                const cachedContent = this.blockContentCache.get(blockId)!;
+                this.updateTagBlockText(itemId, cachedContent);
+                return;
+            }
+            
+            waitedTime += checkInterval;
+            if (waitedTime < maxWaitTime && this.fetchingBlocks.has(blockId)) {
+                setTimeout(pollCache, checkInterval);
+            } else {
+                // 超时或查询已完成但没有结果，显示错误信息
+                this.updateTagBlockText(itemId, '加载超时');
+            }
+        };
+        
+        setTimeout(pollCache, checkInterval);
+    }
+    
+    /**
+     * 更新所有使用相同blockId的tag元素
+     */
+    private updateAllTagBlockTexts(blockId: string, blockContent: string): void {
+        // 查找所有data-block-id属性匹配的元素
+        const elements = document.querySelectorAll(`[data-tag-block-id="${blockId}"]`);
+        const truncatedContent = this.truncateText(blockContent, 80);
+        
+        elements.forEach(element => {
+            element.textContent = truncatedContent;
+        });
+    }
+    
+    /**
+     * 重新检查并更新内容（用于处理DOM重新渲染的情况）
+     */
+    private recheckAndUpdateContent(blockId: string, itemId: string): void {
+        // 如果缓存中有内容但DOM元素显示的还是"加载中"，则更新它
+        if (this.blockContentCache.has(blockId)) {
+            const element = document.querySelector(`[data-tag-item-id="${itemId}"]`);
+            if (element && (element.textContent === '加载中...' || element.textContent === '')) {
+                const cachedContent = this.blockContentCache.get(blockId)!;
+                const truncatedContent = this.truncateText(cachedContent, 80);
+                element.textContent = truncatedContent;
+            }
         }
     }
     

@@ -51,6 +51,14 @@ export class TextFormatParser {
             const sorter = SorterFactory.getDefaultSorter();
             const sortedItems = await sorter.sort(allItems);
             
+            // 在解析完成后，延迟触发tag内容恢复检查
+            setTimeout(() => {
+                const tagProcessor = this.getFormatProcessor(TextFormatType.TAG);
+                if (tagProcessor && 'batchRestoreContent' in tagProcessor) {
+                    (tagProcessor as any).batchRestoreContent();
+                }
+            }, 200);
+            
             return sortedItems;
             
         } catch (error) {
