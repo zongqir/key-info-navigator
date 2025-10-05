@@ -4,6 +4,7 @@ import { FormattedTextUIRenderer } from "./FormattedTextUIRenderer";
 import { FormattedTextEventHandler } from "./FormattedTextEventHandler";
 import { FormattedTextNavigator } from "./FormattedTextNavigator";
 import { FormattedTextMemoManager } from "./FormattedTextMemoManager";
+import { FormattedTextMultiSelectManager } from "./FormattedTextMultiSelectManager";
 import { FormattedTextUtils } from "./FormattedTextUtils";
 import { Logger, EditorUtils, DocumentReadonlyChecker } from "../utils";
 
@@ -32,6 +33,10 @@ export class FormattedTextDock {
     private eventHandler!: FormattedTextEventHandler;
     private navigator!: FormattedTextNavigator;
     private memoManager!: FormattedTextMemoManager;
+    private multiSelectManager!: FormattedTextMultiSelectManager;
+    
+    // 多选状态
+    private selectedItemIds = new Set<string>();
     
     // 状态监听器
     private readonlyStateChangeHandler: (isReadonly: boolean) => void;
@@ -114,6 +119,16 @@ export class FormattedTextDock {
             this.enabledFormats,
             () => this.refresh(true), // 刷新回调
             (type) => this.toggleFormat(type), // 格式切换回调
+            this.i18n,
+            this.logger
+        );
+
+        // 多选管理器
+        this.multiSelectManager = new FormattedTextMultiSelectManager(
+            this.element,
+            this.formattedTexts,
+            (selectedIds) => this.onSelectionChange(selectedIds), // 选择变化回调
+            (selectedItems) => this.handleBatchDelete(selectedItems), // 批量删除回调
             this.i18n,
             this.logger
         );
@@ -281,6 +296,7 @@ export class FormattedTextDock {
         this.navigator.updateFormattedTexts(this.formattedTexts);
         this.memoManager.updateFormattedTexts(this.formattedTexts);
         this.eventHandler.updateFormattedTexts(this.formattedTexts);
+        this.multiSelectManager.updateFormattedTexts(this.formattedTexts);
     }
 
     /**
@@ -318,7 +334,7 @@ export class FormattedTextDock {
         const groupedItems = FormattedTextUtils.groupItems(filteredItems);
         this.log(`分组后的项目数量: ${groupedItems.size}`);
         
-        let listHTML = this.uiRenderer.createListHTML(groupedItems);
+        let listHTML = this.uiRenderer.createListHTML(groupedItems, this.selectedItemIds);
         
         // 如果有被筛选的内容，在列表顶部添加筛选提示
         if (hasFilteredOutContent) {
@@ -455,6 +471,153 @@ export class FormattedTextDock {
         }
     }
 
+
+    /**
+     * 选择状态变化回调
+     */
+    private onSelectionChange(selectedIds: Set<string>): void {
+        this.selectedItemIds = selectedIds;
+        this.log('选择状态变化，选中项目数:', selectedIds.size);
+    }
+
+    /**
+     * 批量删除格式化回调
+     */
+    private async handleBatchDelete(selectedItems: FormattedTextItem[]): Promise<void> {
+        this.log('开始批量删除格式化，项目数量:', selectedItems.length);
+        
+        let successCount = 0;
+        let failCount = 0;
+
+        // 按块ID分组，避免同一块的多次DOM操作冲突
+        const itemsByBlock = new Map<string, FormattedTextItem[]>();
+        selectedItems.forEach(item => {
+            if (!itemsByBlock.has(item.blockId)) {
+                itemsByBlock.set(item.blockId, []);
+            }
+            itemsByBlock.get(item.blockId)!.push(item);
+        });
+
+        // 对每个块逐个处理
+        for (const [blockId, blockItems] of itemsByBlock) {
+            this.log(`处理块 ${blockId}，包含 ${blockItems.length} 个项目`);
+            
+            // 按位置倒序排序，从后往前删除，避免索引变化问题
+            const sortedItems = blockItems.sort((a, b) => b.position - a.position);
+            
+            // 按类型分组
+            const itemsByType = new Map<TextFormatType, FormattedTextItem[]>();
+            sortedItems.forEach(item => {
+                if (!itemsByType.has(item.type)) {
+                    itemsByType.set(item.type, []);
+                }
+                itemsByType.get(item.type)!.push(item);
+            });
+
+            // 对每种类型依次处理
+            for (const [type, items] of itemsByType) {
+                const processor = this.parser.getFormatProcessor(type);
+                
+                if (!processor.removeFormatting) {
+                    this.log(`格式处理器 ${type} 不支持删除格式化功能`);
+                    failCount += items.length;
+                    continue;
+                }
+
+                // 对该类型的项目，也按位置倒序处理
+                const typeItemsSorted = items.sort((a, b) => b.position - a.position);
+                
+                for (const item of typeItemsSorted) {
+                    try {
+                        // 重新计算当前项目的索引（因为前面可能已经删除了一些项目）
+                        const currentFormattedItems = this.formattedTexts.filter(formattedItem => 
+                            formattedItem.type === type && 
+                            formattedItem.text === item.text &&
+                            formattedItem.blockId === item.blockId
+                        );
+                        currentFormattedItems.sort((a, b) => a.position - b.position);
+                        
+                        const itemIndex = currentFormattedItems.findIndex(formattedItem => 
+                            formattedItem.position === item.position
+                        );
+
+                        this.log(`删除项目: [${type}] "${item.text}" 位置=${item.position} 索引=${itemIndex}`);
+
+                        const success = await processor.removeFormatting!(
+                            item.text, 
+                            item.blockId, 
+                            itemIndex >= 0 ? itemIndex : 0
+                        );
+
+                        if (success) {
+                            successCount++;
+                            this.log(`✅ 删除成功`);
+                        } else {
+                            failCount++;
+                            this.log(`❌ 删除失败`);
+                        }
+
+                        // 每次删除后稍微等待，让DOM更新完成
+                        await new Promise(resolve => setTimeout(resolve, 100));
+
+                    } catch (error) {
+                        this.log('删除格式化异常:', error);
+                        failCount++;
+                    }
+                }
+            }
+
+            // 每个块处理完后，更新该块的内容到后端
+            try {
+                await this.memoManager.updateBlockContent();
+                this.log(`块 ${blockId} 内容已更新到后端`);
+            } catch (error) {
+                this.log(`更新块 ${blockId} 内容失败:`, error);
+            }
+
+            // 块间也稍微等待
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        // 显示结果消息
+        if (successCount > 0 && failCount === 0) {
+            showMessage(`✅ 成功删除 ${successCount} 个项目的格式`, 3000, 'info');
+        } else if (successCount > 0 && failCount > 0) {
+            showMessage(`⚠️ 成功删除 ${successCount} 个，失败 ${failCount} 个项目的格式`, 4000, 'warning');
+        } else {
+            showMessage(`❌ 删除格式失败，请手动处理`, 4000, 'error');
+        }
+
+        // 刷新列表
+        setTimeout(() => {
+            this.refresh(true);
+        }, 500);
+    }
+
+    /**
+     * 销毁组件时清理多选管理器
+     */
+    public destroy(): void {
+        // 清理状态变化监听器
+        DocumentReadonlyChecker.removeStateChangeListener(this.readonlyStateChangeHandler);
+        
+        // 清理导航器
+        if (this.navigator) {
+            this.navigator.destroy();
+        }
+        
+        // 清理多选管理器
+        if (this.multiSelectManager) {
+            this.multiSelectManager.destroy();
+        }
+        
+        // 清理定时器
+        if (this.refreshTimer) {
+            clearTimeout(this.refreshTimer);
+        }
+        
+        this.log('FormattedTextDock 组件已销毁');
+    }
 
     /**
      * 日志输出

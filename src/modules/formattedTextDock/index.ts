@@ -9,4 +9,5 @@ export { FormattedTextUIRenderer } from './FormattedTextUIRenderer';
 export { FormattedTextEventHandler } from './FormattedTextEventHandler';
 export { FormattedTextNavigator } from './FormattedTextNavigator';
 export { FormattedTextMemoManager } from './FormattedTextMemoManager';
+export { FormattedTextMultiSelectManager } from './FormattedTextMultiSelectManager';
 export { FormattedTextUtils } from './FormattedTextUtils';

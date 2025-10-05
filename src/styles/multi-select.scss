@@ -1,0 +1,216 @@
+/* 多选功能样式 - 无复选框版本 */
+
+/* 批量操作控制栏 */
+.formatted-text-dock__batch-controls {
+    padding: 8px 12px;
+    background: var(--b3-theme-surface-lighter);
+    border-bottom: 1px solid var(--b3-border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    min-height: 36px;
+}
+
+.formatted-text-dock__batch-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.selected-count {
+    color: var(--b3-theme-on-surface);
+    font-weight: 500;
+}
+
+.formatted-text-dock__batch-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.formatted-text-dock__batch-actions button {
+    padding: 4px 8px;
+    font-size: 11px;
+    border: 1px solid var(--b3-border-color);
+    background: var(--b3-theme-surface);
+    color: var(--b3-theme-on-surface);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.formatted-text-dock__batch-actions button:hover {
+    background: var(--b3-theme-surface-light);
+    border-color: var(--b3-theme-primary);
+}
+
+.formatted-text-dock__select-all:hover {
+    background: var(--b3-theme-primary-lighter);
+    color: var(--b3-theme-primary);
+}
+
+.formatted-text-dock__deselect-all:hover {
+    background: var(--b3-theme-surface-lighter);
+}
+
+.formatted-text-dock__batch-delete {
+    color: var(--b3-theme-error) !important;
+    border-color: var(--b3-theme-error-lighter) !important;
+}
+
+.formatted-text-dock__batch-delete:hover {
+    background: var(--b3-theme-error-lighter) !important;
+    color: var(--b3-theme-error) !important;
+}
+
+/* 项目选中状态样式 - 更突出的视觉效果 */
+.formatted-text-dock__item.selected {
+    background: linear-gradient(90deg, var(--b3-theme-primary-lightest) 0%, var(--b3-theme-primary-lighter) 100%);
+    border-left: 4px solid var(--b3-theme-primary);
+    margin-left: -4px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+    transform: translateX(2px);
+}
+
+.formatted-text-dock__item.selected .formatted-text-dock__item-content {
+    background: transparent;
+}
+
+.formatted-text-dock__item.selected .formatted-text-dock__item-text {
+    color: var(--b3-theme-primary);
+    font-weight: 500;
+}
+
+/* 项目布局调整 */
+.formatted-text-dock__item {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px 12px;
+    margin-bottom: 2px;
+    border-radius: 6px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none; /* 防止文本选择干扰多选 */
+    cursor: pointer;
+    position: relative;
+}
+
+.formatted-text-dock__item:hover:not(.selected) {
+    background: var(--b3-theme-surface-light);
+    transform: translateX(1px);
+}
+
+.formatted-text-dock__item.selected:hover {
+    background: linear-gradient(90deg, var(--b3-theme-primary-lighter) 0%, var(--b3-theme-primary-light) 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+/* 调整项目内容布局 */
+.formatted-text-dock__item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.formatted-text-dock__item-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.formatted-text-dock__item-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* 选中状态的动画效果 */
+.formatted-text-dock__item.selected::before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--b3-theme-primary) 0%, var(--b3-theme-primary-light) 100%);
+    border-radius: 0 2px 2px 0;
+}
+
+/* 多选操作提示 */
+.formatted-text-dock__multi-select-hint {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--b3-theme-surface);
+    border: 1px solid var(--b3-border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--b3-theme-on-surface-light);
+    white-space: nowrap;
+    box-shadow: var(--b3-point-shadow);
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.formatted-text-dock__multi-select-hint.show {
+    opacity: 1;
+}
+
+/* 选中项目计数样式优化 */
+.selected-count {
+    background: var(--b3-theme-primary-lightest);
+    color: var(--b3-theme-primary);
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+    .formatted-text-dock__batch-controls {
+        padding: 6px 8px;
+        font-size: 11px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        min-height: auto;
+    }
+    
+    .formatted-text-dock__batch-info {
+        justify-content: center;
+    }
+    
+    .formatted-text-dock__batch-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .formatted-text-dock__batch-actions button {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+    
+    .formatted-text-dock__item {
+        padding: 8px 10px;
+        margin-bottom: 1px;
+    }
+    
+    .formatted-text-dock__item.selected {
+        margin-left: -3px;
+        border-left-width: 3px;
+    }
+    
+    .formatted-text-dock__multi-select-hint {
+        bottom: 80px;
+        font-size: 10px;
+        padding: 6px 10px;
+    }
+}

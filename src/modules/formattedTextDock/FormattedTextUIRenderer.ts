@@ -44,6 +44,16 @@ export class FormattedTextUIRenderer {
                         </button>
                     </div>
                 </div>
+                <div class="formatted-text-dock__batch-controls" style="display: none;">
+                    <div class="formatted-text-dock__batch-info">
+                        <span class="selected-count">已选择 0 项</span>
+                    </div>
+                    <div class="formatted-text-dock__batch-actions">
+                        <button class="formatted-text-dock__select-all" data-action="select-all">全选</button>
+                        <button class="formatted-text-dock__deselect-all" data-action="deselect-all">取消全选</button>
+                        <button class="formatted-text-dock__batch-delete" data-action="batch-delete">批量删除格式</button>
+                    </div>
+                </div>
                 <div class="formatted-text-dock__content">
                     <div class="formatted-text-dock__empty">${this.i18n.openDocumentFirst}</div>
                 </div>
@@ -98,7 +108,7 @@ export class FormattedTextUIRenderer {
      * 创建列表HTML
      * 注意：items 已经在 TextFormatParser 中通过排序器按渲染顺序排序
      */
-    public createListHTML(groupedItems: Map<string, FormattedTextItem[]>): string {
+    public createListHTML(groupedItems: Map<string, FormattedTextItem[]>, selectedItemIds?: Set<string>): string {
         const html: string[] = [];
         
         // 将分组转换为数组（保持原有顺序，因为已经排序过了）
@@ -121,6 +131,7 @@ export class FormattedTextUIRenderer {
             for (let i = 0; i < sortedItems.length; i++) {
                 const item = sortedItems[i];
                 const displayText = sortedItems.length > 1 ? `${item.text} (${i + 1})` : item.text;
+                const isSelected = selectedItemIds?.has(item.id) || false;
                 
                 const actionButtons = processor.renderActionButtons ? processor.renderActionButtons(item, this.i18n) : '';
                 
@@ -133,14 +144,16 @@ export class FormattedTextUIRenderer {
                 
                 // 确定对齐样式类
                 const alignmentClass = (hasMultilineContent || isMemoWithContent) ? 'has-context' : '';
+                const selectedClass = isSelected ? 'selected' : '';
                 
                 html.push(`
-                    <div class="formatted-text-dock__item ${alignmentClass}" 
+                    <div class="formatted-text-dock__item ${alignmentClass} ${selectedClass}" 
                          data-type="${item.type}"
                          data-text="${item.text}"
                          data-block-id="${item.blockId}"
                          data-index="${i}"
-                         data-position="${item.position}">
+                         data-position="${item.position}"
+                         data-item-id="${item.id}">
                         <div class="formatted-text-dock__item-content">
                             <div class="formatted-text-dock__item-header">
                                 <div class="formatted-text-dock__item-main">

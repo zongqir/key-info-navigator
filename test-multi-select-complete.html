@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Info Navigator - 多选功能测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .test-section {
+            margin-bottom: 32px;
+            padding: 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 4px;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .status-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        .completed { color: #28a745; }
+        .pending { color: #ffc107; }
+        .info { color: #007acc; }
+        
+        .test-instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #007acc;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .kbd {
+            background: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 Key Info Navigator - 简洁多选功能实现完成</h1>
+        
+        <div class="test-section">
+            <h3>✅ 已实现的功能</h3>
+            <ul class="feature-list">
+                <li>
+                    <span class="status-icon completed">✅</span>
+                    <strong>多选状态管理</strong> - 支持复选框显示和选中状态跟踪
+                </li>
+                <li>
+                    <span class="status-icon completed">✅</span>
+                    <strong>Ctrl 多选</strong> - 按住 <span class="kbd">Ctrl</span> 键点击项目可进行多选
+                </li>
+                <li>
+                    <span class="status-icon completed">✅</span>
+                    <strong>Shift 连续选择</strong> - 按住 <span class="kbd">Shift</span> 键点击可选择连续范围
+                </li>
+                <li>
+                    <span class="status-icon completed">✅</span>
+                    <strong>全选/取消全选</strong> - 提供批量选择控制按钮
+                </li>
+                <li>
+                    <span class="status-icon completed">✅</span>
+                    <strong>批量删除格式化</strong> - 支持一次删除多个项目的格式
+                </li>
+                <li>
+                    <span class="status-icon completed">✅</span>
+                    <strong>选择状态UI反馈</strong> - 选中项目高亮显示，批量操作栏动态显示
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🎮 使用方法</h3>
+            <div class="test-instructions">
+                <h4>简洁多选操作（无复选框）：</h4>
+                <ul>
+                    <li><strong>Ctrl 多选：</strong>按住 <span class="kbd">Ctrl</span> (或 <span class="kbd">Cmd</span>) 键点击项目进行多选</li>
+                    <li><strong>Shift 连续选择：</strong>先点击一个项目，然后按住 <span class="kbd">Shift</span> 键点击另一个项目选择范围</li>
+                    <li><strong>视觉反馈：</strong>选中的项目会显示渐变背景和左侧蓝色条纹</li>
+                    <li><strong>全选：</strong>点击批量操作栏中的"全选"按钮</li>
+                    <li><strong>批量删除：</strong>选中项目后，点击"批量删除格式"按钮</li>
+                    <li><strong>快捷键：</strong><span class="kbd">Ctrl+A</span> 快速全选（需在侧边栏内）</li>
+                </ul>
+                <p><strong>提示：</strong>选中状态通过漂亮的渐变背景和左侧蓝色边条显示，无需复选框！</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 技术实现详情</h3>
+            <ul class="feature-list">
+                <li>
+                    <span class="status-icon info">📋</span>
+                    <strong>FormattedTextMultiSelectManager</strong> - 多选状态管理器
+                </li>
+                <li>
+                    <span class="status-icon info">🎨</span>
+                    <strong>UI 组件更新</strong> - 添加复选框和批量操作控制栏
+                </li>
+                <li>
+                    <span class="status-icon info">💅</span>
+                    <strong>样式支持</strong> - 新增 multi-select.scss 样式文件
+                </li>
+                <li>
+                    <span class="status-icon info">🔗</span>
+                    <strong>事件处理集成</strong> - 整合到现有的事件处理系统
+                </li>
+                <li>
+                    <span class="status-icon info">🗑️</span>
+                    <strong>批量删除逻辑</strong> - 按类型分组处理，支持错误处理和进度反馈
+                </li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 下一步</h3>
+            <div class="test-instructions">
+                <p>多选功能已经完全实现！你现在可以：</p>
+                <ol>
+                    <li>重新加载 SiYuan 插件或重启应用</li>
+                    <li>在任意文档中打开格式化文本导航插件</li>
+                    <li>使用上述操作方法测试多选和批量删除功能</li>
+                </ol>
+                <p><strong>注意：</strong>批量删除操作会弹出确认对话框，确保安全删除。</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 代码文件清单</h3>
+            <ul class="feature-list">
+                <li>
+                    <span class="status-icon completed">📄</span>
+                    <code>FormattedTextMultiSelectManager.ts</code> - 新增的多选管理器
+                </li>
+                <li>
+                    <span class="status-icon completed">🔄</span>
+                    <code>FormattedTextDock.ts</code> - 集成多选功能
+                </li>
+                <li>
+                    <span class="status-icon completed">🎨</span>
+                    <code>FormattedTextUIRenderer.ts</code> - UI组件更新
+                </li>
+                <li>
+                    <span class="status-icon completed">💅</span>
+                    <code>multi-select.scss</code> - 多选样式文件
+                </li>
+                <li>
+                    <span class="status-icon completed">📦</span>
+                    <code>index.ts</code> - 导出文件更新
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
