@@ -56,12 +56,12 @@ export class MemoProcessor extends BaseFormatProcessor {
                 this.log('📝 markdown完整内容:', JSON.stringify(markdown));
                 
                 if (contentStartIndex !== -1) {
-                    // 从该位置开始，查找第一个括号（优先英文，后备中文）
-                    let parenIndex = markdown.indexOf(')', contentStartIndex);
+                    // 从该位置开始，查找最后一个括号（优先英文，后备中文）
+                    let parenIndex = markdown.lastIndexOf(')');
                     
                     // 如果没找到英文括号，尝试中文括号
                     if (parenIndex === -1) {
-                        parenIndex = markdown.indexOf('）', contentStartIndex);
+                        parenIndex = markdown.lastIndexOf('）');
                     }
                     
                     this.log('🔍 从位置', contentStartIndex, '开始查找")"的位置:', parenIndex);

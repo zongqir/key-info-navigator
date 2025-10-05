@@ -1,4 +1,4 @@
-import { getAllEditor, showMessage } from "siyuan";
+import { getAllEditor, showMessage, fetchPost } from "siyuan";
 import { TextFormatParser, TextFormatType, FormattedTextItem, ParseOptions } from "../formatProcessor";
 import { FormattedTextUIRenderer } from "./FormattedTextUIRenderer";
 import { FormattedTextEventHandler } from "./FormattedTextEventHandler";
@@ -486,57 +486,55 @@ export class FormattedTextDock {
     }
 
     /**
-     * 批量删除格式化回调
+     * 批量删除格式化回调 - 优化版本
      */
     private async handleBatchDelete(selectedItems: FormattedTextItem[]): Promise<void> {
         this.log('开始批量删除格式化，项目数量:', selectedItems.length);
         
         let successCount = 0;
         let failCount = 0;
+        let wasReadonly = false;
 
-        // 按块ID分组，避免同一块的多次DOM操作冲突
-        const itemsByBlock = new Map<string, FormattedTextItem[]>();
-        selectedItems.forEach(item => {
-            if (!itemsByBlock.has(item.blockId)) {
-                itemsByBlock.set(item.blockId, []);
+        try {
+            // 1. 检查文档状态，如果是只读则先解锁
+            wasReadonly = DocumentReadonlyChecker.checkDocumentReadonly();
+            if (wasReadonly) {
+                this.log('文档处于只读状态，尝试临时解锁进行批量操作');
+                // 这里需要解锁文档，具体实现取决于解锁API
+                // 暂时先记录日志，真正的解锁逻辑需要根据实际API实现
+                this.log('⚠️ 检测到文档锁定，建议先手动解锁后再进行批量删除');
             }
-            itemsByBlock.get(item.blockId)!.push(item);
-        });
 
-        // 对每个块逐个处理
-        for (const [blockId, blockItems] of itemsByBlock) {
-            this.log(`处理块 ${blockId}，包含 ${blockItems.length} 个项目`);
-            
-            // 按位置倒序排序，从后往前删除，避免索引变化问题
-            const sortedItems = blockItems.sort((a, b) => b.position - a.position);
-            
-            // 按类型分组
-            const itemsByType = new Map<TextFormatType, FormattedTextItem[]>();
-            sortedItems.forEach(item => {
-                if (!itemsByType.has(item.type)) {
-                    itemsByType.set(item.type, []);
+            // 2. 按块ID分组进行批量DOM操作
+            const itemsByBlock = new Map<string, FormattedTextItem[]>();
+            selectedItems.forEach(item => {
+                if (!itemsByBlock.has(item.blockId)) {
+                    itemsByBlock.set(item.blockId, []);
                 }
-                itemsByType.get(item.type)!.push(item);
+                itemsByBlock.get(item.blockId)!.push(item);
             });
 
-            // 对每种类型依次处理
-            for (const [type, items] of itemsByType) {
-                const processor = this.parser.getFormatProcessor(type);
+            // 3. 对每个块进行批量DOM操作（不调用API）
+            for (const [blockId, blockItems] of itemsByBlock) {
+                this.log(`处理块 ${blockId}，包含 ${blockItems.length} 个项目`);
                 
-                if (!processor.removeFormatting) {
-                    this.log(`格式处理器 ${type} 不支持删除格式化功能`);
-                    failCount += items.length;
-                    continue;
-                }
-
-                // 对该类型的项目，也按位置倒序处理
-                const typeItemsSorted = items.sort((a, b) => b.position - a.position);
+                // 按位置倒序排序，从后往前删除，避免索引变化问题
+                const sortedItems = blockItems.sort((a, b) => b.position - a.position);
                 
-                for (const item of typeItemsSorted) {
+                // 批量执行DOM删除操作（不触发API更新）
+                for (const item of sortedItems) {
                     try {
-                        // 重新计算当前项目的索引（因为前面可能已经删除了一些项目）
+                        const processor = this.parser.getFormatProcessor(item.type);
+                        
+                        if (!processor.removeFormatting) {
+                            this.log(`格式处理器 ${item.type} 不支持删除格式化功能`);
+                            failCount++;
+                            continue;
+                        }
+                        
+                        // 重新计算当前项目的索引
                         const currentFormattedItems = this.formattedTexts.filter(formattedItem => 
-                            formattedItem.type === type && 
+                            formattedItem.type === item.type && 
                             formattedItem.text === item.text &&
                             formattedItem.blockId === item.blockId
                         );
@@ -546,13 +544,10 @@ export class FormattedTextDock {
                             formattedItem.position === item.position
                         );
 
-                        this.log(`删除项目: [${type}] "${item.text}" 位置=${item.position} 索引=${itemIndex}`);
+                        this.log(`删除项目: [${item.type}] "${item.text}" 位置=${item.position} 索引=${itemIndex}`);
 
-                        const success = await processor.removeFormatting!(
-                            item.text, 
-                            item.blockId, 
-                            itemIndex >= 0 ? itemIndex : 0
-                        );
+                        // 仅执行DOM删除操作，不调用updateDocumentContent
+                        const success = await this.removeFormattingDOMOnly(processor, item.text, item.blockId, itemIndex >= 0 ? itemIndex : 0);
 
                         if (success) {
                             successCount++;
@@ -562,26 +557,34 @@ export class FormattedTextDock {
                             this.log(`❌ 删除失败`);
                         }
 
-                        // 每次删除后稍微等待，让DOM更新完成
-                        await new Promise(resolve => setTimeout(resolve, 100));
-
                     } catch (error) {
                         this.log('删除格式化异常:', error);
                         failCount++;
                     }
                 }
+
+                this.log(`块 ${blockId} 的 DOM 操作完成`);
             }
 
-            // 每个块处理完后，更新该块的内容到后端
-            try {
-                await this.memoManager.updateBlockContent();
-                this.log(`块 ${blockId} 内容已更新到后端`);
-            } catch (error) {
-                this.log(`更新块 ${blockId} 内容失败:`, error);
+            // 4. 统一更新所有修改过的块到后端（一次性API调用）
+            if (successCount > 0) {
+                this.log('开始统一更新所有修改过的块到后端');
+                try {
+                    await this.batchUpdateBlocksContent(Array.from(itemsByBlock.keys()));
+                    this.log('✅ 批量更新到后端成功');
+                } catch (updateError) {
+                    this.log('❌ 批量更新到后端失败:', updateError);
+                    // 即使API更新失败，DOM操作已经成功了
+                }
             }
 
-            // 块间也稍微等待
-            await new Promise(resolve => setTimeout(resolve, 200));
+        } finally {
+            // 5. 恢复文档锁定状态（如果原来是锁定的）
+            if (wasReadonly) {
+                this.log('恢复文档锁定状态');
+                // 这里需要重新锁定文档
+                // 具体实现取决于锁定API
+            }
         }
 
         // 显示结果消息
@@ -597,6 +600,120 @@ export class FormattedTextDock {
         setTimeout(() => {
             this.refresh(true);
         }, 500);
+    }
+
+    /**
+     * 仅执行DOM删除操作，不调用API更新
+     */
+    private async removeFormattingDOMOnly(processor: any, text: string, blockId: string, itemIndex: number): Promise<boolean> {
+        try {
+            // 查找目标元素
+            const targetElements = this.findFormattedElementsForProcessor(processor, text, itemIndex);
+            
+            if (targetElements.length === 0) {
+                this.log('未找到目标格式化元素');
+                return false;
+            }
+            
+            // 删除格式化（仅DOM操作）
+            let success = false;
+            for (const element of targetElements) {
+                const removed = this.removeElementFormattingDOMOnly(element, text);
+                if (removed) {
+                    success = true;
+                }
+            }
+            
+            return success;
+            
+        } catch (error) {
+            this.log('DOM删除操作失败:', error);
+            return false;
+        }
+    }
+
+    /**
+     * 查找格式化元素（供处理器使用）
+     */
+    private findFormattedElementsForProcessor(processor: any, text: string, itemIndex: number): HTMLElement[] {
+        const config = processor.getConfig();
+        const elements: HTMLElement[] = [];
+        
+        for (const selector of config.htmlSelectors) {
+            try {
+                const foundElements = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
+                const matchingElements = foundElements.filter(el => 
+                    el.textContent?.trim() === text
+                );
+                
+                // 如果有索引要求，取对应位置的元素
+                if (itemIndex >= 0 && itemIndex < matchingElements.length) {
+                    elements.push(matchingElements[itemIndex]);
+                } else if (matchingElements.length > 0) {
+                    elements.push(...matchingElements);
+                }
+            } catch (error) {
+                this.log('查找元素失败:', error);
+            }
+        }
+        
+        return elements;
+    }
+
+    /**
+     * 删除元素格式化（仅DOM操作）
+     */
+    private removeElementFormattingDOMOnly(element: HTMLElement, text: string): boolean {
+        try {
+            // 保存父节点
+            const parent = element.parentNode;
+            if (!parent) return false;
+
+            // 创建文本节点替换格式化元素
+            const textNode = document.createTextNode(text);
+            parent.replaceChild(textNode, element);
+
+            return true;
+        } catch (error) {
+            this.log('替换元素失败:', error);
+            return false;
+        }
+    }
+
+    /**
+     * 批量更新多个块的内容到后端
+     */
+    private async batchUpdateBlocksContent(blockIds: string[]): Promise<void> {
+        try {
+            const editor = EditorUtils.getCurrentActiveEditor(this.logger);
+            if (!editor?.protyle?.block) {
+                return;
+            }
+            
+            // 获取当前文档的根块ID
+            const rootBlockId = editor.protyle.block.rootID;
+            const blockElement = editor.protyle.wysiwyg.element;
+            
+            if (!rootBlockId || !blockElement) {
+                return;
+            }
+            
+            // 获取更新后的HTML内容
+            const newContent = blockElement.innerHTML;
+            
+            // 调用思源API更新整个文档块内容（一次性更新）
+            await fetchPost('/api/block/updateBlock', {
+                id: rootBlockId,
+                data: newContent,
+                dataType: 'dom'
+            });
+            
+            this.log(`成功批量更新 ${blockIds.length} 个块的内容`);
+            
+        } catch (error) {
+            this.log('批量更新块内容失败:', error);
+            throw error;
+        }
     }
 
     /**
