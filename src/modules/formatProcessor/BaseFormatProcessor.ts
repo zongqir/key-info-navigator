@@ -145,7 +145,12 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
      * 解析位置
      */
     protected parsePosition(offset: string | number): number {
-        return typeof offset === 'string' ? parseInt(offset, 10) || 0 : offset || 0;
+        // 如果有start_offset，使用它
+        if (offset !== undefined && offset !== null) {
+            return typeof offset === 'string' ? parseInt(offset, 10) || 0 : offset || 0;
+        }
+        // 如果没有start_offset，使用当前时间戳的后几位作为随机位置
+        return Date.now() % 10000;
     }
     
     /**

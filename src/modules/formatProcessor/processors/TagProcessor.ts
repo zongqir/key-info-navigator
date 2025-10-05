@@ -144,7 +144,7 @@ export class TagProcessor extends BaseFormatProcessor {
             text: tagContent, // 使用span中的content作为标签内容
             type: this.formatType,
             blockId: actualBlockId,
-            position: span.start_offset || 0, // 使用span的位置信息
+            position: parseInt(span.id) || 0, // 如果没有start_offset，使用span.id作为位置标识
             context: span.markdown || tagContent, // 临时上下文，后续会被替换
             icon: this.getConfig().icon,
             color: tagColor,

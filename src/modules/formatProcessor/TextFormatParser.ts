@@ -167,7 +167,6 @@ export class TextFormatParser {
             FROM spans
             WHERE root_id = "${rootBlockId}"
               AND (${typeConditions})
-            ORDER BY block_id, start_offset
             ${limit}
         `.trim();
         
@@ -257,7 +256,7 @@ export class TextFormatParser {
                     this.log(`使用 ${selectedProcessor.formatType} 处理器成功提取:`, items.length, '个项目');
                 }
             } catch (error) {
-                this.log(`${selectedProcessor.formatType}处理器提取失败:`, error);
+                this.log(`使用 ${selectedProcessor.formatType} 处理器提取失败:`, error);
             }
         }
         
@@ -341,7 +340,7 @@ export class TextFormatParser {
             // 添加详细的span类型日志
             response.data.forEach((span: any, index: number) => {
                 if (span && span.type) {
-                    this.log(`Span ${index + 1}: type="${span.type}", content="${(span.content || '').substring(0, 50)}..."`);
+                    this.log(`Span ${index + 1}: type="${span.type}", content="${(span.content || '').substring(0, 50)}...", block_id="${span.block_id}", start_offset=${span.start_offset}`);
                 }
             });
             
