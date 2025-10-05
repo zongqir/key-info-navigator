@@ -479,6 +479,26 @@
     }
   }
   
+  /* 手机端备注项边框完整性修复 */
+  .mobile-bottom-sheet .formatted-text-dock__item[data-type="memo"] {
+    border-left: 3px solid #20B2AA !important; /* 强制应用备注边框颜色 */
+    
+    &.has-memo {
+      .formatted-text-dock__item-memo-content {
+        border-left: 3px solid #20B2AA !important; /* 备注内容区域边框 */
+        margin-left: -3px !important; /* 抵消左边框宽度 */
+      }
+    }
+    
+    &:hover {
+      border-left-color: #20B2AA !important;
+      
+      &.has-memo .formatted-text-dock__item-memo-content {
+        border-left-color: #20B2AA !important;
+      }
+    }
+  }
+  
   .peek-title {
     font-size: 13px;
   }

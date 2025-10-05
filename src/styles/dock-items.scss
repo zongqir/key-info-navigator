@@ -16,6 +16,12 @@
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     cursor: pointer;
+    /* 强制宽度控制，防止溢出 */
+    width: 100%;
+    max-width: 100%;
+    min-width: 0; /* 允许收缩 */
+    box-sizing: border-box; /* 包含padding和border */
+    overflow: hidden; /* 防止任何内容溢出 */
     /* 柔和的多层阴影系统 */
     box-shadow: 
       0 2px 4px rgba(0, 0, 0, 0.02),
@@ -126,6 +132,17 @@
     &[data-type="memo"] {
       border-left: 3px solid #20B2AA; /* 恢复原来的鲜明颜色 */
       
+      /* 确保备注边框在所有情况下都完整显示 */
+      &.has-memo {
+        border-left: 3px solid #20B2AA; /* 有备注内容时也保持边框 */
+        
+        .formatted-text-dock__item-memo-content {
+          /* 确保备注内容不会遮挡边框 */
+          border-left: 3px solid #20B2AA; /* 备注内容区域也添加相同颜色的边框 */
+          margin-left: -3px; /* 抵消左边框的宽度 */
+        }
+      }
+      
       &:hover {
         border-left-color: #20B2AA;
         box-shadow: 
@@ -133,6 +150,11 @@
           0 8px 16px rgba(0, 0, 0, 0.06),
           0 16px 32px rgba(0, 0, 0, 0.08),
           -4px 0 16px rgba(32, 178, 170, 0.15);
+          
+        /* hover时备注内容区域的边框也要变色 */
+        &.has-memo .formatted-text-dock__item-memo-content {
+          border-left-color: #20B2AA;
+        }
       }
     }
     
@@ -180,8 +202,12 @@
   /* 项目内容区域 - 优化层次 */
   &__item-content {
     flex: 1;
-    min-width: 0;
+    min-width: 0; /* 关键：允许收缩到0 */
+    max-width: 100%; /* 确保不超出容器 */
+    width: 100%; /* 强制宽度 */
     margin-left: 0;
+    overflow: hidden; /* 防止内容溢出 */
+    box-sizing: border-box;
   }
 
   &__item-header {
@@ -198,8 +224,11 @@
     align-items: center;
     gap: 8px;
     flex: 1;
-    min-width: 0;
+    min-width: 0; /* 关键：允许收缩到0 */
+    max-width: calc(100% - 60px); /* 为操作按钮预留空间 */
     cursor: pointer;
+    overflow: hidden; /* 防止内容溢出 */
+    box-sizing: border-box;
     
     &:hover {
       opacity: 0.8;
@@ -226,12 +255,19 @@
   &__item-text {
     font-weight: 500;
     color: var(--kinfo-text-primary);
-    word-break: break-word;
+    word-break: break-all; /* 改为break-all，强制在任意字符处断行 */
+    word-wrap: break-word; /* 添加word-wrap支持 */
+    overflow-wrap: anywhere; /* 更强的断行控制 */
+    hyphens: auto; /* 自动连字符 */
     line-height: 1.3; /* 减少行高：从 1.5 改为 1.3 */
     font-size: 13px; /* 稍微减少字体：从 14px 改为 13px */
     letter-spacing: 0.01em;
     margin: 0;
     padding: 0;
+    width: 100%; /* 强制宽度 */
+    max-width: 100%; /* 确保不超出容器 */
+    min-width: 0; /* 允许收缩到0 */
+    box-sizing: border-box; /* 包含padding和border */
     
     /* 限制最多显示2行 */
     display: -webkit-box;
@@ -239,6 +275,7 @@
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis; /* 添加省略号 */
   }
   
   /* 项目上下文信息 - 现代化版本（2行限制）- 紧凑版 */
@@ -248,9 +285,15 @@
     line-height: 1.3; /* 减少行高：从 1.4 改为 1.3 */
     margin-top: 2px; /* 减少间距：从 4px 改为 2px */
     opacity: 0.85;
-    word-break: break-word;
+    word-break: break-all; /* 改为break-all，强制在任意字符处断行 */
+    word-wrap: break-word;
+    overflow-wrap: anywhere; /* 更强的断行控制 */
     font-weight: 400;
     letter-spacing: 0.005em;
+    width: 100%; /* 强制宽度 */
+    max-width: 100%; /* 确保不超出容器 */
+    min-width: 0; /* 允许收缩到0 */
+    box-sizing: border-box;
     
     /* 限制最多显示2行 */
     display: -webkit-box;
@@ -258,6 +301,7 @@
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* 备注区域 - 简洁版本（2行限制）- 柔和版 */
@@ -265,6 +309,7 @@
     margin-top: 3px; /* 稍微增加间距：从 2px 改为 3px */
     margin-left: -18px; /* 配合新的内边距调整：从 -16px 改为 -18px */
     margin-right: -18px; /* 配合新的内边距调整：从 -16px 改为 -18px */
+    overflow: hidden; /* 确保备注区域不超出容器 */
     
     &-content {
       font-size: 11px;
@@ -272,9 +317,16 @@
       background: var(--kinfo-memo-bg);
       padding: 4px 18px; /* 配合新的内边距调整：从 16px 改为 18px */
       line-height: 1.3;
-      word-break: break-word;
+      word-break: break-all; /* 改为break-all，强制在任意字符处断行 */
+      word-wrap: break-word; /* 添加word-wrap支持 */
+      overflow-wrap: anywhere; /* 更强的断行控制 */
+      hyphens: auto; /* 自动连字符 */
       border-radius: 0 0 8px 8px; /* 添加底部圆角，与卡片呼应 */
       border-top: 1px solid var(--kinfo-border-light);
+      width: 100%; /* 强制宽度 */
+      max-width: 100%; /* 确保不超出容器 */
+      min-width: 0; /* 允许收缩到0 */
+      box-sizing: border-box; /* 包含padding和border */
       
       /* 限制最多显示2行 */
       display: -webkit-box;
@@ -282,6 +334,7 @@
       line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      text-overflow: ellipsis; /* 添加省略号 */
     }
   }
 
@@ -408,6 +461,27 @@
       &.has-memo {
         padding: 10px 14px;
       }
+      
+      /* 移动端备注边框完整性修复 */
+      &[data-type="memo"] {
+        border-left: 3px solid #20B2AA; /* 确保移动端边框颜色一致 */
+        
+        &.has-memo {
+          .formatted-text-dock__item-memo-content {
+            border-left: 3px solid #20B2AA; /* 移动端备注内容区域边框 */
+            margin-left: -3px; /* 抵消左边框宽度 */
+            border-radius: 0 0 10px 10px; /* 移动端圆角调整 */
+          }
+        }
+        
+        &:hover {
+          border-left-color: #20B2AA;
+          
+          &.has-memo .formatted-text-dock__item-memo-content {
+            border-left-color: #20B2AA;
+          }
+        }
+      }
     }
     
     &__item-indicator {
@@ -432,6 +506,17 @@
 
     &__item-context {
       font-size: 10px; /* 移动端上下文文字更小 */
+    }
+    
+    /* 移动端备注区域样式调整 */
+    &__item-memo {
+      margin-left: -14px; /* 配合移动端内边距调整 */
+      margin-right: -14px; /* 配合移动端内边距调整 */
+      
+      &-content {
+        padding: 4px 14px; /* 配合移动端内边距调整 */
+        border-radius: 0 0 10px 10px; /* 移动端圆角调整 */
+      }
     }
     
     &__action-btn {
