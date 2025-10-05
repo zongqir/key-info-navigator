@@ -8,7 +8,7 @@ export class TagProcessor extends BaseFormatProcessor {
     public readonly formatType = TextFormatType.TAG;
     
     protected readonly config: FormatConfig = {
-        sqlType: [], // 标签块通过blocks表查询，不使用spans
+        sqlType: ["tag"], // 标签通过spans表查询，匹配type包含"tag"的记录
         htmlSelectors: ["span[data-type='tag']"],
         kramdownRegex: /#[\w\u4e00-\u9fa5]+/g,
         icon: "iconCube",
@@ -29,6 +29,9 @@ export class TagProcessor extends BaseFormatProcessor {
         "#54A0FF", // 鲜艳天蓝
         "#5F27CD"  // 鲜艳深紫
     ];
+    
+    // 缓存blocks content，避免重复查询
+    private blockContentCache = new Map<string, string>();
     
     constructor(logger?: (...args: any[]) => void) {
         super(logger);
@@ -56,8 +59,45 @@ export class TagProcessor extends BaseFormatProcessor {
     
     
     extractFromSpan(span: any, blockId = ""): FormattedTextItem[] {
-        // 标签块处理器主要通过块查询，span提取作为补充
-        return [];
+        const items: FormattedTextItem[] = [];
+        
+        if (!span) {
+            return items;
+        }
+        
+        // 从span中获取标签内容
+        const tagContent = span.content?.trim();
+        if (!tagContent) {
+            return items;
+        }
+        
+        // 使用span的block_id作为实际的blockId
+        const actualBlockId = span.block_id || blockId;
+        
+        // 获取标签颜色
+        const tagColor = this.getTagColor(tagContent);
+        
+        const item = {
+            id: `tag_span_${span.id}_${actualBlockId}`,
+            text: tagContent, // 使用span中的content作为标签内容
+            type: this.formatType,
+            blockId: actualBlockId,
+            position: span.start_offset || 0, // 使用span的位置信息
+            context: span.markdown || tagContent, // 临时上下文，后续会被替换
+            icon: this.getConfig().icon,
+            color: tagColor,
+            // 保存标签名用于显示
+            metadata: { 
+                displayName: tagContent, // 显示用标签
+                blockContent: null as string | null, // 这里先设为null，在渲染时异步获取真正的blocks content
+                spanId: span.id, // 保存span的ID用于调试
+                needsBlockContent: true // 标记需要获取block内容
+            }
+        };
+        
+        items.push(item);
+        
+        return items;
     }
     
     /**
@@ -70,7 +110,7 @@ export class TagProcessor extends BaseFormatProcessor {
             // 保留原始标签文本（包含#号），用于匹配DOM
             const tags = block.tag.split(',').map((tag: string) => tag.trim()).filter(Boolean);
             
-            tags.forEach((tag, tagIndex) => {
+            tags.forEach((tag: string, tagIndex: number) => {
                 // 使用块在文档中的位置，而不是标签在块中的索引
                 const position = blockIndex !== undefined ? blockIndex : 0;
                 
@@ -174,18 +214,34 @@ export class TagProcessor extends BaseFormatProcessor {
             return item.text;
         }
         
-        const { displayName, blockContent } = item.metadata;
+        const { displayName, blockContent, needsBlockContent } = item.metadata;
         const tagColor = this.getTagColor(displayName);
         
+        // 如果需要获取block内容且当前blockContent为空，异步获取并显示加载状态
+        if (needsBlockContent && !blockContent) {
+            // 异步获取block内容
+            this.fetchBlockContent(item.blockId, item.id);
+            
+            // 先显示加载状态
+            return `
+                <div class="formatted-text-dock__item-tag-inline">
+                    <div class="formatted-text-dock__tag-shape" style="background-color: ${tagColor}">
+                        <span class="formatted-text-dock__tag-text">${displayName}</span>
+                    </div>
+                    <span class="formatted-text-dock__tag-block-text" data-tag-item-id="${item.id}">加载中...</span>
+                </div>
+            `;
+        }
+        
         // 截断块内容用于显示
-        const truncatedContent = this.truncateText(blockContent, 80);
+        const truncatedContent = this.truncateText(blockContent || displayName, 80);
         
         return `
             <div class="formatted-text-dock__item-tag-inline">
                 <div class="formatted-text-dock__tag-shape" style="background-color: ${tagColor}">
                     <span class="formatted-text-dock__tag-text">${displayName}</span>
                 </div>
-                <span class="formatted-text-dock__tag-block-text">${this.escapeHtml(truncatedContent)}</span>
+                <span class="formatted-text-dock__tag-block-text" data-tag-item-id="${item.id}">${this.escapeHtml(truncatedContent)}</span>
             </div>
         `;
     }
@@ -195,6 +251,57 @@ export class TagProcessor extends BaseFormatProcessor {
      */
     renderItemDetails(item: FormattedTextItem, displayText: string): string {
         return ''; // 不需要额外的详情，主要内容已经包含了胶囊+文本
+    }
+    
+    /**
+     * 异步获取block内容并更新DOM显示
+     */
+    private async fetchBlockContent(blockId: string, itemId: string): Promise<void> {
+        // 检查缓存
+        if (this.blockContentCache.has(blockId)) {
+            const cachedContent = this.blockContentCache.get(blockId)!;
+            this.updateTagBlockText(itemId, cachedContent);
+            return;
+        }
+        
+        try {
+            // 查询blocks表获取content
+            const stmt = `SELECT content FROM blocks WHERE id = "${blockId}"`;
+            const fetchResponse = await fetch('/api/query/sql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ stmt })
+            });
+            
+            const response = await fetchResponse.json();
+            if (response.code === 0 && response.data && response.data.length > 0) {
+                const blockContent = response.data[0].content || '';
+                // 缓存结果
+                this.blockContentCache.set(blockId, blockContent);
+                // 更新DOM显示
+                this.updateTagBlockText(itemId, blockContent);
+            } else {
+                // 查询失败或无内容，显示默认文本
+                this.updateTagBlockText(itemId, '无内容');
+            }
+        } catch (error) {
+            // 查询异常，显示错误信息
+            console.error('获取block内容失败:', error);
+            this.updateTagBlockText(itemId, '加载失败');
+        }
+    }
+    
+    /**
+     * 更新DOM中tag的block文本显示
+     */
+    private updateTagBlockText(itemId: string, blockContent: string): void {
+        const element = document.querySelector(`[data-tag-item-id="${itemId}"]`);
+        if (element) {
+            const truncatedContent = this.truncateText(blockContent, 80);
+            element.textContent = truncatedContent;
+        }
     }
     
     /**

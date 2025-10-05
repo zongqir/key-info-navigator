@@ -29,16 +29,13 @@ export class TextFormatParser {
             // 始终查询所有格式类型的数据，筛选在调用方处理
             // 这确保了即使当前筛选器关闭了某些格式，数据仍然可用于智能提示
             
-            // 直接查询标签块 - 始终查询
-            const tagItems = await this.queryTagBlocks(rootBlockId, options.maxResults);
-            allItems.push(...tagItems);
-            
             // 直接查询Todo块 - 始终查询
             const todoItems = await this.queryTodoBlocks(rootBlockId, options.maxResults);
             allItems.push(...todoItems);
             
-            // 查询spans（其他格式化文本）- 始终查询所有类型
+            // 查询spans（所有格式化文本）- 始终查询所有类型
             const allSpanFormats = [
+                TextFormatType.TAG,        // 标签现在通过spans查询
                 TextFormatType.BOLD,
                 TextFormatType.ITALIC,
                 TextFormatType.UNDERLINE,
@@ -188,10 +185,11 @@ export class TextFormatParser {
         // 定义格式优先级（数字越小优先级越高）
         const formatPriority = new Map([
             [TextFormatType.MEMO, 1],      // 备注最高优先级
-            [TextFormatType.HIGHLIGHT, 2], // 高亮第二
-            [TextFormatType.BOLD, 3],      // 加粗第三
-            [TextFormatType.ITALIC, 4],    // 斜体第四
-            [TextFormatType.UNDERLINE, 5], // 下划线第五
+            [TextFormatType.TAG, 2],       // 标签第二优先级（仅次于备注）
+            [TextFormatType.HIGHLIGHT, 3], // 高亮第三
+            [TextFormatType.BOLD, 4],      // 加粗第四
+            [TextFormatType.ITALIC, 5],    // 斜体第五
+            [TextFormatType.UNDERLINE, 6], // 下划线第六
         ]);
         
         for (const span of spans) {
@@ -348,54 +346,6 @@ export class TextFormatParser {
     
     
     
-    /**
-     * 查询标签块
-     */
-    private async queryTagBlocks(rootBlockId: string, maxResults?: number): Promise<FormattedTextItem[]> {
-        const limit = maxResults ? `LIMIT ${maxResults}` : 'LIMIT 200';
-        
-        const stmt = `
-            SELECT *
-            FROM blocks
-            WHERE root_id = "${rootBlockId}"
-              AND tag IS NOT NULL
-            ORDER BY created ASC
-            ${limit}
-        `.trim();
-        
-        try {
-            // 使用原生 fetch（fetchPost 有问题）
-            const fetchResponse = await fetch('/api/query/sql', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ stmt })
-            });
-            const response = await fetchResponse.json();
-            
-            if (!response) {
-                this.log('标签块查询无响应');
-                return [];
-            }
-            
-            if (response.code !== 0) {
-                this.log('标签块查询失败:', response);
-                return [];
-            }
-            
-            // 确保response.data是有效数组
-            if (!response.data || !Array.isArray(response.data)) {
-                this.log('标签块查询返回无效数据:', response.data);
-                return [];
-            }
-            
-            return this.processTagBlocks(response.data);
-        } catch (error) {
-            this.log('标签块查询异常:', error);
-            return [];
-        }
-    }
     
     /**
      * 查询Todo块
@@ -445,50 +395,6 @@ export class TextFormatParser {
             this.log('Todo块查询异常:', error);
             return [];
         }
-    }
-    
-    /**
-     * 处理标签块数据
-     */
-    private processTagBlocks(blocks: any[]): FormattedTextItem[] {
-        const items: FormattedTextItem[] = [];
-        
-        // 检查blocks是否为有效数组
-        if (!blocks || !Array.isArray(blocks)) {
-            this.log('标签块数据不是有效数组:', blocks);
-            return [];
-        }
-        
-        // 使用TagProcessor来处理标签块
-        const tagProcessor = this.getFormatProcessor(TextFormatType.TAG);
-        
-        blocks.forEach((block, index) => {
-            // 检查block是否为有效对象
-            if (!block || typeof block !== 'object') {
-                this.log('跳过无效的标签块对象:', block);
-                return;
-            }
-            
-            this.log('🔍 [DEBUG] 处理标签块详情:', {
-                'block.id': block.id,
-                'block.root_id': block.root_id,
-                'block.tag': block.tag,
-                'block.content': block.content?.substring(0, 100),
-                'block.type': block.type,
-                '完整block对象': block
-            });
-            
-            if (block.tag) {
-                // 使用TagProcessor的extractFromBlock方法，传递块索引
-                if ('extractFromBlock' in tagProcessor) {
-                    const tagItems = (tagProcessor as any).extractFromBlock(block, index);
-                    this.log('TagProcessor提取的标签项:', tagItems);
-                    items.push(...tagItems);
-                }
-            }
-        });
-        
-        return items;
     }
     
     /**
