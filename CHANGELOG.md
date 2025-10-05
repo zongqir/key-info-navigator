@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.4.0 2025-10-05
+
+### ✨ New Features
+* 智能反向导航 - Smart reverse navigation (only active in reading mode)
+* 精准批量操作 - Intelligent batch operations (Ctrl+click multi-select and batch format removal)
+
+### 🐛 Bug Fixes
+* 备注系统全面修复 - Comprehensive memo system fixes
+* 备注UI问题解决 - Resolved memo UI issues
+
+### 🎨 UI/UX Improvements
+* 反向导航仅阅读模式激活 - Reverse navigation only activates in reading mode to eliminate editing distractions
+* 备注界面深度优化 - Deep memo interface optimizations for better visual consistency
+* 批量操作体验提升 - Enhanced batch operations user experience
+
 ## v2.3.0 2025-10-04
 
 ### ✨ New Features

@@ -2,7 +2,7 @@
 
 # Key Info Navigator
 
-> Current Version: v2.3.0 | Release Date: 2025-10-04
+> Current Version: v2.4.0 | Release Date: 2025-10-05
 
 A plugin that helps you quickly locate and navigate key information in SiYuan notes. Display important content in your documents through a sidebar to make your reading and editing more efficient.
 
@@ -14,7 +14,13 @@ This plugin helps you:
 - ⚡ Jump to any position in the document with one click
 - 📝 Add notes and comments to important content
 
-## ✨ What's New in v2.3.0
+## ✨ What's New in v2.4.0
+
+- 🎯 **Smart Reverse Navigation**: Enhanced reverse navigation now activates only in reading mode, eliminating distractions during editing for a cleaner writing experience
+- 🚀 **Intelligent Batch Operations**: Hold Ctrl to multi-select format items and perform batch format removal - streamline your document cleanup workflow with precision
+- 💎 **Refined Memo System**: Comprehensive memo UI fixes and optimizations for smoother annotation experience and improved visual consistency
+
+## What's New in v2.3.0
 
 - 🌈 Support for multiple highlight styles display
 - 🔧 Fixed compound scenario recognition logic
