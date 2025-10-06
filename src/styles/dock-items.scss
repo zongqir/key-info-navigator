@@ -49,6 +49,14 @@
       
       .formatted-text-dock__item-actions {
         opacity: 1;
+        /* 更新hover状态下的背景，匹配item的背景 */
+        background: linear-gradient(
+          to right,
+          transparent 0%,
+          var(--kinfo-bg-surface-hover) 30%,
+          var(--kinfo-bg-surface-hover) 100%
+        );
+        box-shadow: -8px 0 12px var(--kinfo-bg-surface-hover); /* 匹配hover背景 */
       }
     }
 
@@ -213,10 +221,11 @@
   &__item-header {
     display: flex;
     align-items: center; /* 垂直居中对齐主要内容 */
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: flex-start; /* 改为左对齐，让主内容占满空间 */
+    gap: 0; /* 移除间距，因为按钮将覆盖显示 */
     margin-bottom: 0; /* 减少间距：从 4px 改为 0 */
     width: 100%; /* 确保占满宽度 */
+    position: relative; /* 为绝对定位的按钮提供相对定位容器 */
   }
 
   &__item-main {
@@ -225,7 +234,7 @@
     gap: 8px;
     flex: 1;
     min-width: 0; /* 关键：允许收缩到0 */
-    max-width: calc(100% - 60px); /* 为操作按钮预留空间 */
+    max-width: 100%; /* 现在可以占满全宽 */
     cursor: pointer;
     overflow: hidden; /* 防止内容溢出 */
     box-sizing: border-box;
@@ -241,14 +250,30 @@
     }
   }
 
-  /* 项目操作按钮区域 - 现代化风格 */
+  /* 项目操作按钮区域 - 覆盖模式 */
   &__item-actions {
+    position: absolute; /* 绝对定位，覆盖显示 */
+    top: 50%; /* 垂直居中 */
+    right: 12px; /* 距离右边的距离 */
+    transform: translateY(-50%); /* 垂直居中 */
     display: flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
     opacity: 0;
     transition: opacity 0.2s ease;
+    z-index: 10; /* 确保在最上层 */
+    background: var(--kinfo-bg-primary); /* 添加背景遮挡文字 */
+    padding: 4px 8px 4px 12px; /* 左侧更多padding用于渐变遮挡 */
+    border-radius: 8px; /* 圆角背景 */
+    /* 添加左侧渐变遮罩效果 */
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      var(--kinfo-bg-primary) 30%,
+      var(--kinfo-bg-primary) 100%
+    );
+    box-shadow: -8px 0 12px var(--kinfo-bg-primary); /* 左侧阴影遮挡 */
   }
 
   /* 项目文本 - 现代化优化版本（2行限制）- 紧凑版 */
@@ -523,6 +548,31 @@
       width: 28px;
       height: 28px;
       border-radius: 6px;
+    }
+    
+    /* 移动端操作按钮区域调整 */
+    &__item-actions {
+      right: 8px; /* 移动端稍微靠近边缘 */
+      padding: 2px 6px 2px 8px; /* 移动端更紧凑的padding */
+      
+      /* 移动端hover（触摸）状态背景更新 */
+      background: linear-gradient(
+        to right,
+        transparent 0%,
+        var(--kinfo-bg-primary) 25%,
+        var(--kinfo-bg-primary) 100%
+      );
+      box-shadow: -6px 0 8px var(--kinfo-bg-primary); /* 移动端较小的阴影 */
+    }
+    
+    &__item:hover &__item-actions {
+      background: linear-gradient(
+        to right,
+        transparent 0%,
+        var(--kinfo-bg-surface-hover) 25%,
+        var(--kinfo-bg-surface-hover) 100%
+      );
+      box-shadow: -6px 0 8px var(--kinfo-bg-surface-hover);
     }
   }
 }
