@@ -87,9 +87,13 @@
     &[data-type="italic"] {
       border-left: 3px solid #FF6B6B; /* 恢复原来的鲜明颜色 */
       
-      /* 斜体类型的文本显示为斜体 */
+      /* 斜体类型的文本 - 优雅的倾斜效果 */
       .formatted-text-dock__item-text {
-        font-style: italic;
+        font-style: normal; /* 不使用原生斜体 */
+        transform: skewX(-2deg); /* 非常轻微的倾斜变换 */
+        display: inline-block; /* 让transform生效 */
+        font-weight: 500; /* 稍微加粗 */
+        letter-spacing: 0.02em; /* 增加字间距 */
       }
       
       &:hover {

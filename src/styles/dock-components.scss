@@ -275,10 +275,6 @@
   &__memo-marked-text {
     font-weight: 500;
     color: var(--kinfo-text-primary);
-    text-decoration: underline;
-    text-decoration-color: var(--kinfo-primary);
-    text-decoration-style: solid;
-    text-underline-offset: 2px;
     flex-shrink: 1; /* 改为允许收缩 */
     min-width: 0; /* 允许收缩到0 */
     word-break: break-all; /* 强制断行 */
