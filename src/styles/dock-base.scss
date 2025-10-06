@@ -96,7 +96,7 @@
   /* 内容区域 */
   &__content {
     flex: 1;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
   }
@@ -104,6 +104,7 @@
   &__list {
     flex: 1;
     overflow-y: auto;
+    overflow-x: visible;
     padding: 6px 8px; /* 减少内边距：从 8px 12px 改为 6px 8px */
   }
 

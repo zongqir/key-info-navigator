@@ -5,23 +5,22 @@
 .formatted-text-dock {
   /* 现代化卡片设计 - 柔和舒适风格 */
   &__item {
-    display: flex;
-    align-items: center; /* 默认垂直居中 */
-    padding: 10px 18px; /* 稍微增加舒适感 */
-    margin: 2px 6px; /* 增加卡片间距 */
+    display: flex !important;
+    align-items: center !important;
+    padding: 12px 16px;
+    margin: 3px 8px;
     background: var(--kinfo-bg-primary);
-    border-radius: 12px; /* 更圆润的圆角 */
+    border-radius: 12px;
     border: 1px solid var(--kinfo-border-light);
     border-left: 3px solid transparent;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     cursor: pointer;
-    /* 强制宽度控制，防止溢出 */
     width: 100%;
     max-width: 100%;
-    min-width: 0; /* 允许收缩 */
-    box-sizing: border-box; /* 包含padding和border */
-    overflow: hidden; /* 防止任何内容溢出 */
+    min-width: 0;
+    min-height: 64px !important;
+    box-sizing: border-box;
     /* 柔和的多层阴影系统 */
     box-shadow: 
       0 2px 4px rgba(0, 0, 0, 0.02),
@@ -30,11 +29,16 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     
-    /* 多行内容时的样式（通过JS动态添加类名） */
+    /* 多行内容时的样式 */
     &.has-context,
     &.has-memo {
       align-items: flex-start;
-      padding: 12px 18px; /* 多行内容时稍微增加上下内边距 */
+      padding: 14px 16px;
+      min-height: 64px;
+      
+      .formatted-text-dock__item-header {
+        align-items: flex-start;
+      }
     }
     
     &:hover {
@@ -48,15 +52,9 @@
       transform: translateY(-2px);
       
       .formatted-text-dock__item-actions {
-        opacity: 1;
-        /* 更新hover状态下的背景，匹配item的背景 */
-        background: linear-gradient(
-          to right,
-          transparent 0%,
-          var(--kinfo-bg-surface-hover) 30%,
-          var(--kinfo-bg-surface-hover) 100%
-        );
-        box-shadow: -8px 0 12px var(--kinfo-bg-surface-hover); /* 匹配hover背景 */
+        opacity: 1 !important;
+        background: linear-gradient(90deg, transparent 0%, var(--kinfo-bg-surface-hover) 40%, var(--kinfo-bg-surface-hover) 100%);
+        z-index: 1001 !important;
       }
     }
 
@@ -207,36 +205,33 @@
     }
   }
 
-  /* 项目内容区域 - 优化层次 */
+  /* 项目内容区域 */
   &__item-content {
     flex: 1;
-    min-width: 0; /* 关键：允许收缩到0 */
-    max-width: 100%; /* 确保不超出容器 */
-    width: 100%; /* 强制宽度 */
-    margin-left: 0;
-    overflow: hidden; /* 防止内容溢出 */
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
     box-sizing: border-box;
   }
 
   &__item-header {
-    display: flex;
-    align-items: center; /* 垂直居中对齐主要内容 */
-    justify-content: flex-start; /* 改为左对齐，让主内容占满空间 */
-    gap: 0; /* 移除间距，因为按钮将覆盖显示 */
-    margin-bottom: 0; /* 减少间距：从 4px 改为 0 */
-    width: 100%; /* 确保占满宽度 */
-    position: relative; /* 为绝对定位的按钮提供相对定位容器 */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start;
+    width: 100%;
+    position: relative;
+    min-height: 40px; /* 确保有足够高度容纳按钮 */
   }
 
   &__item-main {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
     gap: 8px;
     flex: 1;
-    min-width: 0; /* 关键：允许收缩到0 */
-    max-width: 100%; /* 现在可以占满全宽 */
+    min-width: 0;
+    padding-right: 80px;
     cursor: pointer;
-    overflow: hidden; /* 防止内容溢出 */
+    overflow: hidden;
     box-sizing: border-box;
     
     &:hover {
@@ -250,30 +245,25 @@
     }
   }
 
-  /* 项目操作按钮区域 - 覆盖模式 */
+  /* 操作按钮区域 - 简单垂直居中 */
   &__item-actions {
-    position: absolute; /* 绝对定位，覆盖显示 */
-    top: 50%; /* 垂直居中 */
-    right: 12px; /* 距离右边的距离 */
-    transform: translateY(-50%); /* 垂直居中 */
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: 6px;
     opacity: 0;
-    transition: opacity 0.2s ease;
-    z-index: 10; /* 确保在最上层 */
-    background: var(--kinfo-bg-primary); /* 添加背景遮挡文字 */
-    padding: 4px 8px 4px 12px; /* 左侧更多padding用于渐变遮挡 */
-    border-radius: 8px; /* 圆角背景 */
-    /* 添加左侧渐变遮罩效果 */
-    background: linear-gradient(
-      to right,
-      transparent 0%,
-      var(--kinfo-bg-primary) 30%,
-      var(--kinfo-bg-primary) 100%
-    );
-    box-shadow: -8px 0 12px var(--kinfo-bg-primary); /* 左侧阴影遮挡 */
+    transition: all 0.25s ease;
+    z-index: 1000 !important;
+    background: linear-gradient(90deg, transparent 0%, var(--kinfo-bg-primary) 40%, var(--kinfo-bg-primary) 100%);
+    padding: 2px 12px 2px 16px;
+    border-radius: 6px;
+    /* 精确匹配容器内容区域 */
+    height: 36px;
+    pointer-events: auto;
   }
 
   /* 项目文本 - 现代化优化版本（2行限制）- 紧凑版 */
@@ -294,13 +284,9 @@
     min-width: 0; /* 允许收缩到0 */
     box-sizing: border-box; /* 包含padding和border */
     
-    /* 限制最多显示2行 */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
+    /* 移除多行限制，让文字正常在flex中垂直居中 */
     overflow: hidden;
-    text-overflow: ellipsis; /* 添加省略号 */
+    text-overflow: ellipsis;
   }
   
   /* 项目上下文信息 - 现代化版本（2行限制）- 紧凑版 */
@@ -478,33 +464,45 @@
 @media (max-width: 768px) {
   .formatted-text-dock {
     &__item {
-      padding: 8px 14px; /* 移动端合适的内边距 */
-      margin: 1px 3px; /* 移动端更紧凑的外边距 */
-      border-radius: 10px; /* 移动端稍小的圆角 */
+      padding: 10px 12px;
+      margin: 2px 4px;
+      border-radius: 10px;
+      min-height: 54px !important;
       
       &.has-context,
       &.has-memo {
-        padding: 10px 14px;
+        align-items: flex-start;
+        padding: 12px 12px;
+        min-height: 56px;
+        
+        .formatted-text-dock__item-header {
+          align-items: flex-start;
+        }
+      }
+    }
+    
+    /* 移动端header最小高度 */
+    &__item-header {
+      min-height: 34px !important; /* 容纳移动端30px按钮 + 4px padding */
+    }
+    
+    /* 移动端备注边框完整性修复 */  
+    &__item[data-type="memo"] {
+      border-left: 3px solid #20B2AA; /* 确保移动端边框颜色一致 */
+      
+      &.has-memo {
+        .formatted-text-dock__item-memo-content {
+          border-left: 3px solid #20B2AA; /* 移动端备注内容区域边框 */
+          margin-left: -3px; /* 抵消左边框宽度 */
+          border-radius: 0 0 10px 10px; /* 移动端圆角调整 */
+        }
       }
       
-      /* 移动端备注边框完整性修复 */
-      &[data-type="memo"] {
-        border-left: 3px solid #20B2AA; /* 确保移动端边框颜色一致 */
+      &:hover {
+        border-left-color: #20B2AA;
         
-        &.has-memo {
-          .formatted-text-dock__item-memo-content {
-            border-left: 3px solid #20B2AA; /* 移动端备注内容区域边框 */
-            margin-left: -3px; /* 抵消左边框宽度 */
-            border-radius: 0 0 10px 10px; /* 移动端圆角调整 */
-          }
-        }
-        
-        &:hover {
+        &.has-memo .formatted-text-dock__item-memo-content {
           border-left-color: #20B2AA;
-          
-          &.has-memo .formatted-text-dock__item-memo-content {
-            border-left-color: #20B2AA;
-          }
         }
       }
     }
@@ -550,29 +548,22 @@
       border-radius: 6px;
     }
     
-    /* 移动端操作按钮区域调整 */
+    /* 移动端操作按钮区域 */
     &__item-actions {
-      right: 8px; /* 移动端稍微靠近边缘 */
-      padding: 2px 6px 2px 8px; /* 移动端更紧凑的padding */
-      
-      /* 移动端hover（触摸）状态背景更新 */
-      background: linear-gradient(
-        to right,
-        transparent 0%,
-        var(--kinfo-bg-primary) 25%,
-        var(--kinfo-bg-primary) 100%
-      );
-      box-shadow: -6px 0 8px var(--kinfo-bg-primary); /* 移动端较小的阴影 */
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      gap: 4px;
+      padding: 2px 8px 2px 12px;
+      background: linear-gradient(90deg, transparent 0%, var(--kinfo-bg-primary) 50%, var(--kinfo-bg-primary) 100%);
+      z-index: 1000 !important;
+      height: 30px;
     }
     
     &__item:hover &__item-actions {
-      background: linear-gradient(
-        to right,
-        transparent 0%,
-        var(--kinfo-bg-surface-hover) 25%,
-        var(--kinfo-bg-surface-hover) 100%
-      );
-      box-shadow: -6px 0 8px var(--kinfo-bg-surface-hover);
+      background: linear-gradient(90deg, transparent 0%, var(--kinfo-bg-surface-hover) 50%, var(--kinfo-bg-surface-hover) 100%);
+      opacity: 1 !important;
+      z-index: 1001 !important;
     }
   }
 }
