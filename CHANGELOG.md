@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.4.1 2025-10-06
+
+### 🐛 Bug Fixes
+* 修复操作按钮占位问题 - Fixed action buttons taking up extra space issue
+* 优化按钮悬停覆盖效果 - Improved button hover overlay behavior
+
+### 🎨 UI/UX Improvements
+* 操作按钮现在在悬停时覆盖文字而非占用额外空间 - Action buttons now overlay text on hover instead of taking extra space
+* 消除面板右侧空白问题 - Eliminated empty space on the right side of panels
+
 ## v2.4.0 2025-10-05
 
 ### ✨ New Features
