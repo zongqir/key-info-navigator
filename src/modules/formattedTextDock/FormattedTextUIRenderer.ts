@@ -31,7 +31,7 @@ export class FormattedTextUIRenderer {
         const filtersHTML = this.createFiltersHTML();
         
         return `
-            <div class="fn__flex-1 fn__flex-column formatted-text-dock">
+            <div class="fn__flex-column formatted-text-dock">
                 <div class="formatted-text-dock__header">
                     <div class="formatted-text-dock__title">
                         <span></span>

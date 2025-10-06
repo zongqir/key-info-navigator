@@ -151,7 +151,7 @@ export class MobileBottomSheet {
         // 创建带滚动的真正内容
         const mainHTML = this.uiRenderer.createMainHTML();
         this.fullContent.innerHTML = `
-            <div style="height: 70vh; overflow-y: scroll; -webkit-overflow-scrolling: touch; background: var(--kinfo-bg-primary);">
+            <div style="height: 100%; overflow-y: scroll; -webkit-overflow-scrolling: touch; background: var(--kinfo-bg-primary);">
                 ${mainHTML}
             </div>
         `;
