@@ -591,10 +591,9 @@ export class FormattedTextDock {
         if (successCount > 0 && failCount === 0) {
             showMessage(`✅ 成功删除 ${successCount} 个项目的格式`, 3000, 'info');
         } else if (successCount > 0 && failCount > 0) {
-            showMessage(`⚠️ 成功删除 ${successCount} 个，失败 ${failCount} 个项目的格式`, 4000, 'info');
-        } else {
-            showMessage(`❌ 删除格式失败，请手动处理`, 4000, 'error');
+            showMessage(`✅ 成功删除 ${successCount} 个项目的格式`, 3000, 'info');
         }
+        // 全部失败时不显示提示
 
         // 刷新列表
         setTimeout(() => {

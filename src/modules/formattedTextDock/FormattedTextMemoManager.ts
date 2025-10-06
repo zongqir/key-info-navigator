@@ -33,7 +33,7 @@ export class FormattedTextMemoManager {
             
         } catch (error) {
             this.log('显示备注对话框失败:', error);
-            showMessage(`❌ ${this.i18n.addMemoFailed}: ${text}`, 3000, 'error');
+            // 静默失败，不显示错误提示
         }
     }
 
@@ -61,7 +61,7 @@ export class FormattedTextMemoManager {
             
         } catch (error) {
             this.log('显示编辑备注对话框失败:', error);
-            showMessage(`❌ ${this.i18n.editMemoFailed || '编辑备注失败'}: ${text}`, 3000, 'error');
+            // 静默失败，不显示错误提示
         }
     }
 
@@ -75,7 +75,7 @@ export class FormattedTextMemoManager {
             // 查找备注元素
             const targetElement = this.findMemoElement(text);
             if (!targetElement) {
-                showMessage(`❌ ${this.i18n.textNotFound}: ${text}`, 3000, 'error');
+                // 静默失败，不显示错误提示
                 return;
             }
             
@@ -96,7 +96,7 @@ export class FormattedTextMemoManager {
             
         } catch (error) {
             this.log('更新备注失败:', error);
-            showMessage(`❌ ${this.i18n.editMemoFailed || '编辑备注失败'}: ${text}`, 3000, 'error');
+            // 静默失败，不显示错误提示
         }
     }
 
@@ -111,14 +111,14 @@ export class FormattedTextMemoManager {
             // 获取当前编辑器
             const editor = EditorUtils.getCurrentActiveEditor(this.logger);
             if (!editor?.protyle) {
-                showMessage('❌ 无法获取编辑器实例', 3000, 'error');
+                // 静默失败，不显示错误提示
                 return;
             }
             
             // 查找包含该文本的元素
             const targetElement = this.findTextElement(text);
             if (!targetElement) {
-                showMessage(`❌ ${this.i18n.textNotFound}: ${text}`, 3000, 'error');
+                // 静默失败，不显示错误提示
                 return;
             }
             
@@ -134,7 +134,7 @@ export class FormattedTextMemoManager {
             
         } catch (error) {
             this.log('保存备注失败:', error);
-            showMessage(`❌ ${this.i18n.addMemoFailed}: ${text}`, 3000, 'error');
+            // 静默失败，不显示错误提示
         }
     }
 

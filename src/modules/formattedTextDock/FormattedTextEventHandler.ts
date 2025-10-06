@@ -279,13 +279,12 @@ export class FormattedTextEventHandler {
                     this.onRefresh();
                 }, 500);
                 
-            } else {
-                showMessage(` ${this.i18n.removeFormatFailed || '格式删除失败，手动删除多重关键词'}`, 4000, 'error');
             }
+            // 失败时不显示提示
             
         } catch (error) {
             this.log('删除格式化失败:', error);
-            showMessage(` ${this.i18n.removeFormatFailed || '格式删除失败，手动删除多重关键词'}`, 4000, 'error');
+            // 静默失败，不显示错误提示
         }
     }
     
@@ -336,7 +335,7 @@ export class FormattedTextEventHandler {
                     this.log('⚠️ [EventHandler] 未找到要恢复的勾选框');
                 }
                 
-                showMessage('❌ Todo状态更新失败', 3000, 'error');
+                // 失败时不显示提示
             }
             
         } catch (error) {
@@ -351,7 +350,7 @@ export class FormattedTextEventHandler {
                 this.log('⚠️ [EventHandler] 异常情况下未找到要恢复的勾选框');
             }
             
-            showMessage('❌ Todo状态更新异常', 3000, 'error');
+            // 静默失败，不显示错误提示
         }
     }
     

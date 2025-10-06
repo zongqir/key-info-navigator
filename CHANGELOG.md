@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.4.2 2025-10-06
+
+### 🎨 UI/UX Improvements
+* 优化斜体显示效果 - Improved italic text display with subtle skew effect instead of native italic style
+* 移除备注文本下划线 - Removed underline from memo text for cleaner appearance
+* 优化移动端列表项高度 - Optimized mobile list item height for better space utilization
+
+### 🔧 Behavior Changes
+* 多选操作需要同时按下 Ctrl+Shift 避免误触 - Multi-select now requires Ctrl+Shift to prevent accidental selection
+
 ## v2.4.1 2025-10-06
 
 ### 🐛 Bug Fixes

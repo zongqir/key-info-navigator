@@ -94,21 +94,20 @@ export class FormattedTextMultiSelectManager {
     }
 
     /**
-     * 处理项目点击事件（支持Ctrl/Shift多选）
+     * 处理项目点击事件（需要Ctrl+Shift多选）
      */
     private handleItemClick(itemElement: HTMLElement, event: MouseEvent): void {
         const itemId = itemElement.dataset.itemId!;
         const itemIndex = parseInt(itemElement.dataset.index || '0');
 
-        if (event.ctrlKey || event.metaKey) {
-            // Ctrl/Cmd 多选
+        // 需要同时按下 Ctrl/Cmd + Shift 才能触发多选
+        const isMultiSelectKey = (event.ctrlKey || event.metaKey) && event.shiftKey;
+
+        if (isMultiSelectKey) {
+            // Ctrl/Cmd + Shift 多选
             event.preventDefault();
             this.toggleSelection(itemId);
             this.lastSelectedIndex = itemIndex;
-        } else if (event.shiftKey && this.lastSelectedIndex >= 0) {
-            // Shift 连续选择
-            event.preventDefault();
-            this.selectRange(this.lastSelectedIndex, itemIndex);
         } else {
             // 普通点击，不改变选择状态，但更新最后选择的索引
             this.lastSelectedIndex = itemIndex;
@@ -202,7 +201,7 @@ export class FormattedTextMultiSelectManager {
         );
 
         if (selectedItems.length === 0) {
-            showMessage('未找到选中的项目', 3000, 'error');
+            // 静默失败，不显示错误提示
             return;
         }
 
@@ -224,7 +223,7 @@ export class FormattedTextMultiSelectManager {
             
         } catch (error) {
             this.log('批量删除失败:', error);
-            showMessage('❌ 批量删除失败，请重试', 3000, 'error');
+            // 静默失败，不显示错误提示
         }
     }
 

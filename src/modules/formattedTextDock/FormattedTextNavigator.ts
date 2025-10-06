@@ -50,7 +50,7 @@ export class FormattedTextNavigator {
 
         } catch (error) {
             this.log('导航失败:', error);
-            showMessage(`❌ ${this.i18n.navigationFailed}: ${text}`, 3000, 'error');
+            // 静默失败，不显示错误提示
         }
     }
 
@@ -74,7 +74,7 @@ export class FormattedTextNavigator {
      */
     private navigateToBlock(item: FormattedTextItem): void {
         if (!item || !item.blockId) {
-            showMessage(`❌ ${this.i18n.textNotFound}`, 3000, 'error');
+            // 静默失败，不显示错误提示
             return;
         }
 
@@ -82,7 +82,7 @@ export class FormattedTextNavigator {
         const allElements = document.querySelectorAll(`[data-node-id="${item.blockId}"]`);
         
         if (allElements.length === 0) {
-            showMessage(`❌ ${this.i18n.textNotFound}: ${item.text}`, 3000, 'error');
+            // 静默失败，不显示错误提示
             return;
         }
         
@@ -130,9 +130,8 @@ export class FormattedTextNavigator {
                 this.scrollToElement(fallbackElement as HTMLElement);
                 this.highlightElement(fallbackElement as HTMLElement);
                 // showMessage(`✅ ${this.i18n.navigationSuccess}: ${item.text}`, 2000, 'info');
-            } else {
-                showMessage(`❌ ${this.i18n.textNotFound}: ${item.text}`, 3000, 'error');
             }
+            // 失败时不显示提示
         }
     }
 
