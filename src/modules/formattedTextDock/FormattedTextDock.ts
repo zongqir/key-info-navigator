@@ -494,6 +494,10 @@ export class FormattedTextDock {
         let successCount = 0;
         let failCount = 0;
         let wasReadonly = false;
+        
+        // 保存光标位置
+        const savedSelection = this.saveSelection();
+        this.log('💾 已保存光标位置:', savedSelection);
 
         try {
             // 1. 检查文档状态，如果是只读则先解锁
@@ -595,10 +599,17 @@ export class FormattedTextDock {
         }
         // 全部失败时不显示提示
 
-        // 刷新列表
+        // 先恢复光标位置，然后刷新列表
         setTimeout(() => {
-            this.refresh(true);
-        }, 500);
+            this.restoreSelection(savedSelection);
+            this.log('🔄 已恢复光标位置');
+            
+            // 光标恢复后立即刷新列表
+            setTimeout(() => {
+                this.log('📋 批量删除后刷新列表');
+                this.refresh(true);
+            }, 100);
+        }, 100);
     }
 
     /**
@@ -712,6 +723,77 @@ export class FormattedTextDock {
         } catch (error) {
             this.log('批量更新块内容失败:', error);
             throw error;
+        }
+    }
+
+    /**
+     * 保存当前光标位置
+     */
+    private saveSelection(): { range: Range | null; container: Node | null; offset: number } | null {
+        try {
+            const selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0) {
+                return null;
+            }
+            
+            const range = selection.getRangeAt(0);
+            return {
+                range: range.cloneRange(),
+                container: range.startContainer,
+                offset: range.startOffset
+            };
+        } catch (error) {
+            this.log('保存光标位置失败:', error);
+            return null;
+        }
+    }
+    
+    /**
+     * 恢复光标位置
+     */
+    private restoreSelection(savedSelection: { range: Range | null; container: Node | null; offset: number } | null): void {
+        if (!savedSelection) {
+            return;
+        }
+        
+        try {
+            const selection = window.getSelection();
+            if (!selection) {
+                return;
+            }
+            
+            // 尝试恢复原始的range
+            if (savedSelection.range) {
+                try {
+                    selection.removeAllRanges();
+                    selection.addRange(savedSelection.range);
+                    this.log('✅ 成功恢复光标位置（使用原始range）');
+                    return;
+                } catch (error) {
+                    this.log('使用原始range恢复失败，尝试备用方案:', error);
+                }
+            }
+            
+            // 备用方案：使用保存的container和offset创建新range
+            if (savedSelection.container && document.contains(savedSelection.container)) {
+                try {
+                    const newRange = document.createRange();
+                    newRange.setStart(savedSelection.container, savedSelection.offset);
+                    newRange.collapse(true);
+                    
+                    selection.removeAllRanges();
+                    selection.addRange(newRange);
+                    this.log('✅ 成功恢复光标位置（使用备用方案）');
+                    return;
+                } catch (error) {
+                    this.log('备用方案也失败:', error);
+                }
+            }
+            
+            this.log('⚠️ 无法恢复光标位置，所有方案都失败了');
+            
+        } catch (error) {
+            this.log('恢复光标位置异常:', error);
         }
     }
 

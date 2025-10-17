@@ -2,7 +2,7 @@
 
 # Key Info Navigator
 
-> Current Version: v2.4.0 | Release Date: 2025-10-05
+> Current Version: v2.4.3 | Release Date: 2025-10-17
 
 A plugin that helps you quickly locate and navigate key information in SiYuan notes. Display important content in your documents through a sidebar to make your reading and editing more efficient.
 
@@ -13,11 +13,18 @@ This plugin helps you:
 - 📍 View all key content at a glance in the sidebar
 - ⚡ Jump to any position in the document with one click
 - 📝 Add notes and comments to important content
+- 🗑️ Batch delete formatting with Ctrl+Shift multi-select
 
-## ✨ What's New in v2.4.0
+## ✨ What's New in v2.4.3
+
+- 🐛 **Fixed Cursor Loss Issue**: Resolved the problem where cursor would disappear during batch deletion operations
+- ⚡ **Optimized Refresh Timing**: Improved refresh timing after batch deletion - cursor restoration and list refresh now complete within 200ms
+- 🔧 **Intelligent Cursor Recovery**: Implemented dual-layer protection strategy to ensure cursor position is always restored correctly
+
+## What's New in v2.4.0
 
 - 🎯 **Smart Reverse Navigation**: Enhanced reverse navigation now activates only in reading mode, eliminating distractions during editing for a cleaner writing experience
-- 🚀 **Intelligent Batch Operations**: Hold Ctrl to multi-select format items and perform batch format removal - streamline your document cleanup workflow with precision
+- 🚀 **Intelligent Batch Operations**: Press Ctrl+Shift and click to multi-select format items, then perform batch format removal - streamline your document cleanup workflow with precision
 - 💎 **Refined Memo System**: Comprehensive memo UI fixes and optimizations for smoother annotation experience and improved visual consistency
 
 ## What's New in v2.3.0
@@ -58,9 +65,18 @@ This plugin helps you:
 
 ## How to Use
 
+### Basic Navigation
 1. Search for "Key Info Navigator" in the SiYuan marketplace and install it
 2. Open any document, and the key information navigation panel will automatically appear in the sidebar
 3. Click any item to quickly jump to the corresponding position
+
+### Batch Operations
+1. **Multi-Select**: Hold `Ctrl+Shift` and click on items to select multiple formatted text entries
+2. **Batch Delete**: After selecting items, click the "Batch Delete" button to remove formatting from all selected entries
+3. **Select All**: Click the "Select All" button to select all items at once
+4. **Deselect All**: Click the "Deselect All" button to clear your selection
+
+> **Note**: Multi-select requires pressing both `Ctrl` and `Shift` keys simultaneously while clicking to prevent accidental selections.
 
 ## Acknowledgments
 

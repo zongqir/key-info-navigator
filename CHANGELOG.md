@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.4.3 2025-10-17
+
+### 🐛 Bug Fixes
+* 修复批量删除时光标消失的问题 - Fixed cursor disappearing issue during batch deletion
+* 优化批量删除后的刷新时序 - Optimized refresh timing after batch deletion
+
+### 🔧 Technical Improvements
+* 添加光标位置保存和恢复机制 - Added cursor position save and restore mechanism
+* 智能光标恢复（双层保护策略）- Intelligent cursor restoration with dual-layer protection strategy
+* 批量删除后200ms内完成光标恢复和列表刷新 - Complete cursor restoration and list refresh within 200ms after batch deletion
+
 ## v2.4.2 2025-10-06
 
 ### 🎨 UI/UX Improvements
