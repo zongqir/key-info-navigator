@@ -297,16 +297,26 @@ export abstract class BaseFormatProcessor implements IFormatProcessor {
     }
     
     /**
-     * 查找格式化元素
+     * 查找格式化元素（只在编辑器中查找！）
      */
     protected findFormattedElements(text: string, itemIndex?: number): HTMLElement[] {
         const selectors = this.config.htmlSelectors.join(',');
-        const allElements = Array.from(document.querySelectorAll(selectors)) as HTMLElement[];
+        
+        // ⚠️ 关键修复：只在编辑器内容区域查找，不要在整个document中查找！
+        // 获取编辑器元素
+        const editorElements = document.querySelectorAll('.protyle-wysiwyg[contenteditable]');
+        let allElements: HTMLElement[] = [];
+        
+        editorElements.forEach(editor => {
+            const elements = Array.from(editor.querySelectorAll(selectors)) as HTMLElement[];
+            allElements = allElements.concat(elements);
+        });
         
         this.log('🔍 查找格式化元素');
+        this.log('  ├─ 编辑器数量:', editorElements.length);
         this.log('  ├─ 选择器:', selectors);
         this.log('  ├─ 查找文本:', text);
-        this.log('  └─ 找到所有元素数量:', allElements.length);
+        this.log('  └─ 在编辑器中找到的元素数量:', allElements.length);
         
         // 显示前几个元素的文本内容
         allElements.slice(0, 5).forEach((el, index) => {

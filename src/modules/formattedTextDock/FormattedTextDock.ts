@@ -486,30 +486,30 @@ export class FormattedTextDock {
     }
 
     /**
-     * 批量删除格式化回调 - 优化版本
+     * 批量删除格式化回调（逐个处理，完全照搬单个删除逻辑）
      */
     private async handleBatchDelete(selectedItems: FormattedTextItem[]): Promise<void> {
-        this.log('开始批量删除格式化，项目数量:', selectedItems.length);
+        this.log('🚀 开始批量删除，项目数量:', selectedItems.length);
         
         let successCount = 0;
         let failCount = 0;
-        let wasReadonly = false;
-        
-        // 保存光标位置
-        const savedSelection = this.saveSelection();
-        this.log('💾 已保存光标位置:', savedSelection);
 
         try {
-            // 1. 检查文档状态，如果是只读则先解锁
-            wasReadonly = DocumentReadonlyChecker.checkDocumentReadonly();
+            // 检查文档状态
+            const wasReadonly = DocumentReadonlyChecker.checkDocumentReadonly();
             if (wasReadonly) {
-                this.log('文档处于只读状态，尝试临时解锁进行批量操作');
-                // 这里需要解锁文档，具体实现取决于解锁API
-                // 暂时先记录日志，真正的解锁逻辑需要根据实际API实现
-                this.log('⚠️ 检测到文档锁定，建议先手动解锁后再进行批量删除');
+                this.log('⚠️ 文档处于只读状态');
+                showMessage('文档已锁定，请先解锁', 3000, 'error');
+                return;
             }
 
-            // 2. 按块ID分组进行批量DOM操作
+            const editor = EditorUtils.getCurrentActiveEditor(this.logger);
+            if (!editor?.protyle?.wysiwyg?.element) {
+                this.log(`❌ 无法获取编辑器`);
+                return;
+            }
+
+            // 按块ID分组
             const itemsByBlock = new Map<string, FormattedTextItem[]>();
             selectedItems.forEach(item => {
                 if (!itemsByBlock.has(item.blockId)) {
@@ -518,282 +518,166 @@ export class FormattedTextDock {
                 itemsByBlock.get(item.blockId)!.push(item);
             });
 
-            // 3. 对每个块进行批量DOM操作（不调用API）
+            // 准备transactions
+            const transactions: any[] = [];
+            
+            // ✅ 对每个块执行完全相同的单个删除逻辑
             for (const [blockId, blockItems] of itemsByBlock) {
-                this.log(`处理块 ${blockId}，包含 ${blockItems.length} 个项目`);
+                this.log(`📦 处理块 ${blockId}，包含 ${blockItems.length} 个项目`);
                 
-                // 按位置倒序排序，从后往前删除，避免索引变化问题
-                const sortedItems = blockItems.sort((a, b) => b.position - a.position);
+                const blockElement = editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${blockId}"]`) as HTMLElement;
+                if (!blockElement) {
+                    this.log(`❌ 未找到块元素: ${blockId}`);
+                    failCount += blockItems.length;
+                    continue;
+                }
                 
-                // 批量执行DOM删除操作（不触发API更新）
-                for (const item of sortedItems) {
+                // 保存oldData
+                const oldData = blockElement.outerHTML;
+                
+                // 逐个删除该块中的所有items
+                for (const item of blockItems) {
                     try {
                         const processor = this.parser.getFormatProcessor(item.type);
                         
-                        if (!processor.removeFormatting) {
-                            this.log(`格式处理器 ${item.type} 不支持删除格式化功能`);
-                            failCount++;
-                            continue;
-                        }
-                        
-                        // 重新计算当前项目的索引
-                        const currentFormattedItems = this.formattedTexts.filter(formattedItem => 
-                            formattedItem.type === item.type && 
-                            formattedItem.text === item.text &&
-                            formattedItem.blockId === item.blockId
+                        // 计算索引
+                        const sameTypeItems = this.formattedTexts.filter(fi => 
+                            fi.type === item.type && fi.text === item.text
                         );
-                        currentFormattedItems.sort((a, b) => a.position - b.position);
+                        sameTypeItems.sort((a, b) => a.position - b.position);
+                        const itemIndex = sameTypeItems.findIndex(fi => fi.position === item.position);
                         
-                        const itemIndex = currentFormattedItems.findIndex(formattedItem => 
-                            formattedItem.position === item.position
-                        );
-
-                        this.log(`删除项目: [${item.type}] "${item.text}" 位置=${item.position} 索引=${itemIndex}`);
-
-                        // 仅执行DOM删除操作，不调用updateDocumentContent
-                        const success = await this.removeFormattingDOMOnly(processor, item.text, item.blockId, itemIndex >= 0 ? itemIndex : 0);
-
+                        // 删除DOM
+                        const success = await processor.removeFormatting!(item.text, item.blockId, itemIndex >= 0 ? itemIndex : 0);
                         if (success) {
                             successCount++;
-                            this.log(`✅ 删除成功`);
                         } else {
                             failCount++;
-                            this.log(`❌ 删除失败`);
                         }
-
                     } catch (error) {
-                        this.log('删除格式化异常:', error);
+                        this.log('❌ 删除异常:', error);
                         failCount++;
                     }
                 }
-
-                this.log(`块 ${blockId} 的 DOM 操作完成`);
-            }
-
-            // 4. 统一更新所有修改过的块到后端（一次性API调用）
-            if (successCount > 0) {
-                this.log('开始统一更新所有修改过的块到后端');
-                try {
-                    await this.batchUpdateBlocksContent(Array.from(itemsByBlock.keys()));
-                    this.log('✅ 批量更新到后端成功');
-                } catch (updateError) {
-                    this.log('❌ 批量更新到后端失败:', updateError);
-                    // 即使API更新失败，DOM操作已经成功了
-                }
-            }
-
-        } finally {
-            // 5. 恢复文档锁定状态（如果原来是锁定的）
-            if (wasReadonly) {
-                this.log('恢复文档锁定状态');
-                // 这里需要重新锁定文档
-                // 具体实现取决于锁定API
-            }
-        }
-
-        // 显示结果消息
-        if (successCount > 0 && failCount === 0) {
-            showMessage(`✅ 成功删除 ${successCount} 个项目的格式`, 3000, 'info');
-        } else if (successCount > 0 && failCount > 0) {
-            showMessage(`✅ 成功删除 ${successCount} 个项目的格式`, 3000, 'info');
-        }
-        // 全部失败时不显示提示
-
-        // 先恢复光标位置，然后刷新列表
-        setTimeout(() => {
-            this.restoreSelection(savedSelection);
-            this.log('🔄 已恢复光标位置');
-            
-            // 光标恢复后立即刷新列表
-            setTimeout(() => {
-                this.log('📋 批量删除后刷新列表');
-                this.refresh(true);
-            }, 100);
-        }, 100);
-    }
-
-    /**
-     * 仅执行DOM删除操作，不调用API更新
-     */
-    private async removeFormattingDOMOnly(processor: any, text: string, blockId: string, itemIndex: number): Promise<boolean> {
-        try {
-            // 查找目标元素
-            const targetElements = this.findFormattedElementsForProcessor(processor, text, itemIndex);
-            
-            if (targetElements.length === 0) {
-                this.log('未找到目标格式化元素');
-                return false;
-            }
-            
-            // 删除格式化（仅DOM操作）
-            let success = false;
-            for (const element of targetElements) {
-                const removed = this.removeElementFormattingDOMOnly(element, text);
-                if (removed) {
-                    success = true;
-                }
-            }
-            
-            return success;
-            
-        } catch (error) {
-            this.log('DOM删除操作失败:', error);
-            return false;
-        }
-    }
-
-    /**
-     * 查找格式化元素（供处理器使用）
-     */
-    private findFormattedElementsForProcessor(processor: any, text: string, itemIndex: number): HTMLElement[] {
-        const config = processor.getConfig();
-        const elements: HTMLElement[] = [];
-        
-        for (const selector of config.htmlSelectors) {
-            try {
-                const foundElements = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
-                const matchingElements = foundElements.filter(el => 
-                    el.textContent?.trim() === text
-                );
                 
-                // 如果有索引要求，取对应位置的元素
-                if (itemIndex >= 0 && itemIndex < matchingElements.length) {
-                    elements.push(matchingElements[itemIndex]);
-                } else if (matchingElements.length > 0) {
-                    elements.push(...matchingElements);
-                }
-            } catch (error) {
-                this.log('查找元素失败:', error);
+                // 等待DOM更新
+                await new Promise(resolve => setTimeout(resolve, 10));
+                
+                // ✅ 更新updated时间戳（关键！）
+                const timestamp = new Date().getTime().toString().substring(0, 14);
+                blockElement.setAttribute('updated', timestamp);
+                this.log(`🕐 更新时间戳: ${timestamp}`);
+                
+                // 获取newData
+                const newData = blockElement.outerHTML;
+                
+                // 创建transaction
+                transactions.push({
+                    doOperations: [{
+                        id: blockId,
+                        data: newData,
+                        action: "update"
+                    }],
+                    undoOperations: [{
+                        id: blockId,
+                        data: oldData,
+                        action: "update"
+                    }]
+                });
             }
-        }
-        
-        return elements;
-    }
 
-    /**
-     * 删除元素格式化（仅DOM操作）
-     */
-    private removeElementFormattingDOMOnly(element: HTMLElement, text: string): boolean {
-        try {
-            // 保存父节点
-            const parent = element.parentNode;
-            if (!parent) return false;
+            // ✅ 批量提交transactions
+            if (transactions.length > 0) {
+                this.log(`📡 提交 ${transactions.length} 个更新...`);
+                await this.submitTransactions(transactions);
+                this.log('✅ Transactions 提交成功');
+                
+                showMessage(`✅ 成功删除 ${successCount} 个项目的格式`, 3000, 'info');
+                
+                // 延迟刷新列表
+                setTimeout(() => {
+                    this.refresh(true);
+                }, 300);
+            } else {
+                showMessage(`❌ 批量删除失败`, 3000, 'error');
+            }
 
-            // 创建文本节点替换格式化元素
-            const textNode = document.createTextNode(text);
-            parent.replaceChild(textNode, element);
-
-            return true;
         } catch (error) {
-            this.log('替换元素失败:', error);
-            return false;
+            this.log('❌ 批量删除失败:', error);
+            showMessage(`❌ 批量删除失败`, 3000, 'error');
         }
     }
 
     /**
-     * 批量更新多个块的内容到后端
+     * 通过 data-node-id 获取块元素（在编辑器内容区域查找）
      */
-    private async batchUpdateBlocksContent(blockIds: string[]): Promise<void> {
+    private getBlockElementByNodeId(blockId: string): HTMLElement | null {
         try {
             const editor = EditorUtils.getCurrentActiveEditor(this.logger);
-            if (!editor?.protyle?.block) {
-                return;
-            }
-            
-            // 获取当前文档的根块ID
-            const rootBlockId = editor.protyle.block.rootID;
-            const blockElement = editor.protyle.wysiwyg.element;
-            
-            if (!rootBlockId || !blockElement) {
-                return;
-            }
-            
-            // 获取更新后的HTML内容
-            const newContent = blockElement.innerHTML;
-            
-            // 调用思源API更新整个文档块内容（一次性更新）
-            await fetchPost('/api/block/updateBlock', {
-                id: rootBlockId,
-                data: newContent,
-                dataType: 'dom'
-            });
-            
-            this.log(`成功批量更新 ${blockIds.length} 个块的内容`);
-            
-        } catch (error) {
-            this.log('批量更新块内容失败:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * 保存当前光标位置
-     */
-    private saveSelection(): { range: Range | null; container: Node | null; offset: number } | null {
-        try {
-            const selection = window.getSelection();
-            if (!selection || selection.rangeCount === 0) {
+            if (!editor?.protyle?.wysiwyg?.element) {
                 return null;
             }
             
-            const range = selection.getRangeAt(0);
-            return {
-                range: range.cloneRange(),
-                container: range.startContainer,
-                offset: range.startOffset
-            };
+            // 在编辑器内容区域查找块元素
+            const blockElement = editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${blockId}"]`) as HTMLElement;
+            return blockElement;
         } catch (error) {
-            this.log('保存光标位置失败:', error);
+            this.log('获取块元素失败:', error);
             return null;
         }
     }
     
     /**
-     * 恢复光标位置
+     * 提交 transactions 到思源后端（使用思源的原生API）
      */
-    private restoreSelection(savedSelection: { range: Range | null; container: Node | null; offset: number } | null): void {
-        if (!savedSelection) {
-            return;
-        }
-        
+    private async submitTransactions(transactions: any[]): Promise<void> {
         try {
-            const selection = window.getSelection();
-            if (!selection) {
-                return;
+            const editor = EditorUtils.getCurrentActiveEditor(this.logger);
+            if (!editor?.protyle) {
+                throw new Error('无法获取 protyle 实例');
             }
             
-            // 尝试恢复原始的range
-            if (savedSelection.range) {
-                try {
-                    selection.removeAllRanges();
-                    selection.addRange(savedSelection.range);
-                    this.log('✅ 成功恢复光标位置（使用原始range）');
-                    return;
-                } catch (error) {
-                    this.log('使用原始range恢复失败，尝试备用方案:', error);
-                }
+            // 使用思源的 transactions API
+            const baseUrl = window.location.origin;
+            const apiUrl = `${baseUrl}/api/transactions`;
+            
+            const sessionId = editor.protyle.id || `plugin-${Date.now()}`;
+            const appId = (window as any).siyuan?.config?.system?.appId || 'siyuan';
+            const reqId = Date.now();
+            
+            this.log('📡 Transactions 参数:');
+            this.log('  - sessionId:', sessionId);
+            this.log('  - appId:', appId);
+            this.log('  - reqId:', reqId);
+            this.log('  - transactions count:', transactions.length);
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session: sessionId,
+                    app: appId,
+                    transactions: transactions,
+                    reqId: reqId
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            // 备用方案：使用保存的container和offset创建新range
-            if (savedSelection.container && document.contains(savedSelection.container)) {
-                try {
-                    const newRange = document.createRange();
-                    newRange.setStart(savedSelection.container, savedSelection.offset);
-                    newRange.collapse(true);
-                    
-                    selection.removeAllRanges();
-                    selection.addRange(newRange);
-                    this.log('✅ 成功恢复光标位置（使用备用方案）');
-                    return;
-                } catch (error) {
-                    this.log('备用方案也失败:', error);
-                }
-            }
+            const responseData = await response.json();
+            this.log('📡 Transactions 响应:', responseData);
             
-            this.log('⚠️ 无法恢复光标位置，所有方案都失败了');
+            if (responseData.code !== 0) {
+                throw new Error(responseData.msg || 'Transactions 失败');
+            }
             
         } catch (error) {
-            this.log('恢复光标位置异常:', error);
+            this.log('❌ 提交 Transactions 失败:', error);
+            throw error;
         }
     }
 

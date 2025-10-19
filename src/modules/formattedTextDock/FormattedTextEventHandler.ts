@@ -5,6 +5,7 @@ import { FormattedTextNavigator } from "./FormattedTextNavigator";
 import { FormattedTextMemoManager } from "./FormattedTextMemoManager";
 import { TodoProcessor } from "../formatProcessor/processors/TodoProcessor";
 import { DocumentReadonlyChecker } from "../utils/DocumentReadonlyChecker";
+import { EditorUtils } from "../utils/EditorUtils";
 
 /**
  * 格式化文本事件处理器
@@ -245,11 +246,27 @@ export class FormattedTextEventHandler {
     }
 
     /**
-     * 删除文本格式化
+     * 删除文本格式化（使用transactions API同步删除数据库记录）
      */
     private async removeFormattingFromText(blockId: string, text: string, type: TextFormatType, position: number): Promise<void> {
         try {
             this.log(`开始删除格式化: "${text}", 类型: ${type}, 位置: ${position}`);
+            
+            // 获取编辑器中的块元素
+            const editor = EditorUtils.getCurrentActiveEditor(this.log.bind(this));
+            if (!editor?.protyle?.wysiwyg?.element) {
+                this.log(`❌ 无法获取编辑器`);
+                return;
+            }
+            
+            const blockElement = editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${blockId}"]`) as HTMLElement;
+            if (!blockElement) {
+                this.log(`❌ 未找到块元素: ${blockId}`);
+                return;
+            }
+            
+            // 保存旧的HTML（用于undo，包含旧的updated时间戳）
+            const oldData = blockElement.outerHTML;
             
             // 获取对应的格式处理器
             const processor = this.parser.getFormatProcessor(type);
@@ -265,19 +282,60 @@ export class FormattedTextEventHandler {
             
             this.log(`找到 ${sameTypeItems.length} 个相同的项目，当前项目索引: ${itemIndex}`);
             
-            // 调用处理器删除格式化
+            // 调用处理器删除格式化（这只是DOM操作）
             const success = await processor.removeFormatting!(text, blockId, itemIndex >= 0 ? itemIndex : 0);
             
             if (success) {
+                // ⚠️ 等待DOM更新完成
+                await new Promise(resolve => setTimeout(resolve, 10));
+                
+                // ✅ 关键修复：更新 updated 时间戳（触发spans表重建）
+                const timestamp = new Date().getTime().toString().substring(0, 14);
+                blockElement.setAttribute('updated', timestamp);
+                this.log(`🕐 更新时间戳到: ${timestamp}`);
+                
+                // 获取新的HTML（包含wbr和新的updated时间戳）
+                const newData = blockElement.outerHTML;
+                
+                this.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+                this.log(`📦 单个删除 - HTML对比:`);
+                this.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+                this.log(`🔴 删除前:`);
+                this.log(oldData);
+                this.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+                this.log(`🟢 删除后:`);
+                this.log(newData);
+                this.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+                
+                // 检查是否真的删除了span
+                const oldSpanCount = (oldData.match(/<span[^>]*data-type[^>]*strong/g) || []).length;
+                const newSpanCount = (newData.match(/<span[^>]*data-type[^>]*strong/g) || []).length;
+                this.log(`📊 strong span数量: ${oldSpanCount} -> ${newSpanCount}`);
+                
+                if (oldSpanCount === newSpanCount) {
+                    this.log(`❌❌❌ 警告：span数量没有减少！DOM删除可能没有生效！`);
+                }
+                
+                // ✅ 使用transactions API更新（会同步删除数据库中的spans记录）
+                await this.submitTransactions([{
+                    doOperations: [{
+                        id: blockId,
+                        data: newData,
+                        action: "update"
+                    }],
+                    undoOperations: [{
+                        id: blockId,
+                        data: oldData,
+                        action: "update"
+                    }]
+                }]);
+                
                 showMessage(`✅ ${this.i18n.removeFormatSuccess || '格式删除成功'}`, 2000, 'info');
                 
-                // 更新块内容到后端
-                await this.memoManager.updateBlockContent();
-                
-                // 延迟刷新列表，让DOM更新完成
+                // 延迟刷新列表，让spans表更新完成
                 setTimeout(() => {
                     this.onRefresh();
-                }, 500);
+                }, 300);
                 
             }
             // 失败时不显示提示
@@ -285,6 +343,59 @@ export class FormattedTextEventHandler {
         } catch (error) {
             this.log('删除格式化失败:', error);
             // 静默失败，不显示错误提示
+        }
+    }
+    
+    /**
+     * 提交 transactions 到思源后端
+     */
+    private async submitTransactions(transactions: any[]): Promise<void> {
+        try {
+            const baseUrl = window.location.origin;
+            const apiUrl = `${baseUrl}/api/transactions`;
+            
+            const editor = EditorUtils.getCurrentActiveEditor(this.log.bind(this));
+            const sessionId = editor?.protyle?.id || `plugin-${Date.now()}`;
+            const appId = (window as any).siyuan?.config?.system?.appId || 'siyuan';
+            
+            // ✅ 关键修复：添加 reqId 参数
+            const reqId = Date.now();
+            const requestBody = {
+                session: sessionId,
+                app: appId,
+                transactions: transactions,
+                reqId: reqId
+            };
+            
+            this.log('📡 完整请求体:');
+            this.log(JSON.stringify(requestBody, null, 2));
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const responseData = await response.json();
+            
+            this.log('📡 Transactions 完整响应:');
+            this.log(JSON.stringify(responseData, null, 2));
+            
+            if (responseData.code !== 0) {
+                throw new Error(responseData.msg || 'Transactions 失败');
+            }
+            
+            this.log('✅ Transactions 提交成功');
+            
+        } catch (error) {
+            this.log('❌ 提交 Transactions 失败:', error);
+            throw error;
         }
     }
     
