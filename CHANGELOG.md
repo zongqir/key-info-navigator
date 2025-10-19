@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.4.4 2025-10-19
+
+### 🐛 Bug Fixes
+* 修复批量删除后刷新仍能看到已删除项的问题 - Fixed issue where deleted items reappear after refresh in batch deletion
+* 修复单个删除后 spans 表未更新的问题 - Fixed spans table not updating after single item deletion
+
+### 🔧 Technical Improvements
+* 使用 transactions API 替代 block update API 确保 spans 表同步更新 - Use transactions API instead of block update API to ensure spans table synchronization
+* 添加 `updated` 时间戳和 `reqId` 参数以触发 spans 表重建 - Added `updated` timestamp and `reqId` parameter to trigger spans table rebuild
+* 简化批量删除逻辑，使用 for 循环逐个处理项目 - Simplified batch deletion logic using for loop to process items one by one
+* 移除冗余的光标管理和 DOM 操作代码（减少 110 行代码）- Removed redundant cursor management and DOM operation code (reduced 110 lines)
+
 ## v2.4.3 2025-10-17
 
 ### 🐛 Bug Fixes
